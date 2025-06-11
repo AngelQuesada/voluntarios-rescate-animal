@@ -1,11 +1,20 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import React from 'react';
-import { User } from '../types/common';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  createElement,
+  Fragment,
+  ChangeEvent,
+  SetStateAction,
+  ReactNode,
+} from 'react';
+
+import { User, UserInfoForForm } from '../types/common';
 import { db } from '@/lib/firebase';
 import { triggerVibration } from '@/lib/vibration';
 import { doc, deleteDoc, getDocs, collection, updateDoc } from 'firebase/firestore';
-import { UserRoles } from "@/lib/constants";
-import { UserInfoForForm } from "@/types/common";
+import { UserRoles } from '@/lib/constants';
 
 // Función para validar formato de número de teléfono español
 const isValidPhone = (phone: string): boolean => {
@@ -28,7 +37,7 @@ export const useAdminPanel = () => {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState<React.ReactNode>('');
+  const [snackbarMessage, setSnackbarMessage] = useState<ReactNode>('');
   const [addSubmitAttempted, setAddSubmitAttempted] = useState(false);
   const [editSubmitAttempted, setEditSubmitAttempted] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -36,11 +45,11 @@ export const useAdminPanel = () => {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
-  
+
   // Estados del formulario usando el tipo correcto
   const [newUserInfo, setNewUserInfo] = useState<ExtendedUserFormData>({
     username: '',
-    roles: [], 
+    roles: [],
     name: '',
     lastname: '',
     birthdate: '',
@@ -51,7 +60,7 @@ export const useAdminPanel = () => {
     password: '',
     isEnabled: true,
   });
-  
+
   const [editUserInfo, setEditUserInfo] = useState<ExtendedUserFormData>({
     username: '',
     roles: [],
@@ -74,22 +83,17 @@ export const useAdminPanel = () => {
   // Estados de paginación y búsqueda
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(12);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [prioritizeResponsables, setPrioritizeResponsables] = useState(false);
-
-  // Cargar usuarios
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collection(db, 'users'));
-      const usersData = querySnapshot.docs.map(doc => ({ 
-        uid: doc.id, 
-        ...doc.data() 
+      const usersData = querySnapshot.docs.map((document) => ({
+        uid: document.id,
+        ...document.data(),
       })) as User[];
       setUsers(usersData);
     } catch (error) {
@@ -99,16 +103,23 @@ export const useAdminPanel = () => {
     }
   };
 
+  // Cargar usuarios
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   // Filtrado de usuarios
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
-      const matchesSearch = !searchTerm || 
+    return users.filter((user) => {
+      const matchesSearch =
+        !searchTerm ||
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.lastname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesRole = !prioritizeResponsables || 
+      const matchesRole =
+        !prioritizeResponsables ||
         (Array.isArray(user.roles) && user.roles.includes(UserRoles.RESPONSABLE));
 
       return matchesSearch && matchesRole;
@@ -116,60 +127,62 @@ export const useAdminPanel = () => {
   }, [users, searchTerm, prioritizeResponsables]);
 
   // Manejadores de eventos del formulario
-  const handleInputChange = useCallback((
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setNewUserInfo(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setNewUserInfo((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const handleEditInputChange = useCallback((
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setEditUserInfo(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleEditInputChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setEditUserInfo((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
 
-  const memoizedSetNewUserInfo = useCallback((value: React.SetStateAction<ExtendedUserFormData>) => {
+  const memoizedSetNewUserInfo = useCallback((value: SetStateAction<ExtendedUserFormData>) => {
     setNewUserInfo(value);
   }, []);
 
-  const memoizedSetEditUserInfo = useCallback((value: React.SetStateAction<ExtendedUserFormData>) => {
+  const memoizedSetEditUserInfo = useCallback((value: SetStateAction<ExtendedUserFormData>) => {
     setEditUserInfo(value);
   }, []);
 
   const handleEnabledSwitchChange = useCallback((checked: boolean) => {
-    setNewUserInfo(prev => ({ ...prev, isEnabled: checked }));
+    setNewUserInfo((prev) => ({ ...prev, isEnabled: checked }));
   }, []);
 
   const handleEditEnabledSwitchChange = useCallback((checked: boolean) => {
-    setEditUserInfo(prev => ({ ...prev, isEnabled: checked }));
+    setEditUserInfo((prev) => ({ ...prev, isEnabled: checked }));
   }, []);
 
   // Handlers memoizados para roles
   const handleAddRoleChange = useCallback((roles: number[]) => {
-    setNewUserInfo(prev => ({
+    setNewUserInfo((prev) => ({
       ...prev,
-      roles: roles
+      roles: roles,
     }));
   }, []);
 
   const handleEditRoleChange = useCallback((roles: number[]) => {
-    setEditUserInfo(prev => ({
+    setEditUserInfo((prev) => ({
       ...prev,
-      roles: roles
+      roles: roles,
     }));
   }, []);
 
   // Validaciones
-  const validateUserInfo = useCallback((userInfo: any): string | null => {
+  const validateUserInfo = useCallback((userInfo: ExtendedUserFormData): string | null => {
     const { email, name, username, phone, password } = userInfo;
-    
+
     // Validaciones básicas requeridas
     if (!email?.trim() || !name?.trim() || !username?.trim() || !phone?.trim()) {
       return 'Todos los campos obligatorios deben estar completos';
     }
-    
+
     // Validación de formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -185,7 +198,7 @@ export const useAdminPanel = () => {
     if (password !== undefined && password.length < 6) {
       return 'La contraseña debe tener al menos 6 caracteres';
     }
-    
+
     return null;
   }, []);
 
@@ -193,13 +206,13 @@ export const useAdminPanel = () => {
   const handleAddUser = async () => {
     // PRIMERO: Mostrar spinner inmediatamente al hacer clic
     setIsAddingUser(true);
-    
+
     // Pequeño delay para asegurar que el spinner se muestre antes de las validaciones
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     setFormError(null);
     setAddSubmitAttempted(true);
-    
+
     const validationError = validateUserInfo(newUserInfo);
     if (validationError) {
       setFormError(validationError);
@@ -242,9 +255,9 @@ export const useAdminPanel = () => {
       }
 
       const userData = await response.json();
-      
+
       // Actualizar el estado local
-      setUsers(prev => [...prev, userData] as User[]);
+      setUsers((prev) => [...prev, userData] as User[]);
       setIsAddDialogOpen(false);
       setNewUserInfo({
         username: '',
@@ -260,35 +273,38 @@ export const useAdminPanel = () => {
         isEnabled: true,
       });
       setAddSubmitAttempted(false);
-      
+
       // Mensaje personalizado con nombre y apellidos en negrita
       const fullName = `${newUserInfo.name} ${newUserInfo.lastname}`.trim();
       setSnackbarMessage(
-        React.createElement(
-          React.Fragment,
+        createElement(
+          Fragment,
           null,
           'El usuario ',
-          React.createElement('strong', null, fullName),
+          createElement('strong', null, fullName),
           ' se agregó correctamente'
         )
       );
       setSnackbarOpen(true);
       triggerVibration(100);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Error adding user:', error);
-      
+
       // Mapear errores comunes
       let errorMessage = 'Error al agregar usuario';
-      if (error.message.includes('email-already-in-use') || error.message.includes('already exists')) {
+      if (
+        (error as Error).message?.includes('email-already-in-use') ||
+        (error as Error).message?.includes('already exists')
+      ) {
         errorMessage = 'Este email ya está registrado';
-      } else if (error.message.includes('weak-password')) {
+      } else if ((error as Error).message?.includes('weak-password')) {
         errorMessage = 'La contraseña es muy débil';
-      } else if (error.message.includes('invalid-email')) {
+      } else if ((error as Error).message?.includes('invalid-email')) {
         errorMessage = 'El formato del email no es válido';
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if ((error as Error).message) {
+        errorMessage = (error as Error).message;
       }
-      
+
       setFormError(errorMessage);
     } finally {
       setIsAddingUser(false);
@@ -300,7 +316,9 @@ export const useAdminPanel = () => {
     setUserToEdit(user);
     setEditUserInfo({
       username: user.username || '',
-      roles: Array.isArray(user.roles) ? user.roles.filter(role => role !== UserRoles.VOLUNTARIO) : [],
+      roles: Array.isArray(user.roles)
+        ? user.roles.filter((role) => role !== UserRoles.VOLUNTARIO)
+        : [],
       name: user.name || '',
       lastname: user.lastname || '',
       birthdate: user.birthdate || '',
@@ -320,7 +338,7 @@ export const useAdminPanel = () => {
 
     setEditSubmitAttempted(true);
     const validationError = validateUserInfo(editUserInfo);
-    
+
     if (validationError) {
       setFormError(validationError);
       return;
@@ -335,37 +353,35 @@ export const useAdminPanel = () => {
       const userData = {
         ...editUserInfo,
         roles: [...new Set(finalRoles)],
-        updatedAt: currentTimestamp
+        updatedAt: currentTimestamp,
       };
 
       await updateDoc(doc(db, 'users', userToEdit.uid), userData);
-      
-      setUsers(prev => prev.map(user => 
-        user.uid === userToEdit.uid 
-          ? { ...user, ...userData }
-          : user
-      ));
-      
+
+      setUsers((prev) =>
+        prev.map((user) => (user.uid === userToEdit.uid ? { ...user, ...userData } : user))
+      );
+
       setIsEditDialogOpen(false);
       setUserToEdit(null);
       setEditSubmitAttempted(false);
-      
+
       // Mensaje personalizado con nombre y apellidos en negrita
       const fullName = `${editUserInfo.name} ${editUserInfo.lastname}`.trim();
       setSnackbarMessage(
-        React.createElement(
-          React.Fragment,
+        createElement(
+          Fragment,
           null,
           'El usuario ',
-          React.createElement('strong', null, fullName),
+          createElement('strong', null, fullName),
           ' se actualizó correctamente'
         )
       );
       setSnackbarOpen(true);
       triggerVibration(100);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Error updating user:', error);
-      setFormError(error.message || 'Error al actualizar usuario');
+      setFormError((error as Error).message || 'Error al actualizar usuario');
     } finally {
       setIsEditingUser(false);
     }
@@ -392,25 +408,25 @@ export const useAdminPanel = () => {
 
     try {
       await deleteDoc(doc(db, 'users', userToDelete.uid));
-      setUsers(prev => prev.filter(user => user.uid !== userToDelete.uid));
+      setUsers((prev) => prev.filter((user) => user.uid !== userToDelete.uid));
       closeDeleteDialog();
-      
+
       // Mensaje personalizado con nombre y apellidos en negrita
       const fullName = `${userToDelete.name} ${userToDelete.lastname}`.trim();
       setSnackbarMessage(
-        React.createElement(
-          React.Fragment,
+        createElement(
+          Fragment,
           null,
           'El usuario ',
-          React.createElement('strong', null, fullName),
+          createElement('strong', null, fullName),
           ' se eliminó correctamente'
         )
       );
       setSnackbarOpen(true);
       triggerVibration(100);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error('Error deleting user:', error);
-      setDeleteError(error.message || 'Error al eliminar usuario');
+      setDeleteError((error as Error).message || 'Error al eliminar usuario');
     } finally {
       setIsDeletingUser(false);
     }
@@ -421,7 +437,7 @@ export const useAdminPanel = () => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -437,12 +453,12 @@ export const useAdminPanel = () => {
     }
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
     setPage(0);
   };
 
-  const handlePrioritizeResponsablesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePrioritizeResponsablesChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPrioritizeResponsables(event.target.checked);
     setPage(0);
   };
@@ -524,6 +540,6 @@ export const useAdminPanel = () => {
     handleAddRoleChange,
     handleEditRoleChange,
     memoizedSetNewUserInfo,
-    memoizedSetEditUserInfo
+    memoizedSetEditUserInfo,
   };
 };

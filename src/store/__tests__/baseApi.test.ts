@@ -14,8 +14,7 @@ describe('Base API Configuration', () => {
       reducer: {
         [api.reducerPath]: api.reducer,
       },
-      middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(api.middleware),
+      middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
     });
 
     expect(store.getState()).toHaveProperty('api');
@@ -26,8 +25,7 @@ describe('Base API Configuration', () => {
       reducer: {
         [api.reducerPath]: api.reducer,
       },
-      middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(api.middleware),
+      middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
     });
 
     const state = store.getState();

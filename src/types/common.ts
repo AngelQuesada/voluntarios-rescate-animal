@@ -1,4 +1,4 @@
-import { User as FirebaseUser } from "firebase/auth";
+import { User as FirebaseUser, UserInfo } from 'firebase/auth';
 
 export interface User {
   id?: string;
@@ -14,11 +14,11 @@ export interface User {
   location?: string;
   createdAt: string;
   updatedAt: string;
-  isEnabled?: boolean; 
+  isEnabled?: boolean;
 }
 
-export interface CurrentUser extends Omit<FirebaseUser, "providerData"> {
-  providerData?: any[];
+export interface CurrentUser extends Omit<FirebaseUser, 'providerData'> {
+  providerData?: UserInfo[];
   email: string;
   uid: string;
   name?: string;
@@ -78,4 +78,3 @@ export interface DialogAction {
   action: () => void;
   variant?: 'primary' | 'secondary' | 'danger';
 }
-

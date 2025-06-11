@@ -1,32 +1,51 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "next/typescript",
-    "airbnb",
     "airbnb-typescript",
     "prettier",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
   ],
-  "plugins": [
-    "prettier",
-    "@typescript-eslint",
-    "unused-imports",
-    "react"
-  ],
+  "plugins": ["prettier", "@typescript-eslint", "unused-imports", "react", "import"],
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": "warn",
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": false,
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "unused-imports/no-unused-imports": "warn",
     "unused-imports/no-unused-vars": [
       "warn",
-      { 
+      {
         "vars": "all",
         "varsIgnorePattern": "^_",
         "args": "after-used",
         "argsIgnorePattern": "^_"
       }
     ],
+    "import/no-unused-modules": [
+      "warn",
+      {
+        "unusedExports": true,
+        "ignoreExports": [
+          "**/middleware.ts",
+          "**/pages/api/**/*.ts",
+          "**/app/api/**/*.ts",
+          "**/app/**/route.ts",
+          "**/app/**/page.tsx",
+          "**/app/**/layout.tsx"
+        ]
+      }
+    ],
+    "import/named": "warn",
     "react/jsx-uses-react": "warn",
     "react/jsx-uses-vars": "warn",
     "react/prop-types": "off",
@@ -39,10 +58,7 @@
     "react/jsx-filename-extension": [
       1,
       {
-        "extensions": [
-          ".tsx",
-          ".jsx"
-        ]
+        "extensions": [".tsx", ".jsx"]
       }
     ],
     "import/extensions": [
@@ -54,7 +70,10 @@
         "ts": "never",
         "tsx": "never"
       }
-    ]
+    ],
+    "import/no-unresolved": "warn",
+    "@typescript-eslint/lines-between-class-members": "off",
+    "@typescript-eslint/no-throw-literal": "off"
   },
   "parserOptions": {
     "project": "./tsconfig.json"
