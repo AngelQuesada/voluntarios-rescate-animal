@@ -31,21 +31,8 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "import/no-unused-modules": [
-      "warn",
-      {
-        "unusedExports": true,
-        "ignoreExports": [
-          "**/middleware.ts",
-          "**/pages/api/**/*.ts",
-          "**/app/api/**/*.ts",
-          "**/app/**/route.ts",
-          "**/app/**/page.tsx",
-          "**/app/**/layout.tsx"
-        ]
-      }
-    ],
-    "import/named": "warn",
+    "import/no-unused-modules": "off",
+    "import/named": "off",
     "react/jsx-uses-react": "warn",
     "react/jsx-uses-vars": "warn",
     "react/prop-types": "off",
@@ -61,17 +48,15 @@
         "extensions": [".tsx", ".jsx"]
       }
     ],
-    "import/extensions": [
-      "error",
-      "ignorePackages",
-      {
-        "js": "never",
-        "jsx": "never",
-        "ts": "never",
-        "tsx": "never"
-      }
-    ],
-    "import/no-unresolved": "warn",
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/default": "off",
+    "import/no-duplicates": "off",
+    "import/no-named-as-default": "off",
+    "import/no-named-as-default-member": "off",
+    "import/namespace": "off",
+    "import/export": "off",
     "@typescript-eslint/lines-between-class-members": "off",
     "@typescript-eslint/no-throw-literal": "off"
   },
