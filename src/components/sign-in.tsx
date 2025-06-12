@@ -47,11 +47,7 @@ const SignIn = () => {
       <CssBaseline />
       <Paper sx={paperStyles}>
         <Avatar sx={{ m: 1, bgcolor: 'transparent', width: 75, height: 75 }}>
-          <Image
-            src="/logo.png"
-            alt="Logo Rescate Animal Granada"
-            style={{ width: '100%', height: '100%' }}
-          />
+          <Image src="/logo.png" alt="Logo Rescate Animal Granada" width="75" height="75" />
         </Avatar>
 
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1, mb: 2 }}>
