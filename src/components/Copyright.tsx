@@ -1,15 +1,15 @@
-import React from "react";
-import { Typography, Link as MuiLink } from "@mui/material";
+import React from 'react';
+import { Typography, Link as MuiLink } from '@mui/material';
 
 const Copyright = () => {
   return (
     <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 5 }}>
-      {"Copyright © "}
+      {'Copyright © '}
       <MuiLink color="inherit" href="#">
         Rescate Animal Granada
-      </MuiLink>{" "}
+      </MuiLink>{' '}
       {new Date().getFullYear()}
-      {"."}
+      {'.'}
     </Typography>
   );
 };

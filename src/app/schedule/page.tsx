@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import ScheduleContent from "@/components/schedule/schedule-content";
-import { Header } from "@/components/schedule/header";
-import { startOfDay } from "date-fns";
-import RoleProtected from "@/components/auth/RoleProtected";
+import { useState } from 'react';
+import ScheduleContent from '@/components/schedule/schedule-content';
+import { Header } from '@/components/schedule/header';
+import { startOfDay } from 'date-fns';
+import RoleProtected from '@/components/auth/RoleProtected';
 
 export interface ScheduleContentProps {
   startDate: Date;
@@ -12,7 +12,7 @@ export interface ScheduleContentProps {
 }
 
 export default function SchedulePage() {
-  const [dateRange, setDateRange] = useState(() => {
+  const [dateRange] = useState(() => {
     const start = startOfDay(new Date());
     const end = startOfDay(new Date());
     end.setDate(start.getDate() + 14);

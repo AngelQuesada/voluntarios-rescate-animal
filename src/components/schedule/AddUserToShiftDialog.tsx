@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogActions,
@@ -13,11 +13,12 @@ import {
   TextField,
   Box,
   Typography,
-} from "@mui/material";
-import { AddCircleOutline } from "@mui/icons-material";
+} from '@mui/material';
+import { AddCircleOutline } from '@mui/icons-material';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { UserRoles } from "@/lib/constants";
-import { AddUserToShiftDialogProps, User } from "./types";
+import { UserRoles } from '@/lib/constants';
+import { AddUserToShiftDialogProps } from './types';
+import { User } from '@/types';
 
 const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
   open,
@@ -26,40 +27,42 @@ const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
   users,
   currentAssignments,
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const alreadyAssignedIds = new Set(currentAssignments.map(a => a.uid));
+  const alreadyAssignedIds = new Set(currentAssignments.map((a) => a.uid));
 
   const filteredUsers = users
-    .filter(user => {
+    .filter((user) => {
       // Filtrar usuarios ya asignados
       if (alreadyAssignedIds.has(user.id)) return false;
-      
+
       // Filtrar usuarios deshabilitados
       if (user.isEnabled === false) return false;
-      
+
       // Si no hay término de búsqueda, incluir todos los usuarios válidos
       if (!searchTerm.trim()) return true;
-      
+
       // Si hay término de búsqueda, verificar coincidencias
-      const fullName = `${user.name || ""} ${user.lastname || ""}`.trim();
-      return fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             (user.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-             (user.lastname || "").toLowerCase().includes(searchTerm.toLowerCase());
+      const fullName = `${user.name || ''} ${user.lastname || ''}`.trim();
+      return (
+        fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.lastname || '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
     })
     .sort((a, b) => {
       // Función para verificar si el usuario es responsable
       const isResponsable = (user: User) => {
         return user.roles?.includes(UserRoles.RESPONSABLE) || false;
       };
-      
+
       const aIsResponsable = isResponsable(a);
       const bIsResponsable = isResponsable(b);
-      
+
       // Priorizar responsables primero
       if (aIsResponsable && !bIsResponsable) return -1;
       if (!aIsResponsable && bIsResponsable) return 1;
-      
+
       // Si ambos son responsables o ninguno lo es, ordenar alfabéticamente
       return `${a.name} ${a.lastname}`.localeCompare(`${b.name} ${b.lastname}`);
     });
@@ -82,20 +85,18 @@ const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
         {filteredUsers.length > 0 ? (
           <List dense>
             {filteredUsers.map((user) => (
-              <ListItem
-                key={user.id}
-                divider
-                sx={{ paddingLeft: 0, paddingRight: 0 }}
-              >
+              <ListItem key={user.id} divider sx={{ paddingLeft: 0, paddingRight: 0 }}>
                 <ListItemText
                   primary={
                     user.roles?.includes(UserRoles.RESPONSABLE) ? (
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {`${user.name || ""} ${user.lastname || ""}`.trim() || "Usuario sin nombre"}
-                        <FiberManualRecordIcon sx={{ color: 'green', fontSize: '0.8rem', ml: 0.5 }} />
+                        {`${user.name || ''} ${user.lastname || ''}`.trim() || 'Usuario sin nombre'}
+                        <FiberManualRecordIcon
+                          sx={{ color: 'green', fontSize: '0.8rem', ml: 0.5 }}
+                        />
                       </Box>
                     ) : (
-                      `${user.name || ""} ${user.lastname || ""}`.trim() || "Usuario sin nombre"
+                      `${user.name || ''} ${user.lastname || ''}`.trim() || 'Usuario sin nombre'
                     )
                   }
                 />

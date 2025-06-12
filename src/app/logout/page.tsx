@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
-import { Box, CircularProgress, Typography } from "@mui/material";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import Image from 'next/image';
 
 export default function LogoutPage() {
   const router = useRouter();
@@ -15,11 +15,11 @@ export default function LogoutPage() {
     const performLogout = async () => {
       try {
         // Eliminar la cookie de autenticación
-        document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
-        
+        document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+
         // Limpiar todas las cookies relacionadas con Firebase Auth
-        document.cookie.split(';').forEach(cookie => {
-          const [name] = cookie.split('=').map(c => c.trim());
+        document.cookie.split(';').forEach((cookie) => {
+          const [name] = cookie.split('=').map((c) => c.trim());
           if (name.includes('firebase') || name.includes('auth')) {
             document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
           }
@@ -28,13 +28,13 @@ export default function LogoutPage() {
         // Cerrar sesión en Firebase
         await signOut(auth);
 
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         // Redirigir a la página de login
         router.replace('/');
       } catch (err) {
-        console.error("Error al cerrar sesión:", err);
-        setError("Ocurrió un error al cerrar la sesión. Intente de nuevo.");
+        console.error('Error al cerrar sesión:', err);
+        setError('Ocurrió un error al cerrar la sesión. Intente de nuevo.');
       }
     };
 
@@ -44,16 +44,16 @@ export default function LogoutPage() {
   return (
     <Box
       sx={{
-        position: "fixed",
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "white",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
+        backgroundColor: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
         gap: 4,
         zIndex: 9999,
       }}
@@ -62,7 +62,7 @@ export default function LogoutPage() {
         sx={{
           width: 150,
           height: 150,
-          position: "relative",
+          position: 'relative',
         }}
       >
         <Image
@@ -70,7 +70,7 @@ export default function LogoutPage() {
           alt="Logo Rescate Animal Granada"
           fill
           sizes="150px"
-          style={{ objectFit: "contain" }}
+          style={{ objectFit: 'contain' }}
           priority
         />
       </Box>

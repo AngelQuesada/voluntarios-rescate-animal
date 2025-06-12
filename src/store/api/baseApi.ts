@@ -1,10 +1,9 @@
-import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // API base para RTK Query
 export const api = createApi({
-  reducerPath: "api",
+  reducerPath: 'api',
   baseQuery: fakeBaseQuery(),
-  tagTypes: ["Users", "Shifts", "User", "Shift"],
+  tagTypes: ['Users', 'Shifts', 'User', 'Shift'],
   endpoints: () => ({}),
 });

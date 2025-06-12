@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ChangeEvent, FC, ReactNode } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -22,7 +22,6 @@ import {
   Pagination,
   Stack,
   Button,
-  Alert,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -30,10 +29,12 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { formatDate, calculateAge } from '@/lib/utils';
 import { UserRoles, getRoleName } from '@/lib/constants';
-import { useUserDetailDialog } from '@/hooks/use-user-detail-dialog';
+import { UserData, useUserDetailDialog } from '@/hooks/use-user-detail-dialog';
+import { User } from '@/types';
+import { UserHistoryShift } from '@/hooks/history/useUserHistory';
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }
@@ -50,11 +51,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
       style={{ padding: '16px 0' }}
     >
-      {value === index && (
-        <Box>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box>{children}</Box>}
     </div>
   );
 }
@@ -63,15 +60,10 @@ interface UserDetailDialogProps {
   open: boolean;
   onClose: () => void;
   userId?: string;
-  user?: any;
+  user?: User;
 }
 
-const UserDetailDialog: React.FC<UserDetailDialogProps> = ({ 
-  open, 
-  onClose, 
-  userId, 
-  user: userProp 
-}) => {
+const UserDetailDialog: FC<UserDetailDialogProps> = ({ open, onClose, userId, user: userProp }) => {
   const {
     userData,
     loading,
@@ -91,8 +83,8 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
   } = useUserDetailDialog({
     open,
     userId,
-    user: userProp,
-    shiftsPerPage: 15
+    user: userProp ? (userProp as unknown as UserData) : undefined,
+    shiftsPerPage: 15,
   });
 
   const handleCall = () => {
@@ -102,7 +94,7 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
 
   const handleWhatsApp = () => {
     if (!userData?.phone) return;
-    const phoneNumber = userData.phone.replace(/[^0-9]/g, "");
+    const phoneNumber = userData.phone.replace(/[^0-9]/g, '');
     window.location.href = `https://wa.me/${phoneNumber}`;
   };
 
@@ -125,21 +117,26 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
     if (roleId === UserRoles.ADMINISTRADOR) {
       color = 'error';
     } else if (roleId === UserRoles.RESPONSABLE) {
-      color = 'success'; 
+      color = 'success';
     }
 
     return (
-      <Chip 
+      <Chip
         key={roleId}
         label={getRoleName(roleId)}
-        color={color as any}
+        color={color as 'primary' | 'error' | 'success'}
         size="small"
         sx={{ mr: 1, mb: 1 }}
       />
     );
   };
 
-  const renderShiftsTable = (shiftsData: any[], currentPage: number, totalPages: number, handlePageChange: (event: React.ChangeEvent<unknown>, value: number) => void) => {
+  const renderShiftsTable = (
+    shiftsData: UserHistoryShift[],
+    currentPage: number,
+    totalPages: number,
+    handlePageChange: (event: ChangeEvent<unknown>, value: number) => void
+  ) => {
     if (shiftsData.length === 0) {
       return (
         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mt: 2 }}>
@@ -162,23 +159,21 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
               {shiftsData.map((shift) => (
                 <TableRow key={shift.id}>
                   <TableCell>{formatDate(shift.date)}</TableCell>
-                  <TableCell>
-                    {shift.area}
-                  </TableCell>
+                  <TableCell>{shift.area}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        
+
         {/* Control de paginación */}
         {totalPages > 1 && (
           <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
-            <Pagination 
-              count={totalPages} 
-              page={currentPage} 
-              onChange={handlePageChange} 
-              color="primary" 
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
               size="small"
             />
           </Stack>
@@ -188,15 +183,11 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose}
-      fullWidth
-      maxWidth="md"
-      scroll="paper"
-    >
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" scroll="paper">
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography fontWeight={"bold"} variant="body1">Detalles del Usuario</Typography>
+        <Typography fontWeight={'bold'} variant="body1">
+          Detalles del Usuario
+        </Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -205,14 +196,12 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
       <DialogContent dividers>
         {/* Información del usuario */}
         <Box sx={{ mb: 3 }}>
-          <Typography variant="body1"  gutterBottom>
+          <Typography variant="body1" gutterBottom>
             {userData.name} {userData.lastname}
           </Typography>
-          
+
           <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
-            {Array.isArray(userData.roles) 
-              ? userData.roles.map(renderRole)
-              : userData.role ? renderRole(userData.role) : null}
+            {userData.roles?.map(renderRole)}
           </Box>
 
           <Grid container spacing={2}>
@@ -229,7 +218,10 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" color="text.secondary">
-                Edad: <strong>{userData.birthdate ? calculateAge(userData.birthdate) : 'No disponible'}</strong>
+                Edad:{' '}
+                <strong>
+                  {userData.birthdate ? calculateAge(userData.birthdate) : 'No disponible'}
+                </strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Profesión: <strong>{userData.job || 'No disponible'}</strong>
@@ -242,30 +234,30 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
 
           {/* Botones de contacto */}
           <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              size="small" 
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
               startIcon={<PhoneIcon />}
               onClick={handleCall}
-              sx={{ 
+              sx={{
                 width: '120px',
                 minWidth: '120px',
-                height: '36px'
+                height: '36px',
               }}
             >
               Llamar
             </Button>
-            <Button 
-              variant="contained" 
-              color="success" 
-              size="small" 
+            <Button
+              variant="contained"
+              color="success"
+              size="small"
               startIcon={<WhatsAppIcon />}
               onClick={handleWhatsApp}
-              sx={{ 
+              sx={{
                 width: '120px',
                 minWidth: '120px',
-                height: '36px'
+                height: '36px',
               }}
             >
               WhatsApp
@@ -281,8 +273,8 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
           Historial de Turnos
         </Typography>
 
-        <Tabs 
-          value={tabValue} 
+        <Tabs
+          value={tabValue}
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
@@ -298,10 +290,20 @@ const UserDetailDialog: React.FC<UserDetailDialogProps> = ({
         ) : (
           <>
             <TabPanel value={tabValue} index={0}>
-              {renderShiftsTable(paginatedUpcomingShifts, upcomingPage, totalUpcomingPages, handleUpcomingPageChange)}
+              {renderShiftsTable(
+                paginatedUpcomingShifts,
+                upcomingPage,
+                totalUpcomingPages,
+                handleUpcomingPageChange
+              )}
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              {renderShiftsTable(paginatedPastShifts, pastPage, totalPastPages, handlePastPageChange)}
+              {renderShiftsTable(
+                paginatedPastShifts,
+                pastPage,
+                totalPastPages,
+                handlePastPageChange
+              )}
             </TabPanel>
           </>
         )}

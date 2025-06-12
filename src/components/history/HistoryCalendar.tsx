@@ -13,7 +13,7 @@ import { db } from '@/lib/firebase';
 
 const HistoryCalendar = () => {
   const today = startOfDay(new Date());
-  
+
   // Inicializar con ninguna fecha seleccionada (null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [firstShiftDate, setFirstShiftDate] = useState<Date | null>(null);
@@ -27,7 +27,7 @@ const HistoryCalendar = () => {
         // Consultar ordenando por fecha ascendente y limitando a 1 resultado
         const q = query(shiftsRef, orderBy('date', 'asc'), limit(1));
         const querySnapshot = await getDocs(q);
-        
+
         if (!querySnapshot.empty) {
           const firstShift = querySnapshot.docs[0].data();
           if (firstShift.date) {
@@ -39,7 +39,7 @@ const HistoryCalendar = () => {
           setFirstShiftDate(today);
         }
       } catch (error) {
-        console.error("Error al obtener la primera fecha de turno:", error);
+        console.error('Error al obtener la primera fecha de turno:', error);
         // En caso de error, establecer la fecha actual como límite
         setFirstShiftDate(today);
       } finally {
@@ -48,7 +48,7 @@ const HistoryCalendar = () => {
     };
 
     fetchFirstShiftDate();
-  }, []);
+  }, [today]);
 
   const handleDateChange = (date: Date | null) => {
     if (date && !isAfter(startOfDay(date), startOfDay(today)) && !isSameDay(date, today)) {
@@ -61,9 +61,11 @@ const HistoryCalendar = () => {
 
   const shouldDisableDate = (date: Date) => {
     // Deshabilitar fechas futuras, el día actual y fechas anteriores al primer turno
-    return isAfter(startOfDay(date), today) || 
-           isSameDay(startOfDay(date), today) ||
-           (firstShiftDate ? isBefore(startOfDay(date), firstShiftDate) : false);
+    return (
+      isAfter(startOfDay(date), today) ||
+      isSameDay(startOfDay(date), today) ||
+      (firstShiftDate ? isBefore(startOfDay(date), firstShiftDate) : false)
+    );
   };
 
   if (loading) {
@@ -78,16 +80,18 @@ const HistoryCalendar = () => {
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
-          <Box sx={{ 
-            flex: 1, 
-            '& .MuiDateCalendar-root': { 
-              width: '100%' 
-            } 
-          }}>
+          <Box
+            sx={{
+              flex: 1,
+              '& .MuiDateCalendar-root': {
+                width: '100%',
+              },
+            }}
+          >
             <Typography variant="h6" component="h2" gutterBottom>
               Selecciona una fecha para ver el historial de voluntarios
             </Typography>
-            <DateCalendar 
+            <DateCalendar
               value={selectedDate}
               onChange={handleDateChange}
               disableHighlightToday
@@ -100,13 +104,13 @@ const HistoryCalendar = () => {
                   '&.Mui-disabled': {
                     opacity: 0.5,
                     color: 'text.secondary',
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                  }
-                }
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  },
+                },
               }}
             />
           </Box>
-          
+
           {selectedDate && (
             <Box sx={{ flex: 1 }}>
               <VolunteersList selectedDate={selectedDate} />

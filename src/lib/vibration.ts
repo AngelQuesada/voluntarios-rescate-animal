@@ -10,8 +10,9 @@ export const triggerVibration = (pattern: number | number[] = 50): void => {
     // Check if the app is in PWA mode
     // This relies on a class 'pwa-mode' being added to the body or html element
     // as seen in src/app/layout.tsx
-    const isPwaMode = document.body.classList.contains('pwa-mode') || 
-                      document.documentElement.classList.contains('pwa-mode');
+    const isPwaMode =
+      document.body.classList.contains('pwa-mode') ||
+      document.documentElement.classList.contains('pwa-mode');
 
     if (isPwaMode) {
       try {
@@ -19,6 +20,6 @@ export const triggerVibration = (pattern: number | number[] = 50): void => {
       } catch (error) {
         console.warn('Vibration failed:', error);
       }
-    } 
-  } 
+    }
+  }
 };

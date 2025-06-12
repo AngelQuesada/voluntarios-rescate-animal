@@ -46,7 +46,7 @@ export async function checkServerStatus(
   request: APIRequestContext,
   options: ServerCheckOptions = {}
 ): Promise<boolean> {
-  const { timeout = 10000, failOnError = true } = options;
+  const { failOnError = true } = options;
 
   try {
     // Verificar que el servidor está respondiendo
@@ -140,20 +140,13 @@ export async function loginUser(page: Page, options: LoginOptions): Promise<bool
     });
 
     // Intentar múltiples selectores para el campo de email
-    const emailSelector = await page
-      .waitForSelector('input#email, input[name="email"], input[type="email"]', {
+    const emailSelector = await page.waitForSelector(
+      'input#email, input[name="email"], input[type="email"]',
+      {
         timeout: 20000,
         state: 'visible',
-      })
-      .catch(async () => {
-        const inputs = await page.locator('input').all();
-        for (let i = 0; i < inputs.length; i++) {
-          const type = await inputs[i].getAttribute('type');
-          const name = await inputs[i].getAttribute('name');
-          const id = await inputs[i].getAttribute('id');
-        }
-        return null;
-      });
+      }
+    );
 
     if (!emailSelector) {
       return false;
@@ -325,12 +318,7 @@ export async function locateShiftDay(
 /**
  * Busca y hace clic en un botón de asignar turno
  */
-export async function findAssignButton(
-  page: Page,
-  options: ShiftElementOptions = {}
-): Promise<boolean> {
-  const { timeout = 5000 } = options;
-
+export async function findAssignButton(page: Page): Promise<boolean> {
   try {
     // Buscar botones con texto "Asignar" o iconos de asignación
     const assignButtons = [
@@ -439,4 +427,3 @@ export async function waitForPageLoad(page: Page, timeout: number = 10000): Prom
 
 // Alias para compatibilidad con tests existentes
 export const findShiftTable = locateShiftTable;
-export const findShiftDay = locateShiftDay;

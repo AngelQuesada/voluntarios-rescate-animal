@@ -5,7 +5,10 @@ import { auth, db } from '@/lib/firebase';
 import { CurrentUser } from '@/types/common';
 
 interface UseAuthUserStatusProps {
-  showSnackbar: (message: React.ReactNode, severity?: "success" | "error" | "info" | "warning") => void;
+  showSnackbar: (
+    message: React.ReactNode,
+    severity?: 'success' | 'error' | 'info' | 'warning'
+  ) => void;
 }
 
 export function useAuthUserStatus({ showSnackbar }: UseAuthUserStatusProps) {
@@ -34,16 +37,16 @@ export function useAuthUserStatus({ showSnackbar }: UseAuthUserStatusProps) {
               isEnabled: userData.isEnabled !== undefined ? userData.isEnabled : true,
             };
             setCurrentUser(currentUserData);
-          } 
+          }
         } catch (e) {
-          console.error("Error al obtener datos del usuario de Firestore:", e);
-          setError("Error al cargar datos del usuario.");
-          showSnackbar("Error al cargar los datos del usuario.", "error");
+          console.error('Error al obtener datos del usuario de Firestore:', e);
+          setError('Error al cargar datos del usuario.');
+          showSnackbar('Error al cargar los datos del usuario.', 'error');
           const currentUserData: CurrentUser = {
             ...user,
             email: user.email || '',
             uid: user.uid,
-            isEnabled: false
+            isEnabled: false,
           };
           setCurrentUser(currentUserData);
         }

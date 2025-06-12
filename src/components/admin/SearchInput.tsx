@@ -1,27 +1,26 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { Box, TextField, Tooltip, IconButton } from "@mui/material";
+import React, { useRef, useEffect, ChangeEvent, FC } from 'react';
+import { Box, TextField, Tooltip, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 interface SearchInputProps {
   searchTerm: string;
   showSearchInput: boolean;
-  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleSearchIconClick: () => void;
   handleClickAwaySearch?: () => void;
   isMobile?: boolean;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({
+const SearchInput: FC<SearchInputProps> = ({
   searchTerm,
   showSearchInput,
   handleSearchChange,
   handleSearchIconClick,
   handleClickAwaySearch,
-  isMobile = false
+  isMobile = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [localFocus, setLocalFocus] = useState(false);
 
   useEffect(() => {
     if (showSearchInput && inputRef.current && document.activeElement === inputRef.current) {
@@ -39,26 +38,12 @@ const SearchInput: React.FC<SearchInputProps> = ({
     }
   }, [searchTerm, showSearchInput]);
 
-  // Efecto para manejar el enfoque automático cuando showSearchInput cambia a true
-  // useEffect(() => {
-  //   if (showSearchInput && inputRef.current && !isMobile) {
-  //     setTimeout(() => {
-  //       if (inputRef.current) {
-  //         inputRef.current.focus();
-  //         // Colocar cursor al final
-  //         const len = inputRef.current.value.length;
-  //         inputRef.current.setSelectionRange(len, len);
-  //       }
-  //     }, 10);
-  //   }
-  // }, [showSearchInput, isMobile]);
-
   // Efecto para manejar clics fuera del componente
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        containerRef.current && 
-        !containerRef.current.contains(event.target as Node) && 
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node) &&
         handleClickAwaySearch &&
         !isMobile &&
         showSearchInput
@@ -70,23 +55,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
     // Solo agregar el listener si no es móvil y el campo de búsqueda está visible
     if (!isMobile && showSearchInput) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [handleClickAwaySearch, isMobile, showSearchInput]);
-
-  // Handler para cuando el input recibe foco
-  const handleFocus = useCallback(() => {
-    setLocalFocus(true);
-  }, []);
-
-  // Handler para cuando el input pierde foco
-  const handleBlur = useCallback(() => {
-    setLocalFocus(false);
-  }, []);
 
   if (isMobile) {
     return (
@@ -98,8 +73,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
           value={searchTerm}
           onChange={handleSearchChange}
           inputRef={inputRef}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
           InputProps={{
             endAdornment: (
               <IconButton>
@@ -115,7 +88,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   // Versión para escritorio con manejo personalizado de enfoque
   return (
-    <Box 
+    <Box
       ref={containerRef}
       sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, minWidth: '200px' }}
     >
@@ -127,8 +100,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
           value={searchTerm}
           onChange={handleSearchChange}
           inputRef={inputRef}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
           onKeyDown={(e) => {
             if (e.key === 'Escape' && handleClickAwaySearch) {
               e.preventDefault();
@@ -139,15 +110,15 @@ const SearchInput: React.FC<SearchInputProps> = ({
         />
       ) : (
         <Tooltip title="Buscar Usuario">
-          <IconButton 
-            onClick={handleSearchIconClick} 
-            sx={{ 
-              mr: 1, 
-              bgcolor: 'primary.main', 
+          <IconButton
+            onClick={handleSearchIconClick}
+            sx={{
+              mr: 1,
+              bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
                 bgcolor: 'primary.dark',
-              }
+              },
             }}
           >
             <SearchIcon />

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,7 +8,7 @@ import {
   Button,
   Alert,
   CircularProgress,
-} from "@mui/material";
+} from '@mui/material';
 
 interface DialogComponentProps {
   open: boolean;
@@ -20,13 +20,13 @@ interface DialogComponentProps {
   actions: {
     label: string;
     onClick: () => void;
-    color?: "inherit" | "primary" | "secondary" | "success" | "error" | "info" | "warning";
-    variant?: "text" | "outlined" | "contained";
+    color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+    variant?: 'text' | 'outlined' | 'contained';
     autoFocus?: boolean;
     disabled?: boolean;
     loading?: boolean;
   }[];
-  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   fullWidth?: boolean;
 }
 
@@ -38,7 +38,7 @@ const DialogComponent: React.FC<DialogComponentProps> = ({
   contentText,
   error,
   actions,
-  maxWidth = "sm",
+  maxWidth = 'sm',
   fullWidth = true,
 }) => {
   return (
@@ -53,9 +53,7 @@ const DialogComponent: React.FC<DialogComponentProps> = ({
       <DialogTitle id="dialog-title">{title}</DialogTitle>
       <DialogContent>
         {contentText && (
-          <DialogContentText id="dialog-description">
-            {contentText}
-          </DialogContentText>
+          <DialogContentText id="dialog-description">{contentText}</DialogContentText>
         )}
         {content}
         {error && (
@@ -69,13 +67,13 @@ const DialogComponent: React.FC<DialogComponentProps> = ({
           <Button
             key={index}
             onClick={action.onClick}
-            color={action.color || "primary"}
-            variant={action.variant || "text"}
+            color={action.color || 'primary'}
+            variant={action.variant || 'text'}
             autoFocus={action.autoFocus}
             disabled={action.disabled || action.loading}
             startIcon={action.loading ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
-            {action.loading ? "Procesando..." : action.label}
+            {action.loading ? 'Procesando...' : action.label}
           </Button>
         ))}
       </DialogActions>

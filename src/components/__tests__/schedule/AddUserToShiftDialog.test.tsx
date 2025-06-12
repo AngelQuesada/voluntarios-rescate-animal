@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render as customRender } from '../../../../__tests__/test-utils';
 import AddUserToShiftDialog from '../../schedule/AddUserToShiftDialog';
@@ -47,9 +47,7 @@ const mockUsers = [
   },
 ];
 
-const mockCurrentAssignments = [
-  { uid: 'user3', name: 'María López' },
-];
+const mockCurrentAssignments = [{ uid: 'user3', name: 'María López' }];
 
 const defaultProps = {
   open: true,
@@ -66,20 +64,20 @@ describe('AddUserToShiftDialog', () => {
 
   test('should render dialog when open', () => {
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Añadir Usuario al Turno')).toBeInTheDocument();
   });
 
   test('should not render dialog when closed', () => {
     customRender(<AddUserToShiftDialog {...defaultProps} open={false} />);
-    
+
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   test('should filter out already assigned users', () => {
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     expect(screen.getByText('Ana García')).toBeInTheDocument();
     expect(screen.getByText('Carlos Ruiz')).toBeInTheDocument();
     expect(screen.queryByText('María López')).not.toBeInTheDocument();
@@ -91,20 +89,20 @@ describe('AddUserToShiftDialog', () => {
       currentAssignments: [], // Remove María from assignments
       users: mockUsers,
     };
-    
+
     customRender(<AddUserToShiftDialog {...propsWithEnabledMaria} />);
-    
+
     // María should not appear because isEnabled is false
     expect(screen.queryByText('María López')).not.toBeInTheDocument();
   });
 
   test('should show responsible users with indicator', () => {
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     // Carlos is a responsable, so should have the green dot indicator
     const carlosItem = screen.getByText('Carlos Ruiz').closest('li');
     expect(carlosItem).toBeInTheDocument();
-    
+
     // Check for the green dot icon (FiberManualRecordIcon)
     const greenDot = carlosItem?.querySelector('[data-testid="FiberManualRecordIcon"]');
     expect(greenDot || carlosItem?.querySelector('svg')).toBeInTheDocument();
@@ -113,11 +111,11 @@ describe('AddUserToShiftDialog', () => {
   test('should filter users by search term', async () => {
     const user = userEvent.setup();
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     const searchInput = screen.getByLabelText(/buscar usuario/i);
-    
+
     await user.type(searchInput, 'Ana');
-    
+
     expect(screen.getByText('Ana García')).toBeInTheDocument();
     expect(screen.queryByText('Carlos Ruiz')).not.toBeInTheDocument();
   });
@@ -125,11 +123,11 @@ describe('AddUserToShiftDialog', () => {
   test('should call onAddUser when add button is clicked', async () => {
     const user = userEvent.setup();
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     // Carlos (responsable) aparece primero en la lista ordenada
     const addButton = screen.getAllByRole('button', { name: /assign shift/i })[0];
     await user.click(addButton);
-    
+
     expect(defaultProps.onAddUser).toHaveBeenCalledWith('user2'); // Carlos es user2
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
@@ -137,10 +135,10 @@ describe('AddUserToShiftDialog', () => {
   test('should call onClose when cancel button is clicked', async () => {
     const user = userEvent.setup();
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     const cancelButton = screen.getByRole('button', { name: /cancelar/i });
     await user.click(cancelButton);
-    
+
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
@@ -149,25 +147,21 @@ describe('AddUserToShiftDialog', () => {
       ...defaultProps,
       users: [],
     };
-    
+
     customRender(<AddUserToShiftDialog {...propsWithNoUsers} />);
-    
+
     expect(screen.getByText(/no hay usuarios disponibles/i)).toBeInTheDocument();
   });
 
   test('should sort users by role hierarchy', () => {
     customRender(<AddUserToShiftDialog {...defaultProps} />);
-    
+
     const listItems = screen.getAllByRole('listitem');
-    
+
     // Carlos (responsable) should appear before Ana (voluntario)
-    const carlosIndex = listItems.findIndex(item => 
-      item.textContent?.includes('Carlos Ruiz')
-    );
-    const anaIndex = listItems.findIndex(item => 
-      item.textContent?.includes('Ana García')
-    );
-    
+    const carlosIndex = listItems.findIndex((item) => item.textContent?.includes('Carlos Ruiz'));
+    const anaIndex = listItems.findIndex((item) => item.textContent?.includes('Ana García'));
+
     expect(carlosIndex).toBeLessThan(anaIndex);
   });
 
@@ -191,9 +185,9 @@ describe('AddUserToShiftDialog', () => {
       ],
       currentAssignments: [],
     };
-    
+
     customRender(<AddUserToShiftDialog {...propsWithUnnamedUser} />);
-    
+
     // El usuario sin nombre debería aparecer como "Usuario sin nombre"
     expect(screen.getByText('Usuario sin nombre')).toBeInTheDocument();
   });

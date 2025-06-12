@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Dialog,
   DialogActions,
@@ -7,8 +7,8 @@ import {
   DialogTitle,
   Button,
   CircularProgress,
-} from "@mui/material";
-import { ConfirmRemoveUserDialogProps } from "./types";
+} from '@mui/material';
+import { ConfirmRemoveUserDialogProps } from './types';
 
 const ConfirmRemoveUserDialog: React.FC<ConfirmRemoveUserDialogProps> = ({
   open,
@@ -24,7 +24,7 @@ const ConfirmRemoveUserDialog: React.FC<ConfirmRemoveUserDialogProps> = ({
         <DialogContentText>
           {userName
             ? `¿Estás seguro de que quieres eliminar a ${userName} de este turno?`
-            : "¿Estás seguro de que quieres eliminar a este usuario de este turno?"}
+            : '¿Estás seguro de que quieres eliminar a este usuario de este turno?'}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

@@ -1,13 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  CircularProgress,
-  Tooltip,
-} from '@mui/material';
+import React, { useState, useEffect, useCallback, FC } from 'react';
+import { Box, Typography, Paper, CircularProgress, Tooltip } from '@mui/material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import UserDetailDialog from '../admin/UserDetailDialog';
@@ -18,35 +12,31 @@ import { useAuth } from '@/context/AuthContext';
 import { useGetUsersQuery } from '@/store/api/usersApi';
 import type { User } from '@/types/common';
 
-interface Volunteer {
-  id: string;
-  uid: string;
-  name: string;
-  lastname: string; // Usando nombre y apellidos separados en lugar de fullName
-  email: string;
-  phone?: string;
-  roles?: number[];
+// Tipo que extiende User con la propiedad shift para voluntarios asignados
+type VolunteerWithShift = User & {
   shift: 'M' | 'T';
-}
+};
 
 interface VolunteersListProps {
   selectedDate: Date;
 }
 
-const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
-  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+const VolunteersList: FC<VolunteersListProps> = ({ selectedDate }) => {
+  const [volunteers, setVolunteers] = useState<VolunteerWithShift[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedVolunteer, setSelectedVolunteer] = useState<Volunteer | null>(null);
+  const [selectedVolunteer, setSelectedVolunteer] = useState<VolunteerWithShift | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const { user } = useAuth();
 
   // Obtener usuarios desde Redux
   const { data: usersMap, isLoading: usersLoading, error: usersError } = useGetUsersQuery();
 
-  // Función para obtener los datos completos del usuario desde el Redux store
-  const getUserData = (uid: string): User | undefined => {
-    return usersMap ? usersMap[uid] : undefined;
-  };
+  const getUserData = useCallback(
+    (uid: string): User | undefined => {
+      return usersMap ? usersMap[uid] : undefined;
+    },
+    [usersMap]
+  );
 
   useEffect(() => {
     const fetchVolunteers = async () => {
@@ -54,31 +44,34 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
       try {
         // Convertir fecha al formato usado en tu base de datos
         const dateString = format(selectedDate, 'yyyy-MM-dd');
-        
+
         // Consultar la colección de shifts para la fecha seleccionada
         const shiftsRef = collection(db, 'shifts');
-        const q = query(shiftsRef, where("date", "==", dateString));
-        
+        const q = query(shiftsRef, where('date', '==', dateString));
+
         const shiftsSnapshot = await getDocs(q);
-        const volunteersData: Volunteer[] = [];
-        
+        const volunteersData: VolunteerWithShift[] = [];
+
         // Procesar los datos de los turnos
         for (const docSnapshot of shiftsSnapshot.docs) {
           const shiftData = docSnapshot.data();
-          
+
           // Determinar el tipo de turno (M o T)
           const shift = shiftData.shift || (docSnapshot.id.endsWith('_M') ? 'M' : 'T');
-          
+
           // Función para procesar voluntarios por turno
-          const processVolunteers = (volunteersArray: any[], shiftType: 'M' | 'T') => {
+          const processVolunteers = (
+            volunteersArray: VolunteerWithShift[],
+            shiftType: 'M' | 'T'
+          ) => {
             if (!Array.isArray(volunteersArray)) return;
-            
+
             for (const volunteerData of volunteersArray) {
               if (!volunteerData.uid) continue;
-              
+
               // Obtener datos completos del usuario desde Redux
               const userData = getUserData(volunteerData.uid);
-              
+
               // Si encontramos el usuario en Redux, usamos esos datos
               if (userData) {
                 volunteersData.push({
@@ -89,7 +82,11 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
                   email: userData.email || volunteerData.email || '',
                   phone: userData.phone || volunteerData.phone || '',
                   roles: userData.roles || volunteerData.roles || [],
-                  shift: shiftType
+                  username: userData.username || volunteerData.username || '',
+                  birthdate: userData.birthdate || volunteerData.birthdate || '',
+                  createdAt: userData.createdAt || volunteerData.createdAt || '',
+                  updatedAt: userData.updatedAt || volunteerData.updatedAt || '',
+                  shift: shiftType,
                 });
               } else {
                 // Si no está en Redux, usamos los datos parciales que tenemos
@@ -101,36 +98,40 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
                   email: volunteerData.email || '',
                   phone: volunteerData.phone || '',
                   roles: volunteerData.roles || [],
-                  shift: shiftType
+                  username: volunteerData.username || '',
+                  birthdate: volunteerData.birthdate || '',
+                  createdAt: volunteerData.createdAt || '',
+                  updatedAt: volunteerData.updatedAt || '',
+                  shift: shiftType,
                 });
               }
             }
           };
-          
+
           // Procesar asignaciones generales (si existen)
           if (shiftData.assignments && Array.isArray(shiftData.assignments)) {
             processVolunteers(shiftData.assignments, shift);
           }
-          
+
           // Procesar turno de mañana
           if (shiftData.M && Array.isArray(shiftData.M)) {
             processVolunteers(shiftData.M, 'M');
           }
-          
+
           // Procesar turno de tarde
           if (shiftData.T && Array.isArray(shiftData.T)) {
             processVolunteers(shiftData.T, 'T');
           }
         }
-        
+
         // Filtrar posibles duplicados por ID y turno
         const uniqueVolunteers = Array.from(
-          new Map(volunteersData.map(v => [v.id + v.shift, v])).values()
+          new Map(volunteersData.map((v) => [v.id + v.shift, v])).values()
         );
-        
+
         setVolunteers(uniqueVolunteers);
       } catch (error) {
-        console.error("Error al obtener voluntarios:", error);
+        console.error('Error al obtener voluntarios:', error);
       } finally {
         setLoading(false);
       }
@@ -140,9 +141,9 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
     if (selectedDate && (!usersLoading || usersMap)) {
       fetchVolunteers();
     }
-  }, [selectedDate, usersMap, usersLoading]);
+  }, [selectedDate, usersMap, usersLoading, getUserData]);
 
-  const handleVolunteerClick = (volunteer: Volunteer) => {
+  const handleVolunteerClick = (volunteer: VolunteerWithShift) => {
     setSelectedVolunteer(volunteer);
     setOpenDialog(true);
   };
@@ -153,15 +154,17 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
   };
 
   const getRoleColor = (roles?: number[]) => {
-    if (!roles) return "text.secondary";
-    if (roles.includes(UserRoles.RESPONSABLE)) return "success.main";
-    return "primary.light";
+    if (!roles) return 'text.secondary';
+    if (roles.includes(UserRoles.RESPONSABLE)) return 'success.main';
+    return 'primary.light';
   };
 
   // Mostrar loading si estamos cargando usuarios o voluntarios
   if (usersLoading || loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -177,10 +180,10 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
   }
 
   // Filtrar por turno de mañana y tarde
-  const morningVolunteers = volunteers.filter(v => v.shift === 'M');
-  const afternoonVolunteers = volunteers.filter(v => v.shift === 'T');
+  const morningVolunteers = volunteers.filter((v) => v.shift === 'M');
+  const afternoonVolunteers = volunteers.filter((v) => v.shift === 'T');
 
-  const renderVolunteerChips = (volunteersList: Volunteer[]) => {
+  const renderVolunteerChips = (volunteersList: VolunteerWithShift[]) => {
     if (volunteersList.length === 0) {
       return (
         <Typography variant="body2" color="text.secondary">
@@ -192,11 +195,11 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
     return (
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "row",
-          flexWrap: "wrap",
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
           gap: 1,
-          alignItems: "center",
+          alignItems: 'center',
         }}
       >
         {volunteersList.map((volunteer) => {
@@ -206,30 +209,30 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
           const Content = (
             <Box
               sx={{
-                borderRadius: "8px",
-                padding: "2px 6px",
-                display: "flex",
-                alignItems: "center",
-                width: "fit-content",
+                borderRadius: '8px',
+                padding: '2px 6px',
+                display: 'flex',
+                alignItems: 'center',
+                width: 'fit-content',
                 backgroundColor: roleColor,
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                "&:hover": { filter: "brightness(0.9)" },
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': { filter: 'brightness(0.9)' },
               }}
             >
               <Typography
                 variant="caption"
                 onClick={() => handleVolunteerClick(volunteer)}
                 sx={{
-                  color: "white",
+                  color: 'white',
                   fontWeight: isCurrentUser ? 600 : 400,
-                  fontSize: "0.7rem",
-                  userSelect: "none",
+                  fontSize: '0.7rem',
+                  userSelect: 'none',
                   cursor: 'pointer',
                 }}
               >
                 {`${volunteer.name} ${volunteer.lastname}`.trim()}
-                {isCurrentUser && " (Tú)"}
+                {isCurrentUser && ' (Tú)'}
               </Typography>
             </Box>
           );
@@ -274,10 +277,22 @@ const VolunteersList: React.FC<VolunteersListProps> = ({ selectedDate }) => {
 
       {/* Diálogo de detalles del usuario */}
       {selectedVolunteer && (
-        <UserDetailDialog 
-          open={openDialog} 
-          onClose={handleCloseDialog} 
-          user={selectedVolunteer} 
+        <UserDetailDialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          user={{
+            id: selectedVolunteer.id,
+            uid: selectedVolunteer.uid,
+            name: selectedVolunteer.name,
+            lastname: selectedVolunteer.lastname,
+            email: selectedVolunteer.email,
+            phone: selectedVolunteer.phone,
+            roles: selectedVolunteer.roles,
+            username: selectedVolunteer.username,
+            birthdate: selectedVolunteer.birthdate,
+            createdAt: selectedVolunteer.createdAt,
+            updatedAt: selectedVolunteer.updatedAt,
+          }}
         />
       )}
     </Box>

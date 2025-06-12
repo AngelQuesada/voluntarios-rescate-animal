@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -12,29 +12,21 @@ import {
   Divider,
   Alert,
   Button,
-  LinearProgress
+  LinearProgress,
 } from '@mui/material';
-import { 
-  startOfWeek, 
-  endOfWeek, 
-  addWeeks, 
-  format, 
-  isWithinInterval, 
-  parseISO 
-} from 'date-fns';
+import { startOfWeek, endOfWeek, addWeeks, format, isWithinInterval, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useGetUsersQuery } from '@/store/api/usersApi';
-import { useGetShiftsQuery } from '@/store/api/shiftsApi';
+import { useGetShiftsQuery, ShiftAssignment } from '@/store/api/shiftsApi';
 import { User } from '@/types/common';
-import { ShiftAssignment } from '@/store/api/shiftsApi';
 
 interface WeekViewPanelProps {
   onUserClick: (user: User) => void;
 }
 
 const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
-  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [nextWeekStart, setNextWeekStart] = useState(startOfWeek(addWeeks(new Date(), 1), { weekStartsOn: 1 }));
+  const [currentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [nextWeekStart] = useState(startOfWeek(addWeeks(new Date(), 1), { weekStartsOn: 1 }));
   const [showAllCurrentWeek, setShowAllCurrentWeek] = useState(false);
   const [showAllNextWeek, setShowAllNextWeek] = useState(false);
 
@@ -45,7 +37,7 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
   const formatWeekRange = (start: Date, end: Date) => {
     const startMonth = format(start, 'MMMM', { locale: es });
     const endMonth = format(end, 'MMMM', { locale: es });
-    
+
     // Si los meses son diferentes
     if (startMonth !== endMonth) {
       return `${format(start, 'd', { locale: es })} de ${startMonth} al ${format(end, 'd', { locale: es })} de ${endMonth}`;
@@ -59,64 +51,76 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
   const nextWeekText = `Semana siguiente: ${formatWeekRange(nextWeekStart, nextWeekEnd)}`;
 
   const { data: usersData, isLoading: usersLoading, error: usersError } = useGetUsersQuery();
-  const { data: shiftsData, isLoading: shiftsLoading, error: shiftsError } = useGetShiftsQuery({
+  const {
+    data: shiftsData,
+    isLoading: shiftsLoading,
+    error: shiftsError,
+  } = useGetShiftsQuery({
     startDate: format(currentWeekStart, 'yyyy-MM-dd'),
     endDate: format(nextWeekEnd, 'yyyy-MM-dd'),
-    users: {}
+    users: {},
   });
 
   const enabledVolunteers = useMemo(() => {
     if (!usersData) return [];
-    return Object.values(usersData).filter(
-      user => user.isEnabled 
-    );
+    return Object.values(usersData).filter((user) => user.isEnabled);
   }, [usersData]);
 
-  const getVolunteersWithoutShiftsInWeek = (weekStartDate: Date, weekEndDate: Date): User[] => {
-    if (!shiftsData || !enabledVolunteers.length) return [];
+  const getVolunteersWithoutShiftsInWeek = useCallback(
+    (weekStartDate: Date, weekEndDate: Date): User[] => {
+      if (!shiftsData || !enabledVolunteers.length) return [];
 
-    const volunteersWithShiftsInWeek = new Set<string>();
+      const volunteersWithShiftsInWeek = new Set<string>();
 
-    Object.entries(shiftsData).forEach(([dateKey, dailyShifts]) => {
-      const shiftDate = parseISO(dateKey); // La fecha se obtiene del dateKey
-      if (isWithinInterval(shiftDate, { start: weekStartDate, end: weekEndDate })) {
-        // dailyShifts es un objeto como { M?: ShiftAssignment[], T?: ShiftAssignment[] }
-        Object.values(dailyShifts).forEach(assignmentsArray => { 
-          // assignmentsArray es ShiftAssignment[] o undefined (para M o T)
-          if (assignmentsArray) { 
-            assignmentsArray.forEach((assignment: ShiftAssignment) => {
-              volunteersWithShiftsInWeek.add(assignment.uid);
-            });
-          }
-        });
-      }
-    });
-    
-    return enabledVolunteers.filter(volunteer => !volunteersWithShiftsInWeek.has(volunteer.uid));
-  };
+      Object.entries(shiftsData).forEach(([dateKey, dailyShifts]) => {
+        const shiftDate = parseISO(dateKey); // La fecha se obtiene del dateKey
+        if (isWithinInterval(shiftDate, { start: weekStartDate, end: weekEndDate })) {
+          // dailyShifts es un objeto como { M?: ShiftAssignment[], T?: ShiftAssignment[] }
+          Object.values(dailyShifts).forEach((assignmentsArray) => {
+            // assignmentsArray es ShiftAssignment[] o undefined (para M o T)
+            if (assignmentsArray) {
+              assignmentsArray.forEach((assignment: ShiftAssignment) => {
+                volunteersWithShiftsInWeek.add(assignment.uid);
+              });
+            }
+          });
+        }
+      });
 
-  const volunteersWithoutShiftsCurrentWeek = useMemo(() => 
-    getVolunteersWithoutShiftsInWeek(currentWeekStart, currentWeekEnd), 
-    [enabledVolunteers, shiftsData, currentWeekStart, currentWeekEnd]
+      return enabledVolunteers.filter(
+        (volunteer) => !volunteersWithShiftsInWeek.has(volunteer.uid)
+      );
+    },
+    [enabledVolunteers, shiftsData]
   );
 
-  const volunteersWithoutShiftsNextWeek = useMemo(() => 
-    getVolunteersWithoutShiftsInWeek(nextWeekStart, nextWeekEnd), 
-    [enabledVolunteers, shiftsData, nextWeekStart, nextWeekEnd]
+  const volunteersWithoutShiftsCurrentWeek = useMemo(
+    () => getVolunteersWithoutShiftsInWeek(currentWeekStart, currentWeekEnd),
+    [currentWeekStart, currentWeekEnd, getVolunteersWithoutShiftsInWeek]
+  );
+
+  const volunteersWithoutShiftsNextWeek = useMemo(
+    () => getVolunteersWithoutShiftsInWeek(nextWeekStart, nextWeekEnd),
+    [nextWeekStart, nextWeekEnd, getVolunteersWithoutShiftsInWeek]
   );
 
   // Calcular voluntarios con turnos asignados y los valores de progreso
   const totalVolunteers = enabledVolunteers.length;
-  const volunteersWithShiftsCurrentWeek = totalVolunteers - volunteersWithoutShiftsCurrentWeek.length;
+  const volunteersWithShiftsCurrentWeek =
+    totalVolunteers - volunteersWithoutShiftsCurrentWeek.length;
   const volunteersWithShiftsNextWeek = totalVolunteers - volunteersWithoutShiftsNextWeek.length;
-  
+
   // Calcular porcentajes para las barras de progreso
-  const currentWeekProgress = totalVolunteers > 0 ? (volunteersWithShiftsCurrentWeek / totalVolunteers) * 100 : 0;
-  const nextWeekProgress = totalVolunteers > 0 ? (volunteersWithShiftsNextWeek / totalVolunteers) * 100 : 0;
+  const currentWeekProgress =
+    totalVolunteers > 0 ? (volunteersWithShiftsCurrentWeek / totalVolunteers) * 100 : 0;
+  const nextWeekProgress =
+    totalVolunteers > 0 ? (volunteersWithShiftsNextWeek / totalVolunteers) * 100 : 0;
 
   if (usersLoading || shiftsLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}
+      >
         <CircularProgress />
         <Typography sx={{ ml: 2 }}>Cargando datos de la semana...</Typography>
       </Box>
@@ -124,27 +128,44 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
   }
 
   if (usersError || shiftsError) {
-    return <Alert severity="error">Error al cargar los datos. Por favor, inténtalo de nuevo más tarde.</Alert>;
+    return (
+      <Alert severity="error">
+        Error al cargar los datos. Por favor, inténtalo de nuevo más tarde.
+      </Alert>
+    );
   }
-  
-  const renderVolunteerList = (volunteers: User[], weekType: string, showAll: boolean, setShowAll: () => void) => {
+
+  const renderVolunteerList = (
+    volunteers: User[],
+    weekType: string,
+    showAll: boolean,
+    setShowAll: () => void
+  ) => {
     if (!volunteers.length) {
-      return <Typography sx={{p:2, fontStyle: 'italic'}}>Todos los voluntarios habilitados tienen turnos asignados para {weekType}.</Typography>;
+      return (
+        <Typography sx={{ p: 2, fontStyle: 'italic' }}>
+          Todos los voluntarios habilitados tienen turnos asignados para {weekType}.
+        </Typography>
+      );
     }
 
     const volunteersToShow = showAll ? volunteers : volunteers.slice(0, 10);
 
     if (!volunteersToShow.length) {
-      return <Typography sx={{p:2, fontStyle: 'italic'}}>No hay voluntarios sin turnos asignados para {weekType}.</Typography>;
+      return (
+        <Typography sx={{ p: 2, fontStyle: 'italic' }}>
+          No hay voluntarios sin turnos asignados para {weekType}.
+        </Typography>
+      );
     }
 
     return (
       <>
         <List dense>
-          {volunteersToShow.map(volunteer => (
-            <ListItem 
-              key={volunteer.uid} 
-              button 
+          {volunteersToShow.map((volunteer) => (
+            <ListItem
+              key={volunteer.uid}
+              button
               onClick={() => onUserClick(volunteer)}
               sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
             >
@@ -164,22 +185,30 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
   };
 
   // Componente para la barra de progreso con texto
-  const ProgressBarWithLabel = ({ value, label, weekTitle }: { value: number, label: string, weekTitle: string }) => (
+  const ProgressBarWithLabel = ({
+    value,
+    label,
+    weekTitle,
+  }: {
+    value: number;
+    label: string;
+    weekTitle: string;
+  }) => (
     <Box sx={{ mb: 2 }}>
       <Box sx={{ position: 'relative', display: 'inline-flex', width: '100%' }}>
-        <LinearProgress 
-          variant="determinate" 
-          value={value} 
-          sx={{ 
-            width: '100%', 
-            height: 40, 
+        <LinearProgress
+          variant="determinate"
+          value={value}
+          sx={{
+            width: '100%',
+            height: 40,
             borderRadius: 8,
             backgroundColor: '#D1D5DB',
             '& .MuiLinearProgress-bar': {
               backgroundColor: '#374151',
-              transition: 'transform 0.4s ease'
-            }
-          }} 
+              transition: 'transform 0.4s ease',
+            },
+          }}
         />
         <Box
           sx={{
@@ -191,22 +220,22 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
             height: '100%',
           }}
         >
-          <Typography 
-            variant="body1" 
-            component="div" 
-            sx={{ 
+          <Typography
+            variant="body1"
+            component="div"
+            sx={{
               fontWeight: 'bold',
               color: '#FFFFFF',
-              textShadow: '0px 0px 4px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.6)'
+              textShadow: '0px 0px 4px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.6)',
             }}
           >
             {label}
           </Typography>
         </Box>
       </Box>
-      
-      <Typography 
-        variant="body2" 
+
+      <Typography
+        variant="body2"
         component="div"
         sx={{
           mt: 1,
@@ -222,28 +251,42 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
       <Paper elevation={3} sx={{ flex: 1, p: 2 }}>
-        <ProgressBarWithLabel 
-          value={currentWeekProgress} 
+        <ProgressBarWithLabel
+          value={currentWeekProgress}
           label={`${volunteersWithShiftsCurrentWeek}/${totalVolunteers} voluntarios`}
           weekTitle={currentWeekText}
         />
-        
-        <Typography variant="subtitle1" sx={{mb:1}}>Voluntarios sin turnos asignados:</Typography>
-        {renderVolunteerList(volunteersWithoutShiftsCurrentWeek, 'la semana actual', showAllCurrentWeek, () => setShowAllCurrentWeek(true))}
+
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          Voluntarios sin turnos asignados:
+        </Typography>
+        {renderVolunteerList(
+          volunteersWithoutShiftsCurrentWeek,
+          'la semana actual',
+          showAllCurrentWeek,
+          () => setShowAllCurrentWeek(true)
+        )}
       </Paper>
 
       <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
       <Divider sx={{ display: { xs: 'block', md: 'none' }, my: 2 }} />
 
       <Paper elevation={3} sx={{ flex: 1, p: 2 }}>
-        <ProgressBarWithLabel 
-          value={nextWeekProgress} 
+        <ProgressBarWithLabel
+          value={nextWeekProgress}
           label={`${volunteersWithShiftsNextWeek}/${totalVolunteers} voluntarios`}
           weekTitle={nextWeekText}
         />
-        
-        <Typography variant="subtitle1" sx={{mb:1}}>Voluntarios sin turnos asignados:</Typography>
-        {renderVolunteerList(volunteersWithoutShiftsNextWeek, 'la semana siguiente', showAllNextWeek, () => setShowAllNextWeek(true))}
+
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          Voluntarios sin turnos asignados:
+        </Typography>
+        {renderVolunteerList(
+          volunteersWithoutShiftsNextWeek,
+          'la semana siguiente',
+          showAllNextWeek,
+          () => setShowAllNextWeek(true)
+        )}
       </Paper>
     </Box>
   );

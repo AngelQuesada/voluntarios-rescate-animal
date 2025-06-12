@@ -1,23 +1,19 @@
-"use client";
+'use client';
 
-import { Inter } from "next/font/google";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "@/theme/theme";
-import { AuthProvider } from "@/context/AuthContext";
-import { Box } from "@mui/material";
-import CssBaseline from "@mui/material/CssBaseline";
-import { ReduxProvider } from "@/store/provider";
-import Script from "next/script";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
-import "@/styles/pwaStyles.css";
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from '@/theme/theme';
+import { AuthProvider } from '@/context/AuthContext';
+import { Box } from '@mui/material';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ReduxProvider } from '@/store/provider';
+import Script from 'next/script';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
+import '@/styles/pwaStyles.css';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <head>
@@ -28,7 +24,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Rescate Animal" />
         <meta name="apple-mobile-web-app-status-bar-style" content="white" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        />
         <meta name="theme-color" content="#ffffff" />
         <meta name="application-name" content="Rescate Animal Voluntariado" />
         <meta name="format-detection" content="telephone=no" />
@@ -43,7 +42,7 @@ export default function RootLayout({
             <CssBaseline />
             <ReduxProvider>
               <AuthProvider>
-                <Box sx={{ minHeight: "100vh" }}>{children}</Box>
+                <Box sx={{ minHeight: '100vh' }}>{children}</Box>
               </AuthProvider>
             </ReduxProvider>
           </ThemeProvider>

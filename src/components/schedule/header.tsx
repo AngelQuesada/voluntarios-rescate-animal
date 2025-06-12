@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image';
+import Link from 'next/link';
 import {
   AppBar,
   Toolbar,
@@ -11,25 +11,23 @@ import {
   Box,
   Dialog,
   CircularProgress,
-} from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
-import { useState, useEffect } from "react";
+} from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 export function Header() {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
-  const isAdminPage = pathname === "/admin";
+  const isAdminPage = pathname === '/admin';
   const isMobile = useIsMobile();
   const router = useRouter();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isLoggingOut] = useState(false);
   const [isNavigatingToAdmin, setIsNavigatingToAdmin] = useState(false);
 
   useEffect(() => {
@@ -37,27 +35,23 @@ export function Header() {
   }, [user]);
 
   const handleLogout = () => {
-    // En lugar de manejar el cierre de sesión aquí, redirigimos a la página dedicada de logout
-    router.push("/logout");
+    router.push('/logout');
   };
 
   const handleAdminNavigation = () => {
     if (!isAdminPage) {
       setIsNavigatingToAdmin(true);
-      router.push("/admin");
+      router.push('/admin');
     } else {
-      router.push("/schedule");
+      router.push('/schedule');
     }
   };
 
   return (
     <>
-      <AppBar
-        position="static"
-        sx={{ bgcolor: "white", color: "text.primary", boxShadow: 1 }}
-      >
-        <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+      <AppBar position="static" sx={{ bgcolor: 'white', color: 'text.primary', boxShadow: 1 }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Link href="/schedule">
               <Image
                 src="/logo.png"
@@ -66,9 +60,9 @@ export function Header() {
                 height={40}
                 priority
                 style={{
-                  marginRight: "16px",
-                  borderRadius: "50%",
-                  cursor: "pointer",
+                  marginRight: '16px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
                 }}
               />
             </Link>
@@ -76,38 +70,35 @@ export function Header() {
               <Typography
                 variant="h6"
                 component="div"
-                sx={{ fontWeight: "bold" }}
-                color={"primary.main"}
+                sx={{ fontWeight: 'bold' }}
+                color={'primary.main'}
               >
                 Rescate Animal Granada
               </Typography>
             )}
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {user?.name && user?.lastname && (
               <Typography
                 variant="body1"
                 sx={{
                   fontWeight: 500,
-                  color: "primary.main",
+                  color: 'primary.main',
                 }}
               >
                 {`${user.name} ${user.lastname}`}
               </Typography>
             )}
             {isAdmin && (
-              <Tooltip
-                title={isAdminPage ? "Ir a Turnos" : "Panel de Administración"}
-                arrow
-              >
+              <Tooltip title={isAdminPage ? 'Ir a Turnos' : 'Panel de Administración'} arrow>
                 <IconButton
                   onClick={handleAdminNavigation}
                   size="small"
                   sx={{
-                    color: "primary.contrastText",
-                    backgroundColor: "primary.main",
-                    "&:hover": {
-                      backgroundColor: "primary.dark",
+                    color: 'primary.contrastText',
+                    backgroundColor: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
                     },
                   }}
                 >
@@ -124,10 +115,10 @@ export function Header() {
                 size="small"
                 onClick={handleLogout}
                 sx={{
-                  color: "primary.contrastText",
-                  backgroundColor: "primary.main",
-                  "&:hover": {
-                    backgroundColor: "primary.dark",
+                  color: 'primary.contrastText',
+                  backgroundColor: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
                   },
                 }}
               >
@@ -143,9 +134,9 @@ export function Header() {
         PaperProps={{
           sx: {
             padding: 3,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: 2,
           },
         }}
@@ -160,17 +151,15 @@ export function Header() {
         PaperProps={{
           sx: {
             padding: 3,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: 2,
           },
         }}
       >
         <CircularProgress />
-        <Typography variant="body1">
-          Cargando panel de administración...
-        </Typography>
+        <Typography variant="body1">Cargando panel de administración...</Typography>
       </Dialog>
     </>
   );

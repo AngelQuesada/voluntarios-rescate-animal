@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
 import { useEffect } from 'react';
-import { AdminPanel } from "@/components/admin/admin-panel";
-import { UserRoles } from "@/lib/constants";
-import RoleProtected from "@/components/auth/RoleProtected";
+import { AdminPanel } from '@/components/admin/admin-panel';
+import { UserRoles } from '@/lib/constants';
+import RoleProtected from '@/components/auth/RoleProtected';
 import { triggerVibration } from '@/lib/vibration';
 
 export default function AdminPage() {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC, useMemo } from 'react';
 import { Box, Typography, Grid, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -13,19 +13,19 @@ import { addDays, startOfDay, isBefore, isEqual, parseISO } from 'date-fns';
 
 interface ShiftRowProps {
   dayKey: string; // Formato 'yyyy-MM-dd'
-  shiftKey: "M" | "T";
+  shiftKey: 'M' | 'T';
   shiftDisplayName: string;
   currentUser: CurrentUser | null;
   assignments: ShiftAssignment[];
   usersMap: { [uid: string]: User };
   isLoading: boolean;
-  initiateShiftAction: (dateKey: string, shiftKey: "M" | "T") => Promise<void>;
-  onAddUserClick: (dayKey: string, shiftKey: "M" | "T") => void;
-  onRemoveUserClick: (assignment: ShiftAssignment, dayKey: string, shiftKey: "M" | "T") => void;
+  initiateShiftAction: (dateKey: string, shiftKey: 'M' | 'T') => Promise<void>;
+  onAddUserClick: (dayKey: string, shiftKey: 'M' | 'T') => void;
+  onRemoveUserClick: (assignment: ShiftAssignment, dayKey: string, shiftKey: 'M' | 'T') => void;
   onVolunteerClick: (volunteer: ShiftAssignment) => void;
 }
 
-const ShiftRow: React.FC<ShiftRowProps> = ({
+const ShiftRow: FC<ShiftRowProps> = ({
   dayKey,
   shiftKey,
   shiftDisplayName,
@@ -38,49 +38,47 @@ const ShiftRow: React.FC<ShiftRowProps> = ({
   onRemoveUserClick,
   onVolunteerClick,
 }) => {
-  const isCurrentUserAssigned = assignments.some(a => a.uid === currentUser?.uid);
-  
+  const isCurrentUserAssigned = assignments.some((a) => a.uid === currentUser?.uid);
+
   // Verificar si el turno es para el día actual o los próximos 2 días
-  const isNearFutureShift = React.useMemo(() => {
+  const isNearFutureShift = useMemo(() => {
     const today = startOfDay(new Date());
     const twoDaysLater = addDays(today, 2);
     const shiftDate = parseISO(dayKey);
 
     return (
-      (isEqual(shiftDate, today) || isBefore(today, shiftDate)) && 
+      (isEqual(shiftDate, today) || isBefore(today, shiftDate)) &&
       (isEqual(shiftDate, twoDaysLater) || isBefore(shiftDate, twoDaysLater))
     );
   }, [dayKey]);
-  
+
   // Obtener el estatus visual del turno
   const getShiftStatus = () => {
     // Solo mostrar advertencias para turnos cercanos
     if (isNearFutureShift) {
       // Verificar si no hay un responsable asignado
-      const hasResponsable = assignments.some(
-        assignment => assignment.roles?.includes(2)
-      );
+      const hasResponsable = assignments.some((assignment) => assignment.roles?.includes(2));
 
-      const hasEnoughVolunteers = assignments.length >2;
+      const hasEnoughVolunteers = assignments.length > 2;
 
-      if (!hasEnoughVolunteers || !hasResponsable ) return "warning";
+      if (!hasEnoughVolunteers || !hasResponsable) return 'warning';
 
-      return "ok";
+      return 'ok';
     }
 
-    return "empty";
+    return 'empty';
   };
-  
+
   const shiftStatus = getShiftStatus();
-  
+
   // Renderizar el icono apropiado según el estatus
   const renderStatusIcon = () => {
     switch (shiftStatus) {
-      case "ok":
+      case 'ok':
         return <CheckCircleIcon color="success" fontSize="small" />;
-      case "warning":
+      case 'warning':
         return <ErrorIcon color="warning" fontSize="small" />;
-      case "empty":
+      case 'empty':
         return <CircleIcon color="disabled" fontSize="small" />;
       default:
         return null;
@@ -99,7 +97,7 @@ const ShiftRow: React.FC<ShiftRowProps> = ({
             </Typography>
           </Box>
         </Grid>
-        
+
         {/* Columna del centro: Lista de asignaciones */}
         <Grid item xs={9} sm={8} md={8}>
           <ShiftAssignmentList
@@ -113,7 +111,7 @@ const ShiftRow: React.FC<ShiftRowProps> = ({
             onVolunteerClick={onVolunteerClick}
           />
         </Grid>
-        
+
         {/* Columna de la derecha: Botón de acción */}
         <Grid item xs={1} sm={2} md={2}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -121,15 +119,19 @@ const ShiftRow: React.FC<ShiftRowProps> = ({
               <CircularProgress size={24} />
             ) : (
               currentUser && (
-                <Tooltip title={isCurrentUserAssigned ? "Eliminarme de este turno" : "Añadirme a este turno"}>
+                <Tooltip
+                  title={
+                    isCurrentUserAssigned ? 'Eliminarme de este turno' : 'Añadirme a este turno'
+                  }
+                >
                   <IconButton
                     onClick={() => {
                       triggerVibration(40);
                       initiateShiftAction(dayKey, shiftKey);
                     }}
-                    color={isCurrentUserAssigned ? "error" : "primary"}
+                    color={isCurrentUserAssigned ? 'error' : 'primary'}
                     size="small"
-                    data-testid={isCurrentUserAssigned ? 'RemoveMyTurn' : 'AddMyTurn' }
+                    data-testid={isCurrentUserAssigned ? 'RemoveMyTurn' : 'AddMyTurn'}
                   >
                     {isCurrentUserAssigned ? <RemoveCircleOutlineIcon /> : <AddCircleOutlineIcon />}
                   </IconButton>

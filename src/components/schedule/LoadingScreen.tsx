@@ -1,26 +1,26 @@
-import React from "react";
-import Image from "next/image";
-import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
+import React from 'react';
+import Image from 'next/image';
+import { Box, CircularProgress, Typography, useTheme } from '@mui/material';
 
 interface LoadingScreenProps {
   message?: string;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Cargando..." }) => {
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = 'Cargando...' }) => {
   const theme = useTheme();
   return (
     <Box
       sx={{
-        position: "fixed",
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
         backgroundColor: theme.palette.background.paper,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
         gap: 4,
         zIndex: theme.zIndex.modal + 1,
       }}
@@ -29,7 +29,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Cargando..." }
         sx={{
           width: 200,
           height: 200,
-          position: "relative",
+          position: 'relative',
         }}
       >
         <Image
@@ -37,7 +37,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ message = "Cargando..." }
           alt="Logo"
           fill
           sizes="200px"
-          style={{ objectFit: "contain" }}
+          style={{ objectFit: 'contain' }}
           priority
         />
       </Box>

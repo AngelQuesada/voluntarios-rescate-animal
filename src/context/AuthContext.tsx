@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   createContext,
@@ -7,13 +7,14 @@ import {
   useState,
   useRef,
   useCallback,
-} from "react";
-import { auth, db } from "@/lib/firebase";
-import { User } from "firebase/auth";
-import { useRouter, usePathname } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { UserRoles } from "@/lib/constants";
-import LoadingScreen from "@/components/schedule/LoadingScreen";
+  ReactNode,
+} from 'react';
+import { auth, db } from '@/lib/firebase';
+import { User } from 'firebase/auth';
+import { useRouter, usePathname } from 'next/navigation';
+import { doc, getDoc } from 'firebase/firestore';
+import { UserRoles } from '@/lib/constants';
+import LoadingScreen from '@/components/schedule/LoadingScreen';
 
 type AuthContextType = {
   user:
@@ -35,8 +36,8 @@ const AuthContext = createContext<AuthContextType>({
   refreshAuthState: async () => {},
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthContextType["user"]>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthContextType['user']>(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
@@ -70,18 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     lastAuthStateRef.current = null;
 
     // Limpiar localStorage y sessionStorage relacionado con auth
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       try {
         // Limpiar cookies de auth
-        document.cookie =
-          "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+        document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
 
         // Limpiar storage keys relacionados con auth
-        const authKeys = [
-          "firebaseAuthState",
-          "authRedirectPending",
-          "loginTimeout",
-        ];
+        const authKeys = ['firebaseAuthState', 'authRedirectPending', 'loginTimeout'];
         authKeys.forEach((key) => {
           sessionStorage.removeItem(key);
           localStorage.removeItem(key);
@@ -89,12 +85,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Limpiar todas las claves de Firebase
         Object.keys(localStorage).forEach((key) => {
-          if (key.includes("firebase") || key.includes("auth")) {
+          if (key.includes('firebase') || key.includes('auth')) {
             localStorage.removeItem(key);
           }
         });
       } catch (error) {
-        console.warn("Error limpiando storage:", error);
+        console.warn('Error limpiando storage:', error);
       }
     }
   }, [cleanup]);
@@ -104,21 +100,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (auth.currentUser) {
       try {
         await auth.currentUser.reload();
-        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUser({
             ...auth.currentUser,
             name: userData.name,
             lastname: userData.lastname,
-            roles:
-              userData.roles === undefined
-                ? [UserRoles.VOLUNTARIO]
-                : userData.roles,
+            roles: userData.roles === undefined ? [UserRoles.VOLUNTARIO] : userData.roles,
           });
         }
       } catch (error) {
-        console.error("Error refreshing auth state:", error);
+        console.error('Error refreshing auth state:', error);
       }
     }
   }, []);
@@ -133,28 +126,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Control mejorado de navegación hacia atrás
   useEffect(() => {
-    if (user && !loading && isInitialized && typeof window !== "undefined") {
+    if (user && !loading && isInitialized && typeof window !== 'undefined') {
       const handlePopState = (event: PopStateEvent) => {
-        if (window.location.pathname === "/" && user) {
+        if (window.location.pathname === '/' && user) {
           event.preventDefault();
-          router.replace("/schedule");
+          router.replace('/schedule');
         }
       };
 
-      window.addEventListener("popstate", handlePopState);
-      return () => window.removeEventListener("popstate", handlePopState);
+      window.addEventListener('popstate', handlePopState);
+      return () => window.removeEventListener('popstate', handlePopState);
     }
   }, [user, loading, isInitialized, router]);
 
   // Verificar permisos para rutas de administración
   useEffect(() => {
-    if (!loading && user && isInitialized && pathname?.startsWith("/admin")) {
+    if (!loading && user && isInitialized && pathname?.startsWith('/admin')) {
       const isAdmin = user.roles?.includes(UserRoles.ADMINISTRADOR);
       if (!isAdmin) {
-        console.log(
-          "Usuario sin permisos de administrador, redirigiendo a /schedule"
-        );
-        router.replace("/schedule");
+        console.log('Usuario sin permisos de administrador, redirigiendo a /schedule');
+        router.replace('/schedule');
       }
     }
   }, [pathname, user, loading, isInitialized, router]);
@@ -169,9 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isUnmountedRef.current) return;
 
       // Crear un identificador único para este estado de auth
-      const authStateId = firebaseUser
-        ? `${firebaseUser.uid}-${Date.now()}`
-        : `null-${Date.now()}`;
+      const authStateId = firebaseUser ? `${firebaseUser.uid}-${Date.now()}` : `null-${Date.now()}`;
 
       // Evitar procesar el mismo estado múltiples veces
       if (lastAuthStateRef.current === authStateId) return;
@@ -181,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (firebaseUser) {
           // Usuario autenticado
           try {
-            const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
 
             if (!isUnmountedRef.current) {
               if (userDoc.exists()) {
@@ -189,9 +178,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 // Verificar si el usuario está habilitado
                 if (userData.isEnabled === false) {
-                  console.log("Usuario deshabilitado detectado, limpiando estado");
+                  console.log('Usuario deshabilitado detectado, limpiando estado');
                   clearAuthState();
-                  router.replace("/");
+                  router.replace('/');
                   return;
                 }
 
@@ -199,22 +188,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   ...firebaseUser,
                   name: userData.name,
                   lastname: userData.lastname,
-                  roles:
-                    userData.roles === undefined
-                      ? [UserRoles.VOLUNTARIO]
-                      : userData.roles,
+                  roles: userData.roles === undefined ? [UserRoles.VOLUNTARIO] : userData.roles,
                 });
               } else {
                 setUser(firebaseUser);
               }
 
               // Redirigir desde login si es necesario
-              if (pathname === "/") {
-                router.replace("/schedule");
+              if (pathname === '/') {
+                router.replace('/schedule');
               }
             }
           } catch (error) {
-            console.error("Error fetching user data:", error);
+            console.error('Error fetching user data:', error);
             if (!isUnmountedRef.current) {
               setUser(firebaseUser);
             }
@@ -226,24 +212,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Solo redirigir si estamos en una ruta protegida
             const isProtectedRoute =
-              pathname !== "/" &&
-              (pathname?.startsWith("/schedule") || pathname?.startsWith("/admin"));
+              pathname !== '/' &&
+              (pathname?.startsWith('/schedule') || pathname?.startsWith('/admin'));
 
             if (isInitialized && isProtectedRoute) {
-              router.replace("/");
+              router.replace('/');
             }
           }
         }
       } catch (error) {
-        console.error("Error en handleAuthStateChange:", error);
+        console.error('Error en handleAuthStateChange:', error);
         if (!isUnmountedRef.current) {
           setUser(null);
         }
       } finally {
         // Finalizar loading con un pequeño delay para móviles
         if (!isUnmountedRef.current) {
-          const isMobile =
-            typeof window !== "undefined" && window.innerWidth < 768;
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
           const delay = isMobile ? 150 : 50;
 
           timeoutRef.current = setTimeout(() => {
@@ -260,17 +245,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     unsubscribeRef.current = auth.onAuthStateChanged(handleAuthStateChange);
 
     return cleanup;
-  }, [router, pathname, isInitialized, clearAuthState]);
+  }, [router, pathname, isInitialized, clearAuthState, cleanup]);
 
   // Timeout de seguridad para evitar loading infinito
   useEffect(() => {
     const maxLoadingTimeout = setTimeout(() => {
       if (loading && !isUnmountedRef.current) {
-        console.warn("Timeout de loading alcanzado, finalizando loading state");
+        console.warn('Timeout de loading alcanzado, finalizando loading state');
         setLoading(false);
         setIsInitialized(true);
       }
-    }, 8000); // 8 segundos máximo
+    }, 8000);
 
     return () => clearTimeout(maxLoadingTimeout);
   }, [loading]);
@@ -278,18 +263,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Detectar cambios de visibilidad para limpiar estados residuales
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && isInitialized) {
+      if (document.visibilityState === 'visible' && isInitialized) {
         // Verificar inconsistencias cuando la página vuelve a estar visible
         const currentUser = auth.currentUser;
         if ((currentUser && !user) || (!currentUser && user)) {
-          console.log("Detectada inconsistencia de estado al volver a la página visible");
+          console.log('Detectada inconsistencia de estado al volver a la página visible');
           refreshAuthState();
         }
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user, isInitialized, refreshAuthState]);
 
   // Mostrar pantalla de carga durante la verificación de autenticación

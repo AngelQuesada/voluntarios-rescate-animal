@@ -23,24 +23,19 @@ const ScheduleTabsComponent: React.FC<ScheduleTabsProps> = ({
 
   return (
     <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChangeWithVibration}
-          aria-label="Pestañas de calendario"
-          variant="fullWidth"
-          indicatorColor="primary"
-          textColor="primary"
-        >
-        <Tab 
-          icon={<CalendarTodayIcon />} 
-          label="Turnos" 
-          id="tab-0"
-          aria-controls="tabpanel-0"
-        />
-        <Tab 
+      <Tabs
+        value={activeTab}
+        onChange={handleTabChangeWithVibration}
+        aria-label="Pestañas de calendario"
+        variant="fullWidth"
+        indicatorColor="primary"
+        textColor="primary"
+      >
+        <Tab icon={<CalendarTodayIcon />} label="Turnos" id="tab-0" aria-controls="tabpanel-0" />
+        <Tab
           icon={
-            <Badge 
-              badgeContent={myShiftsCount} 
+            <Badge
+              badgeContent={myShiftsCount}
               color="primary"
               max={99}
               sx={{
@@ -52,17 +47,12 @@ const ScheduleTabsComponent: React.FC<ScheduleTabsProps> = ({
             >
               <AssignmentIndIcon />
             </Badge>
-          } 
-          label="Mis turnos" 
+          }
+          label="Mis turnos"
           id="tab-1"
           aria-controls="tabpanel-1"
         />
-        <Tab
-          icon={<HistoryIcon />}
-          label="Mi historial"
-          id="tab-2"
-          aria-controls="tabpanel-2"
-        />
+        <Tab icon={<HistoryIcon />} label="Mi historial" id="tab-2" aria-controls="tabpanel-2" />
       </Tabs>
     </Box>
   );

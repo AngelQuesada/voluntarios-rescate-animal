@@ -2,19 +2,16 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getAdminAuth, getAdminFirestore } from '@/lib/firebaseAdmin';
 import { UserRoles } from '@/lib/constants';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { email, password, role = UserRoles.VOLUNTARIO, roles = [], ...userData } = req.body;
+    const { email, password = UserRoles.VOLUNTARIO, roles = [], ...userData } = req.body;
 
     // Asegurarse de que el usuario tenga al menos el rol de Voluntario
-    let finalRoles = Array.isArray(roles) ? [...roles] : [];
+    const finalRoles = Array.isArray(roles) ? [...roles] : [];
     if (!finalRoles.includes(UserRoles.VOLUNTARIO)) {
       finalRoles.push(UserRoles.VOLUNTARIO);
     }
@@ -49,21 +46,21 @@ export default async function handler(
       roles: finalRoles,
       isEnabled: userData.isEnabled !== undefined ? userData.isEnabled : true,
       createdAt: currentTimestamp,
-      updatedAt: currentTimestamp
+      updatedAt: currentTimestamp,
     };
 
     await getAdminFirestore().collection('users').doc(userRecord.uid).set(userDocumentData);
 
     // Retornar el usuario completo
-    return res.status(200).json({ 
+    return res.status(200).json({
       uid: userRecord.uid,
-      ...userDocumentData
+      ...userDocumentData,
     });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('Error creating user:', error);
     return res.status(500).json({
-      error: error.message || 'Error creating user',
-      code: error.code,
+      error: error instanceof Error ? error.message : 'Error creando usuario',
+      code: error instanceof Error ? 'unknown' : 'Codigo de error desconocido',
     });
   }
 }

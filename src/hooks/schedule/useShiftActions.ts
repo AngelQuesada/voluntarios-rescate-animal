@@ -1,45 +1,49 @@
-import React, { useState } from 'react';
-import { useModifyShiftMutation, ShiftAssignment } from "@/store/api/shiftsApi";
-import { triggerVibration } from '@/lib/vibration'; // Added import
-import { UserRoles } from "@/lib/constants";
+import { createElement, Dispatch, Fragment, ReactNode, SetStateAction, useState } from 'react';
+import { useModifyShiftMutation, ShiftAssignment } from '@/store/api/shiftsApi';
+import { triggerVibration } from '@/lib/vibration';
+import { UserRoles } from '@/lib/constants';
 import { CurrentUser, User } from '@/types/common';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ProcessedAssignments } from './useShiftsData';
 
-export interface ShiftActions {
+interface ShiftActions {
   isUpdatingShift: { [key: string]: boolean };
   confirmDialogOpen: boolean;
-  shiftToAction: { dateKey: string; shiftKey: "M" | "T" } | null;
+  shiftToAction: { dateKey: string; shiftKey: 'M' | 'T' } | null;
   removeUserConfirmOpen: boolean;
-  userToRemoveDetails: { uid: string; name: string; dateKey: string; shiftKey: "M" | "T" } | null;
+  userToRemoveDetails: { uid: string; name: string; dateKey: string; shiftKey: 'M' | 'T' } | null;
   addUserDialogOpen: boolean;
-  shiftForUserAssignment: { dateKey: string; shiftKey: "M" | "T" } | null;
+  shiftForUserAssignment: { dateKey: string; shiftKey: 'M' | 'T' } | null;
   isRemovingUser: boolean;
   executeModifyShift: (
     dateKey: string,
-    shiftKey: "M" | "T",
+    shiftKey: 'M' | 'T',
     targetUserId: string,
     targetUserName: string,
     actionType?: 'add' | 'remove'
   ) => Promise<void>;
-  initiateShiftAction: (dateKey: string, shiftKey: "M" | "T") => Promise<void>;
+  initiateShiftAction: (dateKey: string, shiftKey: 'M' | 'T') => Promise<void>;
   confirmShiftAction: () => Promise<void>;
   cancelShiftAction: () => void;
-  handleRemoveUserClick: (assignment: ShiftAssignment, dateKey: string, shiftKey: "M" | "T") => void;
+  handleRemoveUserClick: (
+    assignment: ShiftAssignment,
+    dateKey: string,
+    shiftKey: 'M' | 'T'
+  ) => void;
   confirmRemoveUser: () => Promise<void>;
   cancelRemoveUser: () => void;
-  handleAddUserButtonClick: (dateKey: string, shiftKey: "M" | "T") => void;
+  handleAddUserButtonClick: (dateKey: string, shiftKey: 'M' | 'T') => void;
   confirmAddUserToShift: (userId: string) => Promise<void>;
   cancelAddUser: () => void;
-  setIsUpdatingShift: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
+  setIsUpdatingShift: Dispatch<SetStateAction<{ [key: string]: boolean }>>;
 }
 
 interface UseShiftActionsProps {
   currentUser: CurrentUser | null;
   usersMap: { [uid: string]: User };
   processedAssignments: ProcessedAssignments;
-  showSnackbar: (message: React.ReactNode, severity?: "success" | "error" | "info" | "warning") => void;
+  showSnackbar: (message: ReactNode, severity?: 'success' | 'error' | 'info' | 'warning') => void;
   authLoading: boolean;
 }
 
@@ -53,26 +57,37 @@ export function useShiftActions({
   const [modifyShift] = useModifyShiftMutation();
   const [isUpdatingShift, setIsUpdatingShift] = useState<{ [key: string]: boolean }>({});
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [shiftToAction, setShiftToAction] = useState<{ dateKey: string; shiftKey: "M" | "T" } | null>(null);
+  const [shiftToAction, setShiftToAction] = useState<{
+    dateKey: string;
+    shiftKey: 'M' | 'T';
+  } | null>(null);
   const [removeUserConfirmOpen, setRemoveUserConfirmOpen] = useState(false);
-  const [userToRemoveDetails, setUserToRemoveDetails] = useState<{ uid: string; name: string; dateKey: string; shiftKey: "M" | "T" } | null>(null);
+  const [userToRemoveDetails, setUserToRemoveDetails] = useState<{
+    uid: string;
+    name: string;
+    dateKey: string;
+    shiftKey: 'M' | 'T';
+  } | null>(null);
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
-  const [shiftForUserAssignment, setShiftForUserAssignment] = useState<{ dateKey: string; shiftKey: "M" | "T" } | null>(null);
+  const [shiftForUserAssignment, setShiftForUserAssignment] = useState<{
+    dateKey: string;
+    shiftKey: 'M' | 'T';
+  } | null>(null);
   const [isRemovingUser, setIsRemovingUser] = useState(false);
 
   const executeModifyShift = async (
     dateKey: string,
-    shiftKey: "M" | "T",
+    shiftKey: 'M' | 'T',
     targetUserId: string,
     targetUserName: string,
     actionType: 'add' | 'remove' = 'add'
   ) => {
     if (targetUserId === currentUser?.uid && (!currentUser?.name || !currentUser?.lastname)) {
-      showSnackbar("Perfil incompleto (nombre/apellido).", "warning");
+      showSnackbar('Perfil incompleto (nombre/apellido).', 'warning');
       return;
     }
     if (!currentUser || !currentUser.uid) {
-      showSnackbar("Usuario no autenticado.", "warning");
+      showSnackbar('Usuario no autenticado.', 'warning');
       return;
     }
 
@@ -84,80 +99,84 @@ export function useShiftActions({
         dateKey,
         shiftKey,
         uid: targetUserId,
-        name: '', 
+        name: '',
         action: actionType,
       }).unwrap();
 
       let formattedDate = format(parseISO(dateKey), "EEEE d 'de' MMMM", { locale: es });
       const dateParts = formattedDate.split(' ');
-      if (dateParts.length > 3) { 
-          const dayName = dateParts[0];
-          const monthName = dateParts[3];
-          
-          dateParts[0] = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-          dateParts[3] = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-          formattedDate = dateParts.join(' ');
+      if (dateParts.length > 3) {
+        const dayName = dateParts[0];
+        const monthName = dateParts[3];
+
+        dateParts[0] = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+        dateParts[3] = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+        formattedDate = dateParts.join(' ');
       }
 
-      const shiftTimeName = shiftKey === "M" ? "mañana" : "tarde";
+      const shiftTimeName = shiftKey === 'M' ? 'mañana' : 'tarde';
 
-      if (actionType === "add") {
-        const message = React.createElement(React.Fragment, null, 
-          React.createElement('strong', null, targetUserName), 
-          " asignado al turno del ", 
-          React.createElement('strong', null, formattedDate), 
-          " por la ", 
-          shiftTimeName, 
-          "."
+      if (actionType === 'add') {
+        const message = createElement(
+          Fragment,
+          null,
+          createElement('strong', null, targetUserName),
+          ' asignado al turno del ',
+          createElement('strong', null, formattedDate),
+          ' por la ',
+          shiftTimeName,
+          '.'
         );
-        showSnackbar(message, "success");
+        showSnackbar(message, 'success');
       } else {
-        const message = React.createElement(React.Fragment, null, 
-          React.createElement('strong', null, targetUserName), 
-          " eliminado del turno del ", 
-          React.createElement('strong', null, formattedDate), 
-          " por la ", 
-          shiftTimeName, 
-          "."
+        const message = createElement(
+          Fragment,
+          null,
+          createElement('strong', null, targetUserName),
+          ' eliminado del turno del ',
+          createElement('strong', null, formattedDate),
+          ' por la ',
+          shiftTimeName,
+          '.'
         );
-        showSnackbar(message, "info");
+        showSnackbar(message, 'info');
       }
     } catch (err) {
-      console.error("Error updating shift:", err);
+      console.error('Error updating shift:', err);
       const errorMessage = err instanceof Error ? err.message : String(err);
-      const message = React.createElement(React.Fragment, null, 
-        "Error al actualizar el turno para ", 
-        React.createElement('strong', null, targetUserName), 
-        ": ", 
+      const message = createElement(
+        Fragment,
+        null,
+        'Error al actualizar el turno para ',
+        createElement('strong', null, targetUserName),
+        ': ',
         errorMessage
       );
-      showSnackbar(message, "error");
+      showSnackbar(message, 'error');
     } finally {
       setIsUpdatingShift((prev) => ({ ...prev, [loadingIndicatorKey]: false }));
     }
   };
 
-  const initiateShiftAction = async (dateKey: string, shiftKey: "M" | "T") => {
+  const initiateShiftAction = async (dateKey: string, shiftKey: 'M' | 'T') => {
     if (authLoading || !currentUser || !currentUser.uid) {
-      showSnackbar("Usuario no disponible o no autenticado.", "warning");
+      showSnackbar('Usuario no disponible o no autenticado.', 'warning');
       return;
     }
     if (!currentUser.name || !currentUser.lastname) {
-      showSnackbar("Perfil incompleto (nombre/apellido).", "warning");
+      showSnackbar('Perfil incompleto (nombre/apellido).', 'warning');
       return;
     }
 
     const currentShiftAssignments = processedAssignments[dateKey]?.[shiftKey] ?? [];
-    const isUserAlreadyAssigned = currentShiftAssignments.some(
-      (a) => a.uid === currentUser.uid
-    );
+    const isUserAlreadyAssigned = currentShiftAssignments.some((a) => a.uid === currentUser.uid);
 
     if (!isUserAlreadyAssigned && currentShiftAssignments.length >= 3) {
       setShiftToAction({ dateKey, shiftKey });
       setConfirmDialogOpen(true);
-      return; 
+      return;
     }
-    
+
     const currentUserName = `${currentUser.name} ${currentUser.lastname}`;
     await executeModifyShift(
       dateKey,
@@ -172,7 +191,10 @@ export function useShiftActions({
     triggerVibration(50);
     if (shiftToAction && currentUser && currentUser.uid) {
       if (!currentUser.name || !currentUser.lastname) {
-        showSnackbar("No se puede realizar la acción, falta información del usuario (nombre/apellido).", "warning");
+        showSnackbar(
+          'No se puede realizar la acción, falta información del usuario (nombre/apellido).',
+          'warning'
+        );
         setConfirmDialogOpen(false);
         setShiftToAction(null);
         return;
@@ -187,9 +209,12 @@ export function useShiftActions({
       setConfirmDialogOpen(false);
       setShiftToAction(null);
     } else {
-        showSnackbar("No se puede realizar la acción, usuario no válido o acción no definida.", "warning");
-        setConfirmDialogOpen(false);
-        setShiftToAction(null);
+      showSnackbar(
+        'No se puede realizar la acción, usuario no válido o acción no definida.',
+        'warning'
+      );
+      setConfirmDialogOpen(false);
+      setShiftToAction(null);
     }
   };
 
@@ -198,15 +223,20 @@ export function useShiftActions({
     setShiftToAction(null);
   };
 
-  const handleRemoveUserClick = (assignment: ShiftAssignment, dateKey: string, shiftKey: "M" | "T") => {
+  const handleRemoveUserClick = (
+    assignment: ShiftAssignment,
+    dateKey: string,
+    shiftKey: 'M' | 'T'
+  ) => {
     // Buscar información completa del usuario en usersMap
     const userDetails = usersMap[assignment.uid];
     let displayName = assignment.name || 'Usuario desconocido';
-    
+
     if (userDetails) {
-      displayName = `${userDetails.name || ''} ${userDetails.lastname || ''}`.trim() || 'Usuario desconocido';
+      displayName =
+        `${userDetails.name || ''} ${userDetails.lastname || ''}`.trim() || 'Usuario desconocido';
     }
-    
+
     setUserToRemoveDetails({ uid: assignment.uid, name: displayName, dateKey, shiftKey });
     setRemoveUserConfirmOpen(true);
   };
@@ -231,7 +261,7 @@ export function useShiftActions({
     setUserToRemoveDetails(null);
   };
 
-  const handleAddUserButtonClick = (dateKey: string, shiftKey: "M" | "T") => {
+  const handleAddUserButtonClick = (dateKey: string, shiftKey: 'M' | 'T') => {
     if (currentUser?.roles?.includes(UserRoles.ADMINISTRADOR)) {
       setShiftForUserAssignment({ dateKey, shiftKey });
       setAddUserDialogOpen(true);
@@ -243,7 +273,7 @@ export function useShiftActions({
     if (shiftForUserAssignment && currentUser?.roles?.includes(UserRoles.ADMINISTRADOR)) {
       const userToAdd = usersMap[userId];
       if (!userToAdd) {
-        showSnackbar("Usuario no encontrado.", "error");
+        showSnackbar('Usuario no encontrado.', 'error');
         return;
       }
       const { dateKey, shiftKey } = shiftForUserAssignment;

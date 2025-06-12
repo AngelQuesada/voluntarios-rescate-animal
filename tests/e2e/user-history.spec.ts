@@ -61,11 +61,17 @@ const MOCK_SHIFTS_CONFIG = {
 const ALL_MOCK_SHIFTS: UserHistoryShift[] = Object.values(MOCK_SHIFTS_CONFIG);
 
 // Función para inyectar datos mock en el navegador durante las pruebas
-async function mockUserHistoryData(page: Page, data: UserHistoryShift[] | null, isLoading: boolean = false) {
-  await page.evaluate((mockData) => {
-    // @ts-ignore
-    window.__E2E_MOCK_USER_HISTORY__ = mockData;
-  }, { data, isLoading, error: null });
+async function mockUserHistoryData(
+  page: Page,
+  data: UserHistoryShift[] | null,
+  isLoading: boolean = false
+) {
+  await page.evaluate(
+    (mockData) => {
+      window.__E2E_MOCK_USER_HISTORY__ = mockData;
+    },
+    { data, isLoading, error: null }
+  );
 }
 
 // Función auxiliar para parsear fechas en formato ISO
@@ -76,18 +82,18 @@ function parseISO(dateString: string): Date {
 test.describe('User Shift History Tab', () => {
   test.beforeEach(async ({ page, request }) => {
     // Verificar estado del servidor antes de cada test
-    const serverOk = await checkServerStatus(page, request, { 
-      timeout: 5000, 
-      failOnError: false 
+    const serverOk = await checkServerStatus(page, request, {
+      timeout: 5000,
+      failOnError: false,
     });
-    
+
     if (!serverOk) {
       throw new Error('❌ El servidor no está disponible en el puerto 3001');
     }
-    
+
     // Navegar a la página principal
     await page.goto(`${process.env.BASE_URL || 'http://localhost:3001'}`);
-    
+
     // Verificar que la página cargó correctamente
     const pageLoaded = await checkPageLoad(page);
     if (!pageLoaded) {
@@ -97,20 +103,22 @@ test.describe('User Shift History Tab', () => {
 
   test('tab visibility and navigation', async ({ page }) => {
     console.log('🧪 [INICIANDO] Visibilidad y navegación de pestaña de historial');
-    
+
     // Iniciar sesión como voluntario
     const loginSuccess = await loginUser(page, {
       userType: 'VOLUNTARIO',
       checkRedirect: true,
       expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000
+      timeout: 10000,
     });
-    
+
     if (!loginSuccess) {
-      console.log('❌ [FALLÓ] Visibilidad y navegación de pestaña de historial | Error: No se pudo completar el login');
+      console.log(
+        '❌ [FALLÓ] Visibilidad y navegación de pestaña de historial | Error: No se pudo completar el login'
+      );
       throw new Error('Login como voluntario falló');
     }
-    
+
     try {
       // Buscar la pestaña de historial
       const historyTab = page.locator('button[aria-controls="tabpanel-2"]');
@@ -123,34 +131,40 @@ test.describe('User Shift History Tab', () => {
       // Verificar que se muestra el título del historial
       const historyTabTitle = page.locator('h6:has-text("Mi historial de turnos")');
       await expect(historyTabTitle).toBeVisible({ timeout: 5000 });
-      
+
       // Verificar mensaje cuando no hay turnos
       const noShiftsMessage = page.locator('text="No hay turnos para mostrar."');
       await expect(noShiftsMessage).toBeVisible({ timeout: 5000 });
-      
+
       console.log('✅ [CORRECTO] Visibilidad y navegación de pestaña de historial');
-    } catch (error) {
-      console.log(`❌ [FALLÓ] Visibilidad y navegación de pestaña de historial | Error: ${error.message}`);
+    } catch (error: Error | unknown) {
+      console.log(
+        error instanceof Error
+          ? `❌ [FALLÓ] Visibilidad y navegación de pestaña de historial | Error: ${error.message}`
+          : 'Error desconocido'
+      );
       throw error;
     }
   });
 
   test('data fetching and display with mocked data', async ({ page }) => {
     console.log('🧪 [INICIANDO] Obtención y visualización de datos con datos simulados');
-    
+
     // Iniciar sesión como voluntario
     const loginSuccess = await loginUser(page, {
       userType: 'VOLUNTARIO',
       checkRedirect: true,
       expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000
+      timeout: 10000,
     });
-    
+
     if (!loginSuccess) {
-      console.log('❌ [FALLÓ] Obtención y visualización de datos | Error: No se pudo completar el login');
+      console.log(
+        '❌ [FALLÓ] Obtención y visualización de datos | Error: No se pudo completar el login'
+      );
       throw new Error('Login como voluntario falló');
     }
-    
+
     try {
       // Solo incluye turnos pasados dentro de los últimos 3 meses
       const shiftsForTest = [
@@ -162,7 +176,9 @@ test.describe('User Shift History Tab', () => {
       // Navegar a la pestaña de historial
       const historyTab = page.locator('button[aria-controls="tabpanel-2"]');
       await historyTab.click();
-      await expect(page.locator('h6:has-text("Mi historial de turnos")')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('h6:has-text("Mi historial de turnos")')).toBeVisible({
+        timeout: 5000,
+      });
 
       // Verificar que los turnos esperados se muestren en la tabla
       for (const shift of shiftsForTest) {
@@ -172,35 +188,43 @@ test.describe('User Shift History Tab', () => {
         await expect(shiftEntryDate.first()).toBeVisible({ timeout: 5000 });
         await expect(shiftEntryArea.first()).toBeVisible({ timeout: 5000 });
       }
-      
+
       // Verificar que turnos anteriores a 3 meses NO se muestren
-      const olderShiftDateFormatted = format(parseISO(MOCK_SHIFTS_CONFIG.fourMonthsAgoShift.date), 'dd MMM yyyy', { locale: es });
+      const olderShiftDateFormatted = format(
+        parseISO(MOCK_SHIFTS_CONFIG.fourMonthsAgoShift.date),
+        'dd MMM yyyy',
+        { locale: es }
+      );
       const olderShiftEntry = page.locator(`td:has-text("${olderShiftDateFormatted}")`);
       await expect(olderShiftEntry).not.toBeVisible();
-      
+
       console.log('✅ [CORRECTO] Obtención y visualización de datos con datos simulados');
-    } catch (error) {
-      console.log(`❌ [FALLÓ] Obtención y visualización de datos | Error: ${error.message}`);
+    } catch (error: Error | unknown) {
+      console.log(
+        error instanceof Error
+          ? `❌ [FALLÓ] Obtención y visualización de datos | Error: ${error.message}`
+          : 'Error desconocido'
+      );
       throw error;
     }
   });
 
   test('empty state with mocked data', async ({ page }) => {
     console.log('🧪 [INICIANDO] Estado vacío con datos simulados');
-    
+
     // Iniciar sesión como voluntario
     const loginSuccess = await loginUser(page, {
       userType: 'VOLUNTARIO',
       checkRedirect: true,
       expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000
+      timeout: 10000,
     });
-    
+
     if (!loginSuccess) {
       console.log('❌ [FALLÓ] Estado vacío | Error: No se pudo completar el login');
       throw new Error('Login como voluntario falló');
     }
-    
+
     try {
       // Mockear datos vacíos
       await mockUserHistoryData(page, []);
@@ -208,35 +232,41 @@ test.describe('User Shift History Tab', () => {
       // Navegar a la pestaña de historial
       const historyTab = page.locator('button[aria-controls="tabpanel-2"]');
       await historyTab.click();
-      await expect(page.locator('h6:has-text("Mi historial de turnos")')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('h6:has-text("Mi historial de turnos")')).toBeVisible({
+        timeout: 5000,
+      });
 
       // Verificar que se muestre el mensaje de estado vacío
       const noShiftsMessage = page.locator('text="No hay turnos para mostrar."');
       await expect(noShiftsMessage).toBeVisible({ timeout: 5000 });
-      
+
       console.log('✅ [CORRECTO] Estado vacío con datos simulados');
-    } catch (error) {
-      console.log(`❌ [FALLÓ] Estado vacío | Error: ${error.message}`);
+    } catch (error: Error | unknown) {
+      console.log(
+        error instanceof Error
+          ? `❌ [FALLÓ] Estado vacío | Error: ${error.message}`
+          : 'Error desconocido'
+      );
       throw error;
     }
   });
-  
+
   test('displays only past shifts excluding today and future', async ({ page }) => {
     console.log('🧪 [INICIANDO] Muestra solo turnos pasados excluyendo hoy y futuros');
-    
+
     // Iniciar sesión como voluntario
     const loginSuccess = await loginUser(page, {
       userType: 'VOLUNTARIO',
       checkRedirect: true,
       expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000
+      timeout: 10000,
     });
-    
+
     if (!loginSuccess) {
       console.log('❌ [FALLÓ] Filtrado de turnos pasados | Error: No se pudo completar el login');
       throw new Error('Login como voluntario falló');
     }
-    
+
     try {
       // Usar el conjunto completo de datos para probar el filtrado del hook
       await mockUserHistoryData(page, ALL_MOCK_SHIFTS);
@@ -244,7 +274,9 @@ test.describe('User Shift History Tab', () => {
       // Navegar a la pestaña de historial
       const historyTab = page.locator('button[aria-controls="tabpanel-2"]');
       await historyTab.click();
-      await expect(page.locator('h6:has-text("Mi historial de turnos")')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('h6:has-text("Mi historial de turnos")')).toBeVisible({
+        timeout: 5000,
+      });
 
       // Turnos que deben ser visibles (pasados, últimos 3 meses)
       const expectedVisibleShifts = [
@@ -263,20 +295,28 @@ test.describe('User Shift History Tab', () => {
       // Verificar que los turnos esperados sean visibles
       for (const shift of expectedVisibleShifts) {
         const shiftDateFormatted = format(parseISO(shift.date), 'dd MMM yyyy', { locale: es });
-        const shiftEntry = page.locator(`tr:has(td:text-is("${shiftDateFormatted}")):has(td:text-is("${shift.area}"))`);
+        const shiftEntry = page.locator(
+          `tr:has(td:text-is("${shiftDateFormatted}")):has(td:text-is("${shift.area}"))`
+        );
         await expect(shiftEntry).toBeVisible({ timeout: 5000 });
       }
 
       // Verificar que los turnos no esperados NO sean visibles
       for (const shift of expectedHiddenShifts) {
         const shiftDateFormatted = format(parseISO(shift.date), 'dd MMM yyyy', { locale: es });
-        const shiftEntry = page.locator(`tr:has(td:text-is("${shiftDateFormatted}")):has(td:text-is("${shift.area}"))`);
+        const shiftEntry = page.locator(
+          `tr:has(td:text-is("${shiftDateFormatted}")):has(td:text-is("${shift.area}"))`
+        );
         await expect(shiftEntry).not.toBeVisible();
       }
-      
+
       console.log('✅ [CORRECTO] Muestra solo turnos pasados excluyendo hoy y futuros');
-    } catch (error) {
-      console.log(`❌ [FALLÓ] Filtrado de turnos pasados | Error: ${error.message}`);
+    } catch (error: Error | unknown) {
+      console.log(
+        error instanceof Error
+          ? `❌ [FALLÓ] Filtrado de turnos pasados | Error: ${error.message}`
+          : 'Error desconocido'
+      );
       throw error;
     }
   });

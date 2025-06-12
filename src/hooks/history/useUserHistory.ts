@@ -13,7 +13,7 @@ declare global {
     __E2E_MOCK_USER_HISTORY__?: {
       data: UserHistoryShift[] | null;
       isLoading?: boolean;
-      error?: any;
+      error?: Error | null;
     };
   }
 }
@@ -23,25 +23,24 @@ interface UseUserHistoryParams {
 }
 
 export function useUserHistory({ userId }: UseUserHistoryParams) {
-  let threeMonthShifts: UserHistoryShift[] = [];
   let isLoadingQuery: boolean = false;
   let isFetchingQuery: boolean = false;
-  let errorQuery: any = null;
-  let refetchQuery: () => Promise<any> = () => Promise.resolve();
+  let errorQuery: Error | null = null;
+  let refetchQuery: () => Promise<void> = () => Promise.resolve();
 
-  const e2eMock = (typeof window !== 'undefined' && window.__E2E_MOCK_USER_HISTORY__ !== undefined) 
-    ? window.__E2E_MOCK_USER_HISTORY__ 
-    : null;
+  const e2eMock =
+    typeof window !== 'undefined' && window.__E2E_MOCK_USER_HISTORY__ !== undefined
+      ? window.__E2E_MOCK_USER_HISTORY__
+      : null;
 
   if (e2eMock) {
-    threeMonthShifts = e2eMock.data || [];
     isLoadingQuery = e2eMock.isLoading !== undefined ? e2eMock.isLoading : false;
-    isFetchingQuery = e2eMock.isLoading !== undefined ? e2eMock.isLoading : false; 
+    isFetchingQuery = e2eMock.isLoading !== undefined ? e2eMock.isLoading : false;
     errorQuery = e2eMock.error !== undefined ? e2eMock.error : null;
     refetchQuery = () => Promise.resolve();
   }
 
-  const [dateRange, setDateRange] = useState(() => {
+  const [dateRange] = useState(() => {
     const endDate = new Date();
     const startDate = subMonths(endDate, 3);
     return {
@@ -64,15 +63,17 @@ export function useUserHistory({ userId }: UseUserHistoryParams) {
   if (!e2eMock) {
     isLoadingQuery = queryResult.isLoading;
     isFetchingQuery = queryResult.isFetching;
-    errorQuery = queryResult.error;
-    refetchQuery = queryResult.refetch;
+    errorQuery = queryResult.error as Error | null;
+    refetchQuery = async () => {
+      await queryResult.refetch();
+    };
   }
-  
+
   const threeMonthShiftsFromApi = useMemo(() => {
     if (e2eMock || !queryResult.data) {
       return e2eMock ? e2eMock.data || [] : [];
     }
-    
+
     const allShifts: UserHistoryShift[] = [];
     Object.keys(queryResult.data).forEach((dateKey) => {
       const dayShifts = queryResult.data![dateKey];
@@ -80,14 +81,14 @@ export function useUserHistory({ userId }: UseUserHistoryParams) {
         allShifts.push({
           id: `${dateKey}_M`,
           date: dateKey,
-          area: 'Mañana'
+          area: 'Mañana',
         });
       }
       if (dayShifts.T) {
         allShifts.push({
           id: `${dateKey}_T`,
           date: dateKey,
-          area: 'Tarde'
+          area: 'Tarde',
         });
       }
     });
@@ -95,13 +96,16 @@ export function useUserHistory({ userId }: UseUserHistoryParams) {
     return allShifts;
   }, [e2eMock, queryResult.data]);
 
-  const sourceShifts = e2eMock ? e2eMock.data || [] : threeMonthShiftsFromApi;
+  const sourceShifts = useMemo(
+    () => (e2eMock ? e2eMock.data || [] : threeMonthShiftsFromApi),
+    [e2eMock, threeMonthShiftsFromApi]
+  );
 
   const filteredShifts = useMemo(() => {
     const todayStart = startOfDay(new Date());
     const threeMonthsAgo = startOfDay(subMonths(new Date(), 3));
-    
-    return sourceShifts.filter(shift => {
+
+    return sourceShifts.filter((shift) => {
       const shiftDate = parseISO(shift.date);
       return shiftDate < todayStart && shiftDate >= threeMonthsAgo;
     });

@@ -76,7 +76,7 @@
     "@typescript-eslint/no-throw-literal": "off"
   },
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": ["./tsconfig.json", "./tests/tsconfig.json"]
   },
   "settings": {
     "import/resolver": {

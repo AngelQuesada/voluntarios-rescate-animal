@@ -13,6 +13,10 @@ const InfiniteScrollLoader: React.FC<InfiniteScrollLoaderProps> = ({ isVisible, 
   useEffect(() => {
     if (!onIntersect) return;
 
+    // Capturar la referencia al inicio del efecto para evitar problemas en el cleanup
+    const currentRef = loaderRef.current;
+    if (!currentRef) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -27,14 +31,10 @@ const InfiniteScrollLoader: React.FC<InfiniteScrollLoaderProps> = ({ isVisible, 
       }
     );
 
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
+    observer.observe(currentRef);
 
     return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
+      observer.unobserve(currentRef);
     };
   }, [onIntersect]);
 

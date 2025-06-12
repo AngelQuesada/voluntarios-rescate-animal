@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import { TextField, Box, Alert, FormControlLabel, Checkbox } from "@mui/material";
-import SubmitButton from "./SubmitButton";
+import React, { useState, useEffect, useRef, FormEvent } from 'react';
+import { TextField, Box, Alert, FormControlLabel, Checkbox } from '@mui/material';
+import SubmitButton from './SubmitButton';
 import { triggerVibration } from '@/lib/vibration';
-import { textFieldStyles } from "@/styles/formStyles";
+import { textFieldStyles } from '@/styles/formStyles';
 
 interface SignInFormProps {
   email: string;
@@ -11,7 +11,7 @@ interface SignInFormProps {
   setPassword: (password: string) => void;
   error: string | null;
   isLoading: boolean;
-  handleSignIn: (e: React.FormEvent, rememberMe?: boolean) => Promise<void>;
+  handleSignIn: (e: FormEvent, rememberMe?: boolean) => Promise<void>;
   resetForm: () => void;
   onSilentReset?: () => void;
 }
@@ -28,10 +28,10 @@ const SignInForm = ({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [formErrors, setFormErrors] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
-  
+
   const submitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -51,43 +51,43 @@ const SignInForm = ({
     }
   }, [isLoading]);
 
-  const validateField = (field: "email" | "password") => {
-    if (field === "email" && !email.trim()) {
+  const validateField = (field: 'email' | 'password') => {
+    if (field === 'email' && !email.trim()) {
       setFormErrors((prev) => ({
         ...prev,
-        email: "El correo electrónico es obligatorio",
+        email: 'El correo electrónico es obligatorio',
       }));
       return false;
-    } else if (field === "email") {
-      setFormErrors((prev) => ({ ...prev, email: "" }));
+    } else if (field === 'email') {
+      setFormErrors((prev) => ({ ...prev, email: '' }));
     }
 
-    if (field === "password" && !password) {
+    if (field === 'password' && !password) {
       setFormErrors((prev) => ({
         ...prev,
-        password: "La contraseña es obligatoria",
+        password: 'La contraseña es obligatoria',
       }));
       return false;
-    } else if (field === "password" && password.length < 6) {
+    } else if (field === 'password' && password.length < 6) {
       setFormErrors((prev) => ({
         ...prev,
-        password: "La contraseña debe tener al menos 6 caracteres",
+        password: 'La contraseña debe tener al menos 6 caracteres',
       }));
       return false;
-    } else if (field === "password") {
-      setFormErrors((prev) => ({ ...prev, password: "" }));
+    } else if (field === 'password') {
+      setFormErrors((prev) => ({ ...prev, password: '' }));
     }
 
     return true;
   };
 
   const validateForm = () => {
-    const emailValid = validateField("email");
-    const passwordValid = validateField("password");
+    const emailValid = validateField('email');
+    const passwordValid = validateField('password');
     return emailValid && passwordValid;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     triggerVibration(50);
     e.preventDefault();
     setSubmitAttempted(true);
@@ -104,8 +104,8 @@ const SignInForm = ({
 
     try {
       await handleSignIn(e, rememberMe);
-    } catch (error) {
-      console.error('Error en login:', error);
+    } catch (_error) {
+      console.error('Error en login:', _error);
     }
   };
 
@@ -115,7 +115,7 @@ const SignInForm = ({
       ref={formRef}
       onSubmit={handleSubmit}
       noValidate
-      sx={{ mt: 1, width: "100%" }}
+      sx={{ mt: 1, width: '100%' }}
     >
       <TextField
         margin="normal"
@@ -129,13 +129,11 @@ const SignInForm = ({
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
-          if (submitAttempted) validateField("email");
+          if (submitAttempted) validateField('email');
         }}
         error={!!error || (submitAttempted && !!formErrors.email)}
         disabled={isLoading}
-        helperText={
-          submitAttempted && formErrors.email ? formErrors.email : ""
-        }
+        helperText={submitAttempted && formErrors.email ? formErrors.email : ''}
         sx={textFieldStyles}
       />
       <TextField
@@ -150,13 +148,11 @@ const SignInForm = ({
         value={password}
         onChange={(e) => {
           setPassword(e.target.value);
-          if (submitAttempted) validateField("password");
+          if (submitAttempted) validateField('password');
         }}
         error={!!error || (submitAttempted && !!formErrors.password)}
         disabled={isLoading}
-        helperText={
-          submitAttempted && formErrors.password ? formErrors.password : ""
-        }
+        helperText={submitAttempted && formErrors.password ? formErrors.password : ''}
         sx={textFieldStyles}
       />
       <FormControlLabel
@@ -172,7 +168,7 @@ const SignInForm = ({
         sx={{ mt: 1, mb: 1 }}
       />
       {error && (
-        <Alert severity="error" sx={{ width: "100%", mt: 2, mb: 1 }}>
+        <Alert severity="error" sx={{ width: '100%', mt: 2, mb: 1 }}>
           {error}
         </Alert>
       )}

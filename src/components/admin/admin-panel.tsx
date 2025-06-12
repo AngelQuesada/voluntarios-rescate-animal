@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, Suspense, lazy } from "react";
+import React, { useState, Suspense, lazy, useMemo } from 'react';
 import {
   Button,
   Table,
@@ -19,26 +19,24 @@ import {
   Tabs,
   Tab,
   CircularProgress,
-  Divider,
-} from "@mui/material";
-import { Header } from "@/components/schedule/header";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
-import PeopleIcon from "@mui/icons-material/People";
-import CalendarViewWeekIcon from "@mui/icons-material/CalendarViewWeek";
-import HistoryIcon from "@mui/icons-material/History";
-import { useAdminPanel } from "@/hooks/use-admin-panel";
-import NotificationSnackbar from "../schedule/NotificationSnackbar";
-import { UserRoles, getRoleName } from "@/lib/constants";
-import DialogComponent from "./DialogComponent";
-import UserDetailDialog from "./UserDetailDialog";
-import ContactDialog from "../schedule/ContactDialog";
-import UserForm from "./UserForm";
-import SearchInput from "./SearchInput";
-import WeekViewPanel from "./WeekViewPanel";
-import { useIsMobile } from "@/hooks/use-mobile";
+} from '@mui/material';
+import { Header } from '@/components/schedule/header';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
+import PeopleIcon from '@mui/icons-material/People';
+import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
+import HistoryIcon from '@mui/icons-material/History';
+import { useAdminPanel } from '@/hooks/use-admin-panel';
+import NotificationSnackbar from '../schedule/NotificationSnackbar';
+import { UserRoles, getRoleName } from '@/lib/constants';
+import DialogComponent from './DialogComponent';
+import UserDetailDialog from './UserDetailDialog';
+import ContactDialog from '../schedule/ContactDialog';
+import UserForm from './UserForm';
+import SearchInput from './SearchInput';
+import WeekViewPanel from './WeekViewPanel';
 
 const HistoryCalendar = lazy(() => import('../history/HistoryCalendar'));
 
@@ -59,18 +57,13 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ py: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   );
 }
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState(0);
-  const isMobile = useIsMobile();
   const {
     loading,
     isAddDialogOpen,
@@ -121,10 +114,10 @@ export function AdminPanel() {
     handleEditRoleChange,
     isAddingUser,
     isEditingUser,
-    isDeletingUser
+    isDeletingUser,
   } = useAdminPanel();
 
-  const sortedFilteredUsers = React.useMemo(() => {
+  const sortedFilteredUsers = useMemo(() => {
     return filteredUsers.sort((a, b) => {
       if (a.isEnabled !== false && b.isEnabled === false) return -1;
       if (a.isEnabled === false && b.isEnabled !== false) return 1;
@@ -140,21 +133,21 @@ export function AdminPanel() {
     <>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           mb: 2,
         }}
       >
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
             gap: 1,
           }}
         >
-          <SearchInput 
+          <SearchInput
             searchTerm={searchTerm}
             showSearchInput={showSearchInput}
             handleSearchChange={handleSearchChange}
@@ -172,7 +165,7 @@ export function AdminPanel() {
         </Box>
       </Box>
 
-      <Paper sx={{ width: "100%", overflow: "hidden" }}>
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <TableContainer>
           <Table stickyHeader aria-label="user table">
             <TableHead>
@@ -189,11 +182,11 @@ export function AdminPanel() {
                     <TableCell>
                       <Box
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          height: "24px",
-                          width: "70%",
-                          bgcolor: "rgba(0, 0, 0, 0.08)",
+                          display: 'flex',
+                          alignItems: 'center',
+                          height: '24px',
+                          width: '70%',
+                          bgcolor: 'rgba(0, 0, 0, 0.08)',
                           borderRadius: 1,
                         }}
                       />
@@ -201,9 +194,9 @@ export function AdminPanel() {
                     <TableCell>
                       <Box
                         sx={{
-                          height: "24px",
-                          width: "50%",
-                          bgcolor: "rgba(0, 0, 0, 0.08)",
+                          height: '24px',
+                          width: '50%',
+                          bgcolor: 'rgba(0, 0, 0, 0.08)',
                           borderRadius: 1,
                         }}
                       />
@@ -211,9 +204,9 @@ export function AdminPanel() {
                     <TableCell>
                       <Box
                         sx={{
-                          height: "24px",
-                          width: "40%",
-                          bgcolor: "rgba(0, 0, 0, 0.08)",
+                          height: '24px',
+                          width: '40%',
+                          bgcolor: 'rgba(0, 0, 0, 0.08)',
                           borderRadius: 1,
                         }}
                       />
@@ -239,7 +232,7 @@ export function AdminPanel() {
                         opacity: user.isEnabled === false ? 0.5 : 1,
                         '& .MuiTableCell-root': {
                           color: user.isEnabled === false ? 'text.disabled' : 'text.primary',
-                        }
+                        },
                       }}
                     >
                       <TableCell>
@@ -250,53 +243,55 @@ export function AdminPanel() {
                               cursor: 'pointer',
                               '&:hover': {
                                 textDecoration: 'underline',
-                                color: 'primary.main'
+                                color: 'primary.main',
                               },
-                              mr: 0.5
+                              mr: 0.5,
                             }}
                             onClick={() => handleOpenUserDetailDialog(user)}
                           >
                             {`${user.name} ${user.lastname}`}
                           </Typography>
-                          {Array.isArray(user.roles) && user.roles.includes(UserRoles.ADMINISTRADOR) && (
-                            <Tooltip title={getRoleName(UserRoles.ADMINISTRADOR)} arrow>
-                              <Box
-                                sx={{
-                                  width: 12,
-                                  height: 12,
-                                  borderRadius: '50%',
-                                  backgroundColor: 'red',
-                                  ml: 0.5
-                                }}
-                              />
-                            </Tooltip>
-                          )}
-                          {Array.isArray(user.roles) && user.roles.includes(UserRoles.RESPONSABLE) && (
-                            <Tooltip title={getRoleName(UserRoles.RESPONSABLE)} arrow>
-                              <Box
-                                sx={{
-                                  width: 12,
-                                  height: 12,
-                                  borderRadius: '50%',
-                                  backgroundColor: 'green',
-                                  ml: 0.5
-                                }}
-                              />
-                            </Tooltip>
-                          )}
+                          {Array.isArray(user.roles) &&
+                            user.roles.includes(UserRoles.ADMINISTRADOR) && (
+                              <Tooltip title={getRoleName(UserRoles.ADMINISTRADOR)} arrow>
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    backgroundColor: 'red',
+                                    ml: 0.5,
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
+                          {Array.isArray(user.roles) &&
+                            user.roles.includes(UserRoles.RESPONSABLE) && (
+                              <Tooltip title={getRoleName(UserRoles.RESPONSABLE)} arrow>
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    backgroundColor: 'green',
+                                    ml: 0.5,
+                                  }}
+                                />
+                              </Tooltip>
+                            )}
                         </Box>
                       </TableCell>
                       <TableCell align="center">
                         <Tooltip title="Contactar" arrow>
-                          <IconButton 
+                          <IconButton
                             onClick={() => handleOpenContactDialog(user)}
                             size="small"
                             sx={{
                               color: 'primary.main',
                               '&:hover': {
                                 backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                                color: 'primary.dark'
-                              }
+                                color: 'primary.dark',
+                              },
                             }}
                           >
                             <ContactPhoneIcon />
@@ -306,30 +301,30 @@ export function AdminPanel() {
                       <TableCell align="center">
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
                           <Tooltip title="Editar" arrow>
-                            <IconButton 
+                            <IconButton
                               onClick={() => openEditDialog(user)}
                               size="small"
                               sx={{
                                 color: 'primary.main',
                                 '&:hover': {
                                   backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                                  color: 'primary.dark'
-                                }
+                                  color: 'primary.dark',
+                                },
                               }}
                             >
                               <EditIcon />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Eliminar" arrow>
-                            <IconButton 
+                            <IconButton
                               onClick={() => openDeleteDialog(user)}
                               size="small"
                               sx={{
                                 color: 'error.main',
                                 '&:hover': {
                                   backgroundColor: 'rgba(211, 47, 47, 0.08)',
-                                  color: 'error.dark'
-                                }
+                                  color: 'error.dark',
+                                },
                               }}
                             >
                               <DeleteIcon />
@@ -352,7 +347,7 @@ export function AdminPanel() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage="Filas por página:"
-          labelDisplayedRows={({ from, to, count }) => 
+          labelDisplayedRows={({ from, to, count }) =>
             `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
           }
         />
@@ -363,7 +358,7 @@ export function AdminPanel() {
   return (
     <>
       <Header />
-      
+
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
@@ -436,13 +431,13 @@ export function AdminPanel() {
         }
         error={formError}
         actions={[
-          { label: "Cancelar", onClick: () => setIsAddDialogOpen(false) },
-          { 
-            label: "Añadir", 
-            onClick: handleAddUser, 
-            variant: "contained",
-            loading: isAddingUser
-          }
+          { label: 'Cancelar', onClick: () => setIsAddDialogOpen(false) },
+          {
+            label: 'Añadir',
+            onClick: handleAddUser,
+            variant: 'contained',
+            loading: isAddingUser,
+          },
         ]}
       />
 
@@ -464,8 +459,13 @@ export function AdminPanel() {
           />
         }
         actions={[
-          { label: "Cancelar", onClick: () => setIsEditDialogOpen(false) },
-          { label: "Guardar", onClick: handleEditUser, variant: "contained", loading: isEditingUser }
+          { label: 'Cancelar', onClick: () => setIsEditDialogOpen(false) },
+          {
+            label: 'Guardar',
+            onClick: handleEditUser,
+            variant: 'contained',
+            loading: isEditingUser,
+          },
         ]}
       />
 
@@ -476,14 +476,14 @@ export function AdminPanel() {
         contentText="Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este usuario?"
         error={deleteError}
         actions={[
-          { label: "Cancelar", onClick: closeDeleteDialog },
+          { label: 'Cancelar', onClick: closeDeleteDialog },
           {
-            label: "Eliminar",
+            label: 'Eliminar',
             onClick: handleDeleteUser,
-            color: "error",
-            variant: "contained",
-            loading: isDeletingUser
-          }
+            color: 'error',
+            variant: 'contained',
+            loading: isDeletingUser,
+          },
         ]}
       />
     </>

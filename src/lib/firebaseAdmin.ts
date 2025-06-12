@@ -6,7 +6,7 @@ export function initAdmin() {
     try {
       // Configurar credenciales usando variables de entorno
       const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-      
+
       const credentials = {
         type: 'service_account',
         project_id: process.env.FIREBASE_PROJECT_ID,
@@ -18,12 +18,12 @@ export function initAdmin() {
         token_uri: 'https://oauth2.googleapis.com/token',
         auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
         client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
-        universe_domain: 'googleapis.com'
+        universe_domain: 'googleapis.com',
       };
 
       admin.initializeApp({
         credential: admin.credential.cert(credentials as admin.ServiceAccount),
-        projectId: process.env.FIREBASE_PROJECT_ID
+        projectId: process.env.FIREBASE_PROJECT_ID,
       });
     } catch (error) {
       console.error('Error inicializando Firebase Admin:', error);
@@ -41,5 +41,3 @@ export const getAdminFirestore = () => {
   initAdmin();
   return admin.firestore();
 };
-
-export default admin;

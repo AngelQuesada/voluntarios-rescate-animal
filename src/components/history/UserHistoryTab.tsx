@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, FC, useEffect, ChangeEvent } from 'react';
 import {
   Box,
   Typography,
@@ -21,7 +21,7 @@ const renderShiftsTable = (
   shiftsData: UserHistoryShift[],
   currentPage: number,
   totalPages: number,
-  handlePageChange: (event: React.ChangeEvent<unknown>, value: number) => void,
+  handlePageChange: (event: ChangeEvent<unknown>, value: number) => void,
   itemsPerPage: number
 ) => {
   const paginatedShifts = shiftsData.slice(
@@ -37,9 +37,9 @@ const renderShiftsTable = (
       </Typography>
     );
   }
-  
+
   if (paginatedShifts.length === 0 && shiftsData.length > 0) {
-     return (
+    return (
       <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mt: 2 }}>
         No hay más turnos para mostrar en esta página.
       </Typography>
@@ -83,18 +83,13 @@ const renderShiftsTable = (
 };
 
 interface UserHistoryTabProps {
-  currentUser: { uid: string; [key: string]: any; } | null;
+  currentUser: { uid: string; email?: string; displayName?: string; photoURL?: string } | null;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-const UserHistoryTab: React.FC<UserHistoryTabProps> = ({ currentUser }) => {
-  const {
-    shifts,
-    isLoading,
-    isFetching,
-    error,
-  } = useUserHistory({ userId: currentUser?.uid });
+const UserHistoryTab: FC<UserHistoryTabProps> = ({ currentUser }) => {
+  const { shifts, isLoading, isFetching, error } = useUserHistory({ userId: currentUser?.uid });
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -102,7 +97,7 @@ const UserHistoryTab: React.FC<UserHistoryTabProps> = ({ currentUser }) => {
     return Math.ceil(shifts.length / ITEMS_PER_PAGE);
   }, [shifts]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     } else if (shifts.length === 0 && currentPage !== 1) {
@@ -110,8 +105,7 @@ const UserHistoryTab: React.FC<UserHistoryTabProps> = ({ currentUser }) => {
     }
   }, [shifts, currentPage, totalPages]);
 
-
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (event: ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
 
@@ -134,7 +128,9 @@ const UserHistoryTab: React.FC<UserHistoryTabProps> = ({ currentUser }) => {
   }
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2 } }}> {/* Responsive padding */}
+    <Box sx={{ p: { xs: 1, sm: 2 } }}>
+      {' '}
+      {/* Responsive padding */}
       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
         Mi historial de turnos
       </Typography>

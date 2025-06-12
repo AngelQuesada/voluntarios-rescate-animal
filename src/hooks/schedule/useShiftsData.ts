@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
-import { useGetShiftsQuery, useGetUserShiftsQuery, type ShiftAssignment } from "@/store/api/shiftsApi";
-import { useGetUsersQuery } from "@/store/api/usersApi";
-import { CurrentUser, User} from '@/types/common';
+import {
+  useGetShiftsQuery,
+  useGetUserShiftsQuery,
+  type ShiftAssignment,
+} from '@/store/api/shiftsApi';
+import { useGetUsersQuery } from '@/store/api/usersApi';
+import { CurrentUser, User } from '@/types/common';
 
 export interface ProcessedAssignments {
   [dateKey: string]: {
@@ -10,7 +14,7 @@ export interface ProcessedAssignments {
   };
 }
 
-export interface ShiftsData {
+interface ShiftsData {
   processedAssignments: ProcessedAssignments;
   filteredAssignments: ProcessedAssignments;
   usersMap: { [uid: string]: User };
@@ -18,7 +22,7 @@ export interface ShiftsData {
   shiftsLoading: boolean;
   userShiftsLoading: boolean;
   usersLoading: boolean;
-  shiftsError: any; // Considerar un tipo más específico si es posible
+  shiftsError: Error | null;
   myShiftsCount: number;
 }
 
@@ -33,10 +37,7 @@ export function useShiftsData({
   endDateISO,
   currentUser,
 }: UseShiftsDataProps): ShiftsData {
-  const { 
-    data: usersMap = {}, 
-    isLoading: usersLoading 
-  } = useGetUsersQuery();
+  const { data: usersMap = {}, isLoading: usersLoading } = useGetUsersQuery();
 
   const allUsersList = useMemo(() => {
     return Object.entries(usersMap).map(([uid, user]) => ({
@@ -57,12 +58,9 @@ export function useShiftsData({
     users: usersMap,
   });
 
-  const {
-    data: filteredAssignments = {},
-    isLoading: userShiftsLoading,
-  } = useGetUserShiftsQuery(
+  const { data: filteredAssignments = {}, isLoading: userShiftsLoading } = useGetUserShiftsQuery(
     {
-      userId: currentUser?.uid || "",
+      userId: currentUser?.uid || '',
       startDate: startDateISO,
       endDate: endDateISO,
       users: usersMap,
@@ -72,7 +70,7 @@ export function useShiftsData({
 
   const myShiftsCount = useMemo(() => {
     if (!filteredAssignments) return 0;
-    return Object.values(filteredAssignments).reduce((acc, day: any) => {
+    return Object.values(filteredAssignments).reduce((acc, day: ProcessedAssignments[string]) => {
       const count = (day.M?.length || 0) + (day.T?.length || 0);
       return acc + count;
     }, 0);
@@ -86,7 +84,7 @@ export function useShiftsData({
     shiftsLoading,
     userShiftsLoading,
     usersLoading,
-    shiftsError,
+    shiftsError: shiftsError as Error | null,
     myShiftsCount,
   };
 }

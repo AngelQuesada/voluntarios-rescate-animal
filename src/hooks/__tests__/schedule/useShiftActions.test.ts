@@ -58,10 +58,10 @@ describe('useShiftActions Hook', () => {
   };
 
   const mockUsersMap = {
-    'user1': { 
-      uid: 'user1', 
-      name: 'Ana', 
-      lastname: 'García', 
+    user1: {
+      uid: 'user1',
+      name: 'Ana',
+      lastname: 'García',
       email: 'ana@example.com',
       username: 'ana.garcia',
       roles: [UserRoles.VOLUNTARIO],
@@ -70,10 +70,10 @@ describe('useShiftActions Hook', () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
-    'user2': { 
-      uid: 'user2', 
-      name: 'Carlos', 
-      lastname: 'Ruiz', 
+    user2: {
+      uid: 'user2',
+      name: 'Carlos',
+      lastname: 'Ruiz',
       email: 'carlos@example.com',
       username: 'carlos.ruiz',
       roles: [UserRoles.RESPONSABLE],
@@ -86,9 +86,7 @@ describe('useShiftActions Hook', () => {
 
   const mockProcessedAssignments = {
     '2025-05-26': {
-      M: [
-        { uid: 'user1', name: 'Ana García' },
-      ],
+      M: [{ uid: 'user1', name: 'Ana García' }],
       T: [],
     },
   };
@@ -125,7 +123,7 @@ describe('useShiftActions Hook', () => {
 
   test('should show warning for incomplete profile', async () => {
     const incompleteUser = { ...mockCurrentUser, name: '', lastname: '' };
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, currentUser: incompleteUser })
     );
 
@@ -140,18 +138,13 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should show warning for unauthenticated user', async () => {
-    const { result } = renderHook(() => 
-      useShiftActions({ ...defaultProps, currentUser: null })
-    );
+    const { result } = renderHook(() => useShiftActions({ ...defaultProps, currentUser: null }));
 
     await act(async () => {
       await result.current.executeModifyShift('2025-05-26', 'M', 'test-uid', 'Test User');
     });
 
-    expect(mockShowSnackbar).toHaveBeenCalledWith(
-      'Usuario no autenticado.',
-      'warning'
-    );
+    expect(mockShowSnackbar).toHaveBeenCalledWith('Usuario no autenticado.', 'warning');
   });
 
   test('should execute modify shift successfully for add action', async () => {
@@ -169,10 +162,7 @@ describe('useShiftActions Hook', () => {
       action: 'add',
     });
 
-    expect(mockShowSnackbar).toHaveBeenCalledWith(
-      expect.anything(),
-      'success'
-    );
+    expect(mockShowSnackbar).toHaveBeenCalledWith(expect.anything(), 'success');
   });
 
   test('should execute modify shift successfully for remove action', async () => {
@@ -190,10 +180,7 @@ describe('useShiftActions Hook', () => {
       action: 'remove',
     });
 
-    expect(mockShowSnackbar).toHaveBeenCalledWith(
-      expect.anything(),
-      'info'
-    );
+    expect(mockShowSnackbar).toHaveBeenCalledWith(expect.anything(), 'info');
   });
 
   test('should handle modify shift error', async () => {
@@ -207,10 +194,7 @@ describe('useShiftActions Hook', () => {
       await result.current.executeModifyShift('2025-05-26', 'M', 'user2', 'Carlos Ruiz', 'add');
     });
 
-    expect(mockShowSnackbar).toHaveBeenCalledWith(
-      expect.anything(),
-      'error'
-    );
+    expect(mockShowSnackbar).toHaveBeenCalledWith(expect.anything(), 'error');
   });
 
   test('should initiate shift action for user not assigned', async () => {
@@ -241,7 +225,7 @@ describe('useShiftActions Hook', () => {
       },
     };
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, processedAssignments: assignmentsWithCurrentUser })
     );
 
@@ -271,7 +255,7 @@ describe('useShiftActions Hook', () => {
       },
     };
 
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, processedAssignments: fullShiftAssignments })
     );
 
@@ -299,13 +283,6 @@ describe('useShiftActions Hook', () => {
       await result.current.initiateShiftAction('2025-05-26', 'T');
     });
 
-    // Mock del estado interno para la confirmación
-    const hookWithConfirmState = {
-      ...result.current,
-      shiftToAction: { dateKey: '2025-05-26', shiftKey: 'T' as const },
-      confirmDialogOpen: true,
-    };
-
     await act(async () => {
       await result.current.confirmShiftAction();
     });
@@ -325,7 +302,7 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should handle remove user click (admin only)', () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, currentUser: mockAdminUser })
     );
 
@@ -345,7 +322,7 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should handle add user button click (admin only)', () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, currentUser: mockAdminUser })
     );
 
@@ -372,9 +349,7 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should handle auth loading state', async () => {
-    const { result } = renderHook(() => 
-      useShiftActions({ ...defaultProps, authLoading: true })
-    );
+    const { result } = renderHook(() => useShiftActions({ ...defaultProps, authLoading: true }));
 
     await act(async () => {
       await result.current.initiateShiftAction('2025-05-26', 'M');
@@ -387,7 +362,7 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should confirm add user to shift (admin only)', async () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, currentUser: mockAdminUser })
     );
 
@@ -410,7 +385,7 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should handle user not found in add user action', async () => {
-    const { result } = renderHook(() => 
+    const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, currentUser: mockAdminUser })
     );
 
@@ -423,9 +398,6 @@ describe('useShiftActions Hook', () => {
       await result.current.confirmAddUserToShift('non-existent-user');
     });
 
-    expect(mockShowSnackbar).toHaveBeenCalledWith(
-      'Usuario no encontrado.',
-      'error'
-    );
+    expect(mockShowSnackbar).toHaveBeenCalledWith('Usuario no encontrado.', 'error');
   });
 });

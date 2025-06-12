@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { render as customRender } from '../../../__tests__/test-utils';
 import SignIn from '../sign-in';
 
@@ -23,7 +23,7 @@ jest.mock('@/styles/formStyles', () => ({
 describe('SignIn Component', () => {
   test('should render sign in form after mount', async () => {
     customRender(<SignIn />);
-    
+
     await waitFor(() => {
       expect(screen.getByRole('img', { name: /logo rescate animal granada/i })).toBeInTheDocument();
       expect(screen.getAllByText('Rescate Animal Granada')).toHaveLength(2); // Uno en el título y otro en el copyright
@@ -33,18 +33,19 @@ describe('SignIn Component', () => {
   test('should not render content before mount', () => {
     // Mock useState para simular estado no montado
     const mockSetState = jest.fn();
-    const mockUseState = jest.spyOn(React, 'useState')
+    const mockUseState = jest
+      .spyOn(React, 'useState')
       .mockImplementationOnce(() => [false, mockSetState]);
 
     const { container } = customRender(<SignIn />);
     expect(container.firstChild).not.toBeNull(); // El componente siempre renderiza algo, solo cambia el contenido
-    
+
     mockUseState.mockRestore();
   });
 
   test('should render logo with correct attributes', async () => {
     customRender(<SignIn />);
-    
+
     await waitFor(() => {
       const logo = screen.getByRole('img', { name: /logo rescate animal granada/i });
       expect(logo).toHaveAttribute('src', '/logo.png');
@@ -54,7 +55,7 @@ describe('SignIn Component', () => {
 
   test('should render copyright component', async () => {
     customRender(<SignIn />);
-    
+
     await waitFor(() => {
       expect(screen.getByText(/Copyright ©/)).toBeInTheDocument();
     });
