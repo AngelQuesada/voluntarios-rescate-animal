@@ -40,10 +40,7 @@
   "scope": "/",
   "description": "Aplicación para la gestión de voluntarios en rescate animal",
   "prefer_related_applications": false,
-  "categories": [
-    "productivity",
-    "utilities"
-  ],
+  "categories": ["productivity", "utilities"],
   "dir": "ltr",
   "lang": "es-ES",
   "shortcuts": [
@@ -55,13 +52,5 @@
     }
   ],
   "capture_links": "existing-client-navigate",
-  "screenshots": [
-    {
-      "src": "/images/screenshot1.png",
-      "type": "image/png",
-      "sizes": "540x720",
-      "form_factor": "narrow"
-    }
-  ],
   "related_applications": []
 }
