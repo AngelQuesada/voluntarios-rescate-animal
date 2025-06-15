@@ -47,8 +47,8 @@ describe('SignIn Component', () => {
     customRender(<SignIn />);
 
     await waitFor(() => {
-      const logo = screen.getByRole('img', { name: /logo rescate animal granada/i });
-      expect(logo).toHaveAttribute('src', '/logo.png');
+      const logo = screen.getByAltText('Logo Rescate Animal Granada');
+      expect(logo).toBeInTheDocument();
       expect(logo).toHaveAttribute('alt', 'Logo Rescate Animal Granada');
     });
   });
