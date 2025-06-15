@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Paper, Typography, CircularProgress } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -12,7 +12,8 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const HistoryCalendar = () => {
-  const today = startOfDay(new Date());
+  // Memoizamos 'today' para que no se cree un nuevo objeto en cada render.
+  const today = useMemo(() => startOfDay(new Date()), []);
 
   // Inicializar con ninguna fecha seleccionada (null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -21,7 +22,7 @@ const HistoryCalendar = () => {
 
   useEffect(() => {
     const fetchFirstShiftDate = async () => {
-      setLoading(true);
+      // No es necesario setLoading(true) aquí si ya está inicializado a true.
       try {
         const shiftsRef = collection(db, 'shifts');
         // Consultar ordenando por fecha ascendente y limitando a 1 resultado
@@ -48,11 +49,12 @@ const HistoryCalendar = () => {
     };
 
     fetchFirstShiftDate();
-  }, [today]);
+    // El array vacío asegura que este efecto se ejecute solo una vez, al montar el componente.
+  }, [today]); // Se mantiene 'today' como dependencia porque se usa dentro, pero ahora está memoizado.
 
   const handleDateChange = (date: Date | null) => {
-    if (date && !isAfter(startOfDay(date), startOfDay(today)) && !isSameDay(date, today)) {
-      // Solo permitir fechas desde el primer turno hasta ayer
+    // Solo permitir fechas desde el primer turno hasta ayer
+    if (date && !isAfter(startOfDay(date), today) && !isSameDay(date, today)) {
       if (firstShiftDate && !isBefore(startOfDay(date), firstShiftDate)) {
         setSelectedDate(date);
       }
