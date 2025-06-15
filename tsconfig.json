@@ -42,7 +42,8 @@
     ".next/types/**/*.ts",
     "__tests__/**/*",
     "jest.setup.js",
-    "src/types/jest.d.ts"
+    "src/types/jest.d.ts",
+    "scripts/restart-project.js"
   ],
   "exclude": [
     "node_modules",

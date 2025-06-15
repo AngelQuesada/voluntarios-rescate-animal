@@ -24,6 +24,9 @@ export async function GET() {
 
     return NextResponse.json(shiftsData);
   } catch (error) {
-    return NextResponse.json({ error: 'Error al obtener los turnos' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error al obtener los turnos', fullError: error },
+      { status: 500 }
+    );
   }
 }
