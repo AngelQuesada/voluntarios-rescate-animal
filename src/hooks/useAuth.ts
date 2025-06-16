@@ -109,24 +109,129 @@ interface AuthErrorHistory {
   message: string;
 }
 
+// Configuración para limitación de intentos de inicio de sesión
+const LOGIN_ATTEMPT_CONFIG = {
+  MAX_ATTEMPTS: 5,
+  LOCKOUT_DURATION: 15 * 60 * 1000,
+  ATTEMPT_WINDOW: 30 * 60 * 1000,
+};
+
+// Interfaz para el historial de intentos de login
+interface LoginAttempt {
+  timestamp: number;
+  email: string;
+  success: boolean;
+}
+
 export function useAuth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
   const router = useRouter();
 
   // Ref para evitar múltiples intentos de login simultáneos
   const isLoginInProgressRef = useRef(false);
   const loginTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const blockTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Referencias para seguimiento de errores y recuperación automática
   const errorHistoryRef = useRef<AuthErrorHistory[]>([]);
   const recoveryAttemptsRef = useRef(0);
+  const loginAttemptsRef = useRef<LoginAttempt[]>([]);
 
   // Establecer límites para intentos de recuperación
   const MAX_RECOVERY_ATTEMPTS = 3;
+
+  // Función para limpiar intentos antiguos de login
+  const cleanOldLoginAttempts = useCallback(() => {
+    const now = Date.now();
+    loginAttemptsRef.current = loginAttemptsRef.current.filter(
+      (attempt) => now - attempt.timestamp < LOGIN_ATTEMPT_CONFIG.ATTEMPT_WINDOW
+    );
+  }, []);
+
+  // Función para verificar si el usuario está bloqueado
+  const checkIfBlocked = useCallback(
+    (userEmail: string) => {
+      cleanOldLoginAttempts();
+
+      const failedAttempts = loginAttemptsRef.current.filter(
+        (attempt) => attempt.email.toLowerCase() === userEmail.toLowerCase() && !attempt.success
+      );
+
+      if (failedAttempts.length >= LOGIN_ATTEMPT_CONFIG.MAX_ATTEMPTS) {
+        const lastFailedAttempt = failedAttempts[failedAttempts.length - 1];
+        const timeSinceLastAttempt = Date.now() - lastFailedAttempt.timestamp;
+
+        // Calcular tiempo de bloqueo progresivo (15 min base + 5 min por cada intento extra)
+        const extraAttempts = Math.max(
+          0,
+          failedAttempts.length - LOGIN_ATTEMPT_CONFIG.MAX_ATTEMPTS
+        );
+        const lockoutDuration =
+          LOGIN_ATTEMPT_CONFIG.LOCKOUT_DURATION + extraAttempts * 5 * 60 * 1000;
+
+        if (timeSinceLastAttempt < lockoutDuration) {
+          const remainingTime = lockoutDuration - timeSinceLastAttempt;
+          return { isBlocked: true, remainingTime };
+        }
+      }
+
+      return { isBlocked: false, remainingTime: 0 };
+    },
+    [cleanOldLoginAttempts]
+  );
+
+  // Función para registrar un intento de login
+  const recordLoginAttempt = useCallback(
+    (userEmail: string, success: boolean) => {
+      const attempt: LoginAttempt = {
+        timestamp: Date.now(),
+        email: userEmail.toLowerCase(),
+        success,
+      };
+
+      loginAttemptsRef.current.push(attempt);
+      cleanOldLoginAttempts();
+    },
+    [cleanOldLoginAttempts]
+  );
+
+  // Función para iniciar el temporizador de bloqueo
+  const startBlockTimer = useCallback((remainingTime: number) => {
+    setIsBlocked(true);
+    setBlockTimeRemaining(Math.ceil(remainingTime / 1000));
+
+    // Limpiar temporizador anterior si existe
+    if (blockTimerRef.current) {
+      clearInterval(blockTimerRef.current);
+    }
+
+    blockTimerRef.current = setInterval(() => {
+      setBlockTimeRemaining((prev) => {
+        if (prev <= 1) {
+          setIsBlocked(false);
+          if (blockTimerRef.current) {
+            clearInterval(blockTimerRef.current);
+            blockTimerRef.current = null;
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // Función para formatear el tiempo restante de bloqueo
+  const formatBlockTime = useCallback((seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }, []);
 
   // Función para comprobar problemas recurrentes en la autenticación
   const checkForRecurringProblems = useCallback(() => {
@@ -216,6 +321,28 @@ export function useAuth() {
     return () => clearTimeout(resetTimer);
   }, []);
 
+  // Effect para limpiar temporizadores al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (blockTimerRef.current) {
+        clearInterval(blockTimerRef.current);
+      }
+      if (loginTimeoutRef.current) {
+        clearTimeout(loginTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Effect para verificar bloqueo al cambiar el email
+  useEffect(() => {
+    if (email.trim() && isValidEmail(email)) {
+      const blockStatus = checkIfBlocked(email);
+      if (blockStatus.isBlocked && !isBlocked) {
+        startBlockTimer(blockStatus.remainingTime);
+      }
+    }
+  }, [email, checkIfBlocked, startBlockTimer, isBlocked]);
+
   const handleSignIn = async (_error: React.FormEvent, rememberMe: boolean = false) => {
     _error.preventDefault();
 
@@ -246,6 +373,15 @@ export function useAuth() {
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    // Verificar si el usuario está bloqueado por demasiados intentos fallidos
+    const blockStatus = checkIfBlocked(email);
+    if (blockStatus.isBlocked) {
+      const timeFormatted = formatBlockTime(Math.ceil(blockStatus.remainingTime / 1000));
+      setError(`Demasiados intentos fallidos. Inténtalo de nuevo en ${timeFormatted}.`);
+      startBlockTimer(blockStatus.remainingTime);
       return;
     }
 
@@ -313,7 +449,8 @@ export function useAuth() {
       // Establecer la cookie de forma segura
       setAuthCookie(token, cookieMaxAge);
 
-      // Resetear el contador de intentos de recuperación si el login es exitoso
+      // Registrar intento exitoso y resetear contadores
+      recordLoginAttempt(email, true);
       recoveryAttemptsRef.current = 0;
 
       // Limpiar los campos del formulario
@@ -324,20 +461,34 @@ export function useAuth() {
     } catch (e: Error | unknown) {
       console.error('Error Iniciando Sesión:', e);
 
+      // Registrar intento fallido (solo para errores de credenciales)
+      const errorCode = (e as { code?: string }).code;
+      if (
+        errorCode &&
+        [
+          'auth/user-not-found',
+          'auth/invalid-email',
+          'auth/invalid-credential',
+          'auth/wrong-password',
+        ].includes(errorCode)
+      ) {
+        recordLoginAttempt(email, false);
+      }
+
       // En caso de error, desactivar el estado de autenticación
       setIsAuthenticating(false);
 
       // Guardar el error en el historial
-      if ((e as { code?: string }).code) {
+      if (errorCode) {
         errorHistoryRef.current.push({
           timestamp: Date.now(),
-          code: (e as { code?: string }).code || 'unknown-error',
+          code: errorCode || 'unknown-error',
           message: (e as Error)?.message || '',
         });
       }
 
       // Mapear errores específicos de Firebase a mensajes más amigables
-      switch ((e as { code?: string }).code) {
+      switch (errorCode) {
         case 'auth/user-not-found':
         case 'auth/invalid-email':
         case 'auth/invalid-credential':
@@ -399,6 +550,9 @@ export function useAuth() {
     setPassword,
     error,
     isLoading: isLoading || isAuthenticating,
+    isBlocked,
+    blockTimeRemaining,
+    formatBlockTime,
     handleSignIn,
     resetForm,
   };

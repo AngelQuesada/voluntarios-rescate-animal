@@ -11,6 +11,9 @@ interface SignInFormProps {
   setPassword: (password: string) => void;
   error: string | null;
   isLoading: boolean;
+  isBlocked: boolean;
+  blockTimeRemaining: number;
+  formatBlockTime: (seconds: number) => string;
   handleSignIn: (e: FormEvent, rememberMe?: boolean) => Promise<void>;
   resetForm: () => void;
   onSilentReset?: () => void;
@@ -23,6 +26,9 @@ const SignInForm = ({
   setPassword,
   error,
   isLoading,
+  isBlocked,
+  blockTimeRemaining,
+  formatBlockTime,
   handleSignIn,
 }: SignInFormProps) => {
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -172,7 +178,12 @@ const SignInForm = ({
           {error}
         </Alert>
       )}
-      <SubmitButton isLoading={isLoading} />
+      {isBlocked && (
+        <Alert severity="warning" sx={{ width: '100%', mt: 2, mb: 1 }}>
+          Cuenta temporalmente bloqueada. Tiempo restante: {formatBlockTime(blockTimeRemaining)}
+        </Alert>
+      )}
+      <SubmitButton isLoading={isLoading} isBlocked={isBlocked} />
     </Box>
   );
 };
