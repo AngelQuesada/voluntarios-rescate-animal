@@ -107,9 +107,9 @@ export async function startTestServer(port: number = 3001): Promise<boolean> {
         if (!resolved) {
           resolved = true;
           console.error(`❌ El servidor se cerró con código ${code}`);
-          if (errorOutput) {
-            console.error('Errores del servidor:', errorOutput);
-          }
+          // if (errorOutput) {
+          //   console.error('Errores del servidor:', errorOutput);
+          // }
           reject(new Error(`El servidor se cerró inesperadamente con código ${code}`));
         }
       });
@@ -127,8 +127,8 @@ export async function startTestServer(port: number = 3001): Promise<boolean> {
         if (!resolved) {
           resolved = true;
           console.error('❌ Timeout al iniciar el servidor');
-          console.log('Salida del servidor:', serverOutput);
-          console.log('Errores del servidor:', errorOutput);
+          // console.log('Salida del servidor:', serverOutput);
+          // console.log('Errores del servidor:', errorOutput);
           reject(new Error('Timeout al iniciar el servidor'));
         }
       }, 30000); // 30 segundos timeout

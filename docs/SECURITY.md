@@ -48,6 +48,32 @@ El control de acceso se implementa mediante:
 - Sistema de roles (Admin, Responsable, Voluntario)
 - Verificación de permisos en el frontend
 - Validación de permisos en el backend (API routes)
+- Validación de usuarios habilitados/deshabilitados
+- Control de intentos fallidos de autenticación
+
+### Mejoras en Seguridad de Sesiones
+
+#### Limpieza Robusta de Sesión
+El sistema ahora implementa una limpieza completa del estado de sesión durante el logout:
+
+**Datos de SessionStorage Limpiados:**
+- `loginFormState`: Estado del formulario de login
+- `authRedirectPending`: Estado de redirección pendiente
+- `loginTimeout`: Timeouts de login activos
+- `firebaseAuthState`: Estado de autenticación de Firebase
+- `loginStart`: Timestamp de inicio de sesión
+
+**Beneficios de Seguridad:**
+- Previene reutilización de tokens de sesión
+- Elimina datos sensibles del navegador
+- Reduce riesgo de ataques de sesión
+- Mejora la privacidad del usuario
+
+#### Validación de Usuarios Deshabilitados
+El sistema incluye validación para usuarios deshabilitados:
+- Verificación en tiempo real del estado del usuario
+- Bloqueo automático de acceso para usuarios deshabilitados
+- Mensajes de error apropiados sin revelar información sensible
 - Reglas de seguridad en Firestore
 
 ## Protección de datos
@@ -197,6 +223,42 @@ En caso de detectar una brecha de seguridad:
 4. **Comunicación**:
    - Notificar a los usuarios afectados
    - Documentar el incidente y las medidas tomadas
+
+## Testing de Seguridad
+
+### Tests de Validación Implementados
+
+El sistema incluye tests automatizados de seguridad:
+
+#### Tests de Autenticación Avanzada (`advanced-auth.spec.ts`)
+- Validación de usuarios deshabilitados
+- Tests de intentos fallidos de login
+- Verificación de limpieza de sesión
+- Validación de tokens y permisos
+
+#### Tests de Validación de Seguridad (`security-validation.spec.ts`)
+- Validación de formato de email
+- Tests de inyección y XSS
+- Validación de campos obligatorios
+- Tests de límites y casos edge
+- Validación de entrada de datos maliciosos
+
+#### Cobertura de Tests de Seguridad
+- Autenticación y autorización
+- Validación de entrada
+- Manejo de sesiones
+- Protección contra ataques comunes
+- Validación de permisos por rol
+
+## Mejores prácticas de desarrollo
+
+### Validación de entrada
+
+- Validación tanto en frontend como backend
+- Sanitización de datos de usuario
+- Validación de tipos de datos
+- Límites en tamaños de entrada
+- Tests automatizados de validación
 
 ## Recursos adicionales
 

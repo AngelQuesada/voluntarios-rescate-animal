@@ -168,6 +168,7 @@ const SignInForm = ({
             onChange={(e) => setRememberMe(e.target.checked)}
             color="primary"
             disabled={isLoading}
+            data-testid="remember-me-checkbox"
           />
         }
         label="Recordarme"

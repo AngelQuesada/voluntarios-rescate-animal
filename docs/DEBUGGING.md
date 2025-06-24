@@ -132,6 +132,51 @@ Si el depurador no se conecta:
 2. Verifica que estás intentando conectarte a la dirección IP correcta (127.0.0.1)
 3. Reinicia la aplicación y el depurador
 
+## Depuración de Problemas de Autenticación
+
+### Verificar estado de autenticación
+
+Puedes verificar el estado actual de autenticación en la consola del navegador:
+
+```javascript
+// En la consola del navegador
+console.log('Usuario actual:', firebase.auth().currentUser);
+```
+
+### Limpiar estado de autenticación
+
+Si experimentas problemas con el estado de autenticación, puedes limpiar el almacenamiento local:
+
+```javascript
+// En la consola del navegador
+localStorage.clear();
+sessionStorage.clear();
+location.reload();
+```
+
+### Mejoras en el Proceso de Logout
+
+El sistema ahora incluye una limpieza más robusta del estado de sesión durante el logout:
+
+#### Datos de SessionStorage Limpiados
+- `loginFormState`: Estado del formulario de login
+- `authRedirectPending`: Estado de redirección pendiente
+- `loginTimeout`: Timeouts de login
+- `firebaseAuthState`: Estado de autenticación de Firebase
+- `loginStart`: Timestamp de inicio de sesión
+
+#### Verificar Limpieza de Sesión
+
+Puedes verificar que la limpieza se realizó correctamente:
+
+```javascript
+// Verificar que los datos de sesión fueron eliminados
+const sessionKeys = ['loginFormState', 'authRedirectPending', 'loginTimeout', 'firebaseAuthState', 'loginStart'];
+sessionKeys.forEach(key => {
+  console.log(`${key}:`, sessionStorage.getItem(key)); // Debería ser null
+});
+```
+
 ## Consejos para Depuración Efectiva
 
 - Coloca puntos de interrupción (breakpoints) en VS Code haciendo clic en el margen izquierdo junto al número de línea

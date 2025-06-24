@@ -34,7 +34,7 @@ const getCookieDuration = (isAdmin: boolean, isMobile: boolean, rememberMe: bool
 
 // Función para validar formato de email
 const isValidEmail = (email: string): boolean => {
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailPattern = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*@([^\s@.]+\.)+[^\s@.]{2,}$/;
   return emailPattern.test(email);
 };
 
@@ -111,7 +111,7 @@ interface AuthErrorHistory {
 
 // Configuración para limitación de intentos de inicio de sesión
 const LOGIN_ATTEMPT_CONFIG = {
-  MAX_ATTEMPTS: 5,
+  MAX_ATTEMPTS: 3,
   LOCKOUT_DURATION: 15 * 60 * 1000,
   ATTEMPT_WINDOW: 30 * 60 * 1000,
 };
@@ -379,8 +379,6 @@ export function useAuth() {
     // Verificar si el usuario está bloqueado por demasiados intentos fallidos
     const blockStatus = checkIfBlocked(email);
     if (blockStatus.isBlocked) {
-      const timeFormatted = formatBlockTime(Math.ceil(blockStatus.remainingTime / 1000));
-      setError(`Demasiados intentos fallidos. Inténtalo de nuevo en ${timeFormatted}.`);
       startBlockTimer(blockStatus.remainingTime);
       return;
     }
@@ -497,11 +495,11 @@ export function useAuth() {
         case 'auth/wrong-password':
           setError('Correo electrónico o contraseña incorrectos.');
           break;
-        case 'auth/too-many-requests':
-          setError(
-            'Demasiados intentos fallidos. Por favor, espera unos minutos antes de intentarlo de nuevo.'
-          );
+        case 'auth/too-many-requests': {
+          const firebaseBlockDuration = 15 * 60 * 1000; // 15 minutos como duración base
+          startBlockTimer(firebaseBlockDuration);
           break;
+        }
         case 'auth/network-request-failed':
           setError('Error de conexión. Verifica tu conexión a internet e inténtalo de nuevo.');
           // En caso de error de red, intentar limpiar tokens potencialmente expirados

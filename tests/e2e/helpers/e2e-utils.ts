@@ -28,6 +28,7 @@ export interface LoginOptions {
   expectedRedirectUrl?: string | RegExp;
   timeout?: number;
   skipServerCheck?: boolean;
+  rememberMe?: boolean;
 }
 
 /**
@@ -46,11 +47,16 @@ export async function checkServerStatus(
   request: APIRequestContext,
   options: ServerCheckOptions = {}
 ): Promise<boolean> {
-  const { failOnError = true } = options;
+  const { timeout = 60000, failOnError = true } = options;
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
 
   try {
-    // Verificar que el servidor está respondiendo
-    const response = await request.get(`${process.env.BASE_URL || 'http://localhost:3000'}`);
+    console.log('🔍 Verificando estado del servidor y compilación...');
+
+    // Verificar que el servidor está respondiendo con timeout extendido
+    const response = await request.get(baseUrl, {
+      timeout: timeout,
+    });
 
     if (!response.ok()) {
       const errorMsg = `⚠️ El servidor no responde correctamente. Código de estado: ${response.status()}`;
@@ -74,6 +80,41 @@ export async function checkServerStatus(
         throw new Error('La URL base devuelve un error 404');
       }
       return false;
+    }
+
+    // Verificar si el servidor está completamente compilado midiendo el tiempo de respuesta
+    console.log('🔄 Verificando si el servidor está completamente compilado...');
+
+    // Realizar múltiples peticiones para verificar la velocidad de respuesta
+    const maxAttempts = 3;
+    let isCompiled = false;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      console.log(`🔄 Intento ${attempt}/${maxAttempts} de verificación de compilación...`);
+
+      // Medir el tiempo de respuesta
+      const startTime = Date.now();
+      await request.get(baseUrl);
+      const endTime = Date.now();
+      const responseTime = endTime - startTime;
+
+      console.log(`⏱️ Tiempo de respuesta: ${responseTime}ms`);
+
+      // Si la respuesta es rápida (menos de 1 segundo), probablemente ya está compilado
+      if (responseTime < 1000) {
+        console.log('✅ Servidor compilado y respondiendo rápidamente');
+        isCompiled = true;
+        break;
+      } else {
+        console.log('⏳ Servidor aún no está completamente compilado, esperando...');
+        // Esperar antes del siguiente intento
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    }
+
+    if (!isCompiled) {
+      console.warn('⚠️ El servidor está respondiendo pero podría no estar completamente compilado');
+      // Continuar de todos modos, pero con una advertencia
     }
 
     return true;
@@ -122,6 +163,7 @@ export async function loginUser(page: Page, options: LoginOptions): Promise<bool
     expectedRedirectUrl = /\/schedule$/,
     timeout = 10000,
     skipServerCheck = false,
+    rememberMe = false,
   } = options;
 
   // Obtener credenciales del usuario
@@ -191,6 +233,8 @@ export async function loginUser(page: Page, options: LoginOptions): Promise<bool
       console.error('❌ El campo contraseña está vacío');
       return false;
     }
+
+    if (rememberMe) await page.locator('[data-testid="remember-me-checkbox"]').check();
 
     // Buscar y hacer clic en el botón de submit
     const submitButton = await page.waitForSelector(
@@ -424,6 +468,14 @@ export async function waitForPageLoad(page: Page, timeout: number = 10000): Prom
     return false;
   }
 }
+export const userAlreadyInDB = async (email: string, adminAuth: any): Promise<boolean> => {
+  try {
+    await adminAuth.getUserByEmail(email);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 // Alias para compatibilidad con tests existentes
 export const findShiftTable = locateShiftTable;

@@ -25,6 +25,41 @@ export default function LogoutPage() {
           }
         });
 
+        // Limpiar datos de sessionStorage relacionados con la sesión
+        const sessionKeysToRemove = [
+          'loginFormState',
+          'authRedirectPending', 
+          'loginTimeout',
+          'firebaseAuthState',
+          'loginStart'
+        ];
+        
+        sessionKeysToRemove.forEach((key) => {
+          sessionStorage.removeItem(key);
+        });
+
+        // Limpiar datos de localStorage relacionados con la autenticación
+        const localStorageKeysToRemove = [
+          'auth-token-backup',
+          'firebaseAuthState',
+          'authRedirectPending',
+          'loginTimeout'
+        ];
+        
+        localStorageKeysToRemove.forEach((key) => {
+          localStorage.removeItem(key);
+        });
+
+        // Limpiar todas las claves de Firebase Auth automáticas
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes('firebase:authUser:') || 
+              key.includes('firebase:host:') ||
+              key.includes('firebase:heartbeat:') ||
+              key.startsWith('firebase-')) {
+            localStorage.removeItem(key);
+          }
+        });
+
         // Cerrar sesión en Firebase
         await signOut(auth);
 

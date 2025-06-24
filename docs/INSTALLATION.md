@@ -4,10 +4,11 @@ Esta guía proporciona instrucciones detalladas para configurar el entorno de de
 
 ## Requisitos previos
 
-- Node.js v16 o superior
-- npm o yarn
+- Node.js v18 o superior (requerido para las últimas características)
+- npm (gestor de paquetes preferido)
 - Cuenta en Firebase
 - Editor de código (recomendado: Visual Studio Code)
+- Git para control de versiones
 
 ## Pasos de instalación
 
@@ -93,7 +94,41 @@ npm run dev
 yarn dev
 ```
 
-### 8. Acceder a la aplicación
+### 8. Configurar entorno de testing (opcional)
+
+Para ejecutar los tests E2E, necesitas configurar variables de entorno adicionales:
+
+```bash
+# Crear archivo .env.test para testing
+cp .env.example .env.test
+```
+
+Edita `.env.test` con las configuraciones específicas para testing:
+
+```bash
+# URL base para tests (usualmente localhost con puerto diferente)
+BASE_URL=http://localhost:3001
+
+# Configuraciones de Firebase para testing (pueden ser las mismas que desarrollo)
+NEXT_PUBLIC_FIREBASE_API_KEY=your-test-api-key
+# ... resto de configuraciones Firebase
+```
+
+#### Ejecutar tests
+
+```bash
+# Tests unitarios con Jest
+npm test
+
+# Tests E2E con Playwright
+npm run test:e2e
+
+# Tests específicos por proyecto
+npm run test:e2e -- --project=login-tests
+npm run test:e2e -- --project=security-validation-tests
+```
+
+### 9. Acceder a la aplicación
 
 Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 

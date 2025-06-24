@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

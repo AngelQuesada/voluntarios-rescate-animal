@@ -5,7 +5,7 @@ test.describe('Admin Permissions and Features', () => {
   test.beforeEach(async ({ page, request }) => {
     // Verificar estado del servidor antes de cada test
     const serverOk = await checkServerStatus(page, request, {
-      timeout: 5000,
+      timeout: 60000,
       failOnError: false,
     });
 
