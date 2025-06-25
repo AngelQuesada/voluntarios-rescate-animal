@@ -22,7 +22,6 @@
     "test:e2e:user-crud-tests": "playwright test --project=user-crud-tests",
     "test:e2e:admin": "playwright test --project=admin-features-tests",
     "test:e2e:sequence": "playwright test --project=login-tests --project=role-assignment-tests --project=history-view-tests",
-    "test:e2e:all-sequential": "npm run test:e2e:login && npm run test:e2e:roles-assignment && npm run test:e2e:history && npm run test:e2e:user-history && npm run test:e2e:admin",
     "test:e2e:ui": "playwright test --ui",
     "test:setup-env": "node -e \"require('./tests/helpers/setup-test-environment').setupTestEnvironment({requireUsers: true, requireShifts: true})\"",
     "test:cleanup-env": "node -e \"require('./tests/helpers/setup-test-environment').cleanupTestEnvironment()\"",
@@ -30,6 +29,7 @@
     "test:e2e:changed": "playwright test --grep-files $(git diff --staged --name-only)",
     "test": "npm run test:unit && npm run test:e2e",
     "test:all": "npm run test:unit:coverage && npm run test:e2e",
+    "test:ci": "npm run jest --ci --silent",
     "killTasks": "taskkill /F /IM node.exe",
     "prepare": "husky install"
   },

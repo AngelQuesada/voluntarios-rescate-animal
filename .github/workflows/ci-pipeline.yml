@@ -1,0 +1,109 @@
+# Nombre del workflow que aparecerá en la pestaña "Actions" de GitHub
+name: CI Pipeline - Pruebas y Linting
+
+# Define cuándo se ejecutará este workflow
+on:
+  # Ejecutar en cada push a cualquier rama
+  push:
+    branches:
+      - '**'
+  # Ejecutar cuando se abra o actualice un Pull Request dirigido a la rama 'main'
+  pull_request:
+    branches:
+      - master
+
+# Define los trabajos (jobs) que se ejecutarán
+jobs:
+  # -------- JOB 1: TESTS UNITARIOS Y LINTING (Rápido) --------
+  unit-tests-and-lint:
+    # Nombre descriptivo del job
+    name: Tests Unitarios y Linting
+    # Máquina virtual donde se ejecutará
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Clonar el repositorio
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Paso 2: Configurar el entorno de Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Usa la misma versión que tu proyecto
+
+      # Paso 3: Instalar dependencias de forma eficiente
+      - name: Install dependencies
+        run: npm ci # 'ci' es más rápido y seguro que 'install' para entornos de CI
+
+      # Paso 4: Ejecutar el linting
+      - name: Run linting
+        run: npm run lint
+
+      # Paso 5: Ejecutar los tests unitarios
+      - name: Run unit tests
+        run: npm run test:unit # Usamos el script de tu package.json
+
+  # -------- JOB 2: TESTS E2E (Lento y Completo) --------
+  e2e-tests:
+    # Nombre descriptivo del job
+    name: Tests End-to-End (Playwright)
+    # Solo ejecutar si los tests unitarios y el linting han pasado
+    needs: unit-tests-and-lint
+    # Máquina virtual donde se ejecutará
+    runs-on: ubuntu-latest
+
+    # Tiempo máximo de ejecución para este job
+    timeout-minutes: 15
+
+    steps:
+      # Paso 1: Clonar el repositorio
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Paso 2: Configurar el entorno de Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Paso 3: Instalar dependencias
+      - name: Install dependencies
+        run: npm ci
+
+      # Paso 4: Instalar las dependencias de los navegadores de Playwright
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # Paso 5: Construir la aplicación Next.js para producción
+      # Los tests E2E deben correr contra una build de producción
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          # Si tu build necesita variables de entorno, ponlas aquí
+          # Ejemplo: FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ vars.NEXT_PUBLIC_FIREBASE_API_KEY || 'default-key' }}
+
+      # Paso 6: Ejecutar los tests E2E
+      # El comando 'start' levantará el servidor, y el '&' lo deja corriendo en segundo plano
+      # 'wait-on' esperará a que el servidor esté listo antes de lanzar los tests
+      - name: Run E2E tests
+        run: |
+          npm run start &
+          npx wait-on http://localhost:3000
+          npm run test:e2e
+        env:
+          # Define la URL base para Playwright
+          BASE_URL: http://localhost:3000
+          # Si tus tests E2E necesitan variables, ponlas aquí también
+          # Ejemplo: TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+      # Paso 7 (Opcional pero recomendado): Subir el reporte de Playwright
+      # Esto te permite descargar y ver el reporte HTML si los tests fallan
+      - name: Upload Playwright report
+        if: always() # Ejecutar siempre, incluso si los tests fallan
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7 # Guardar el reporte por 7 días
