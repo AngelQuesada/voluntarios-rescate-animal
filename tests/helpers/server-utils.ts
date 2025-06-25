@@ -70,7 +70,7 @@ export async function stopGlobalTestServer(): Promise<boolean> {
                 }
 
                 if (originalProcessStillExists) {
-                  console.warn(`⚠️ Falló taskkill para PID ${globalTestServer.pid} (aún detectado tras fallo), pero otros intentos seguirán. Error: ${e.message}`);
+                  console.warn(`⚠️ Falló taskkill para PID ${globalTestServer.pid} (aún detectado tras fallo), pero otros intentos seguirán. Error: ${e instanceof Error ? e.message : String(e)}`);
                 } else {
                   console.log(`ℹ️ Taskkill para PID ${globalTestServer.pid} falló, pero el proceso ya no se detecta (confirmado tras fallo).`);
                   serverTerminated = true; // Si no existe, está terminado.
@@ -107,7 +107,7 @@ export async function stopGlobalTestServer(): Promise<boolean> {
                       } catch (checkErr) { /* Proceso ya no existe */ }
 
                       if (processStillExists) {
-                        console.warn(`⚠️ Falló taskkill para PID ${pid} (buscado por puerto, aún detectado). Error: ${killError.message}`);
+                        console.warn(`⚠️ Falló taskkill para PID ${pid} (buscado por puerto, aún detectado). Error: ${killError instanceof Error ? killError.message : String(killError)}`);
                       } else {
                         console.log(`ℹ️ Taskkill para PID ${pid} (buscado por puerto) falló, pero el proceso ya no se detecta.`);
                       }
@@ -149,7 +149,7 @@ export async function stopGlobalTestServer(): Promise<boolean> {
                       } catch (checkErr) { /* Proceso ya no existe */ }
                       
                       if (processStillExists) {
-                        console.warn(`⚠️ Falló taskkill para PID ${pid} (proceso Node.js, aún detectado). Error: ${killError.message}`);
+                        console.warn(`⚠️ Falló taskkill para PID ${pid} (proceso Node.js, aún detectado). Error: ${killError instanceof Error ? killError.message : String(killError)}`);
                       } else {
                         console.log(`ℹ️ Taskkill para PID ${pid} (proceso Node.js) falló, pero el proceso ya no se detecta.`);
                       }

@@ -286,7 +286,7 @@ async function startGlobalTestServer(port: number): Promise<boolean> {
         setGlobalTestServer(localTestServer);
 
         // Ya no necesitamos buscar el PID ni simular un ChildProcess porque estamos usando spawn directamente
-        console.log(`✅ Servidor iniciado con PID: ${localTestServer.pid}`);
+        console.log(`✅ Servidor iniciado con PID: ${localTestServer?.pid || 'unknown'}`);
 
         // Ahora podemos manejar los eventos de stdout y stderr directamente
         if (localTestServer && localTestServer.stdout) {
@@ -371,10 +371,7 @@ async function startGlobalTestServer(port: number): Promise<boolean> {
         setGlobalTestServer(localTestServer);
       }
 
-      let serverOutput = '';
-      let errorOutput = '';
       let resolved = false;
-      let serverReady = false;
 
       // Si estamos en Windows y usando la ventana separada, no tenemos acceso directo a stdout/stderr
       // Verificar periódicamente si el servidor está respondiendo (para todos los sistemas operativos)
@@ -392,15 +389,14 @@ async function startGlobalTestServer(port: number): Promise<boolean> {
             if (!resolved) {
               console.log('✅ Servidor detectado como funcionando correctamente');
               resolved = true;
-              serverReady = true;
               cleanupAndResolve(true);
             }
           }
-        } catch (error) {
-          // El servidor aún no está listo, seguir esperando
-          console.log('⏳ Servidor aún no responde, continuando espera...');
-          // Continuamos intentando conectar
-        }
+        } catch (_error) {
+            // El servidor aún no está listo, seguir esperando
+            console.log('⏳ Servidor aún no responde, continuando espera...');
+            // Continuamos intentando conectar
+          }
       }, 5000); // Verificar cada 5 segundos
 
       // Timeout de seguridad para evitar esperar indefinidamente
@@ -409,7 +405,6 @@ async function startGlobalTestServer(port: number): Promise<boolean> {
         if (!resolved) {
           console.log('⏳ Tiempo de espera agotado, asumiendo que el servidor está listo...');
           resolved = true;
-          serverReady = true;
           cleanupAndResolve(true);
         }
       }, 90000); // 90 segundos máximo de espera para permitir compilación completa
@@ -425,6 +420,7 @@ async function startGlobalTestServer(port: number): Promise<boolean> {
  */
 export async function stopGlobalTestServer(): Promise<boolean> {
   try {
+    const globalTestServer = getGlobalTestServer();
     if (globalTestServer && !globalTestServer.killed) {
       console.log('🛑 Deteniendo servidor de testing...');
 
@@ -452,14 +448,14 @@ export async function stopGlobalTestServer(): Promise<boolean> {
                 execSync(`taskkill /pid ${globalTestServer.pid} /T /F`, { stdio: 'ignore' });
                 console.log(`✅ Comando taskkill ejecutado para PID ${globalTestServer.pid}`);
                 serverTerminated = true;
-              } catch (e) {
+              } catch (_) {
                 // Si el comando falla, es posible que el proceso ya no exista
                 console.log(
                   `ℹ️ El proceso con PID ${globalTestServer.pid} ya no está en ejecución`
                 );
               }
-            } catch (e) {
-              console.error('⚠️ Error al intentar terminar el proceso por PID:', e);
+            } catch (error) {
+              console.error('⚠️ Error al intentar terminar el proceso por PID:', error);
             }
           }
 
@@ -493,8 +489,8 @@ export async function stopGlobalTestServer(): Promise<boolean> {
             } else {
               console.log(`ℹ️ No se encontraron procesos usando el puerto ${port}`);
             }
-          } catch (e) {
-            console.error('⚠️ Error al buscar procesos por puerto:', e);
+          } catch (error) {
+            console.error('⚠️ Error al buscar procesos por puerto:', error);
           }
 
           // Buscar procesos de Node.js que puedan ser nuestro servidor
@@ -530,11 +526,11 @@ export async function stopGlobalTestServer(): Promise<boolean> {
                 'ℹ️ No se encontraron procesos de Node.js que coincidan con nuestro servidor'
               );
             }
-          } catch (e) {
-            console.error('⚠️ Error al buscar procesos de Node.js:', e);
+          } catch (error) {
+            console.error('⚠️ Error al buscar procesos de Node.js:', error);
           }
-        } catch (e) {
-          console.error('⚠️ Error general al intentar terminar procesos en Windows:', e);
+        } catch (error) {
+          console.error('⚠️ Error general al intentar terminar procesos en Windows:', error);
         }
 
         // Si tenemos el objeto de proceso, intentar matarlo directamente
@@ -545,15 +541,15 @@ export async function stopGlobalTestServer(): Promise<boolean> {
             );
             globalTestServer.kill('SIGTERM');
             console.log('✅ Método kill() ejecutado en el proceso del servidor');
-          } catch (e) {
-            console.error('⚠️ Error al intentar usar kill() en el proceso:', e);
+          } catch (error) {
+            console.error('⚠️ Error al intentar usar kill() en el proceso:', error);
           }
         }
       } else {
         // En Unix, usar el grupo de proceso negativo para matar todo el árbol
         try {
           process.kill(-globalTestServer.pid!, 'SIGTERM');
-        } catch (e) {
+        } catch (_) {
           globalTestServer.kill('SIGTERM');
         }
       }
@@ -590,8 +586,8 @@ export async function stopGlobalTestServer(): Promise<boolean> {
             } else {
               console.log(`✅ Verificación final: No hay procesos usando el puerto ${port}`);
             }
-          } catch (e) {
-            console.error('⚠️ Error en verificación final de procesos por puerto:', e);
+          } catch (error) {
+            console.error('⚠️ Error en verificación final de procesos por puerto:', error);
           }
 
           // Si tenemos el PID original, verificar que ya no exista
@@ -603,15 +599,15 @@ export async function stopGlobalTestServer(): Promise<boolean> {
                 `⚠️ El proceso original con PID ${globalTestServer.pid} sigue ejecutándose, forzando cierre final...`
               );
               execSync(`taskkill /pid ${globalTestServer.pid} /T /F`, { stdio: 'ignore' });
-            } catch (e) {
+            } catch (_) {
               // Si el comando falla, es porque el proceso ya no existe, lo cual es bueno
               console.log(
                 `✅ Confirmado: el proceso con PID ${globalTestServer.pid} ha sido terminado`
               );
             }
           }
-        } catch (e) {
-          console.error('⚠️ Error en la verificación final del proceso:', e);
+        } catch (error) {
+          console.error('⚠️ Error en la verificación final del proceso:', error);
         }
       } else if (
         globalTestServer &&
@@ -622,7 +618,7 @@ export async function stopGlobalTestServer(): Promise<boolean> {
         globalTestServer.kill('SIGKILL');
       }
 
-      globalTestServer = null;
+      setGlobalTestServer(null);
       console.log('✅ Servidor de testing detenido');
     } else {
       console.log('ℹ️ No hay servidor de testing en ejecución para detener');
@@ -634,7 +630,7 @@ export async function stopGlobalTestServer(): Promise<boolean> {
   }
 }
 
-async function globalSetup(config: FullConfig) {
+async function globalSetup(_config: FullConfig) {
   console.log('🚀 Iniciando configuración global para tests de Playwright...');
 
   // Cargar variables de entorno
@@ -674,7 +670,7 @@ async function globalSetup(config: FullConfig) {
     try {
       const url = new URL(baseUrl);
       targetPort = parseInt(url.port) || 3001;
-    } catch (e) {
+    } catch (_) {
       console.warn('⚠️ BASE_URL inválida, usando puerto 3001 por defecto');
     }
   }
@@ -720,7 +716,7 @@ async function globalSetup(config: FullConfig) {
           console.log('✅ Servidor responde correctamente, continuando con los tests');
           return;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('⚠️ Servidor no responde, forzando compilación...');
       }
     } else {
@@ -737,22 +733,16 @@ async function globalSetup(config: FullConfig) {
     // Función para verificar si el servidor está compilado
     const checkServerCompilation = async (): Promise<boolean> => {
       try {
-        // Realizar una petición al servidor
-        const response = await fetch(baseUrl, { method: 'GET' });
-        console.log(`📋 Respuesta del servidor: ${response.status} ${response.statusText}`);
-
         // Verificar si la respuesta es rápida (indicador de que está compilado)
         const startTime = Date.now();
         await fetch(baseUrl, { method: 'GET' });
         const endTime = Date.now();
         const responseTime = endTime - startTime;
 
-        console.log(`⏱️ Tiempo de respuesta: ${responseTime}ms`);
-
         // Si la respuesta es rápida (menos de 1 segundo), probablemente ya está compilado
         return responseTime < 1000;
-      } catch (error) {
-        console.error('⚠️ Error al verificar compilación:', error);
+      } catch (_error) {
+        console.error('⚠️ Error al verificar compilación:', _error);
         return false;
       }
     };

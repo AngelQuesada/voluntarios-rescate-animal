@@ -9,18 +9,18 @@ import { stopGlobalTestServer } from './server-utils';
 
 async function globalTeardown(config: FullConfig) {
   console.log('🧹 Iniciando limpieza global después de los tests de Playwright...');
-  
+
   // 1. Limpiar datos variables de la base de datos
   if (process.env.AUTO_CLEANUP_TEST_DATA === 'true') {
     console.log('🔄 Limpieza automática de datos de prueba activada');
-    
+
     // Inicializar Firebase Admin para la limpieza
     const firebaseInitialized = await initializeFirebaseAdmin();
     if (!firebaseInitialized) {
       console.error('⚠️ Error al inicializar Firebase Admin para limpieza');
     } else {
       const cleanupSuccess = await cleanupTestDataConditional();
-      
+
       if (!cleanupSuccess) {
         console.error('⚠️ Error durante la limpieza del entorno de prueba');
         // No salimos con error para no interrumpir el flujo de CI/CD
@@ -35,7 +35,7 @@ async function globalTeardown(config: FullConfig) {
   // 2. Detener servidor de testing
   console.log('🛑 Deteniendo servidor de testing...');
   const serverStopped = await stopGlobalTestServer();
-  
+
   if (!serverStopped) {
     console.error('⚠️ Error al detener el servidor de testing');
   } else {

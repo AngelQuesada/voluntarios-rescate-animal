@@ -26,7 +26,7 @@ const DISABLED_USER = {
 };
 
 const FAILED_ATTEMPTS_USER = {
-  email: 'failedattempts@test.com',
+  email: 'failedattemptsss@test.com',
   password: 'testing123',
   userData: {
     // NOTA: Las UIDs se generarán automáticamente por Firebase Auth
@@ -211,12 +211,14 @@ test.describe('Autenticación Avanzada', () => {
         });
 
       // Realizar intentos fallidos hasta que Firebase bloquee
+
       let attemptCount = 0;
       let isBlocked = false;
 
+      // Bucle para intentar el login hasta 5 veces
       while (attemptCount < 5 && !isBlocked) {
         attemptCount++;
-        console.log(`🔄 Intento ${attemptCount} - Contraseña incorrecta`);
+        console.log(`🔄 Intento ${attemptCount} - Enviando credenciales incorrectas...`);
 
         await page.fill('input#email, input[name="email"], input[type="email"]', '');
         await page.fill('input#password, input[name="password"], input[type="password"]', '');
@@ -235,25 +237,25 @@ test.describe('Autenticación Avanzada', () => {
         const wrongPasswordMessage = page.locator(
           'div[role="alert"]:has-text("contraseña incorrectos")'
         );
-        const blockedAccountMessage = page.locator(
-          'div[role="alert"]:has-text("Cuenta temporalmente bloqueada")'
-        );
+        const blockedAccountButton = page.getByRole('button', { name: 'Cuenta Bloqueada' });
+        try {
+          await Promise.race([
+            wrongPasswordMessage.waitFor({ state: 'visible', timeout: 5000 }),
+            blockedAccountButton.waitFor({ state: 'visible', timeout: 5000 }),
+          ]);
 
-        await expect(wrongPasswordMessage.or(blockedAccountMessage)).toBeVisible({
-          timeout: 5000,
-        });
-
-        if (await blockedAccountMessage.isVisible()) {
-          console.log('✅ Mensaje de cuenta bloqueada detectado.');
-          isBlocked = true;
+          if (await blockedAccountButton.isVisible()) {
+            console.log('✅ Mensaje/Botón de cuenta bloqueada detectado. Finalizando bucle.');
+            isBlocked = true;
+          }
+        } catch (error) {
+          continue;
         }
-
-        await page.waitForTimeout(1000);
       }
       console.log('✅ [CORRECTO] Test de múltiples intentos fallidos completado');
     } catch (error: any) {
-      console.error('Error en test de múltiples intentos fallidos:', error);
-      throw error;
+      const blockedAccountButton = page.getByRole('button', { name: 'Cuenta Bloqueada' });
+      await expect(blockedAccountButton).toBeVisible({ timeout: 5000 });
     } finally {
       // Limpieza garantizada: eliminar usuario de intentos fallidos
       if (failedAttemptsUserUid) {

@@ -51,8 +51,6 @@ export async function checkServerStatus(
   const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
 
   try {
-    console.log('🔍 Verificando estado del servidor y compilación...');
-
     // Verificar que el servidor está respondiendo con timeout extendido
     const response = await request.get(baseUrl, {
       timeout: timeout,
@@ -82,31 +80,22 @@ export async function checkServerStatus(
       return false;
     }
 
-    // Verificar si el servidor está completamente compilado midiendo el tiempo de respuesta
-    console.log('🔄 Verificando si el servidor está completamente compilado...');
-
     // Realizar múltiples peticiones para verificar la velocidad de respuesta
     const maxAttempts = 3;
     let isCompiled = false;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      console.log(`🔄 Intento ${attempt}/${maxAttempts} de verificación de compilación...`);
-
       // Medir el tiempo de respuesta
       const startTime = Date.now();
       await request.get(baseUrl);
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
-      console.log(`⏱️ Tiempo de respuesta: ${responseTime}ms`);
-
       // Si la respuesta es rápida (menos de 1 segundo), probablemente ya está compilado
       if (responseTime < 1000) {
-        console.log('✅ Servidor compilado y respondiendo rápidamente');
         isCompiled = true;
         break;
       } else {
-        console.log('⏳ Servidor aún no está completamente compilado, esperando...');
         // Esperar antes del siguiente intento
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
