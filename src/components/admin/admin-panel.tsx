@@ -381,7 +381,7 @@ export function AdminPanel() {
           </TabPanel>
 
           <TabPanel value={activeTab} index={1}>
-            <WeekViewPanel onUserClick={() => {}} />
+            <WeekViewPanel onUserClick={handleOpenUserDetailDialog} />
           </TabPanel>
 
           <TabPanel value={activeTab} index={2}>

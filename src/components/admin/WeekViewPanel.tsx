@@ -165,9 +165,18 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
           {volunteersToShow.map((volunteer) => (
             <ListItem
               key={volunteer.uid}
-              button
+              component="div"
               onClick={() => onUserClick(volunteer)}
-              sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+              sx={{
+                cursor: 'pointer',
+                borderRadius: 1,
+                transition: 'background-color 0.2s ease',
+                '&:hover': {
+                  backgroundColor: 'action.hover'
+                },
+                py: 1,
+                px: 2
+              }}
             >
               <ListItemText primary={`${volunteer.name} ${volunteer.lastname}`} />
             </ListItem>
