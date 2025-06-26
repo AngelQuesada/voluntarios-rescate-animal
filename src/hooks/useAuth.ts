@@ -34,7 +34,12 @@ const getCookieDuration = (isAdmin: boolean, isMobile: boolean, rememberMe: bool
 
 // Función para validar formato de email
 const isValidEmail = (email: string): boolean => {
-  const emailPattern = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*@([^\s@.]+\.)+[^\s@.]{2,}$/;
+  const emailPattern =
+    /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*(?:\.[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)*@([^\s@.]+\.)+[^\s@.]{2,}$/;
+  if (email.includes('..')) {
+    return false;
+  }
+
   return emailPattern.test(email);
 };
 
