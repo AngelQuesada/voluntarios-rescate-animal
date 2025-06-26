@@ -10,7 +10,7 @@
     "lint": "next lint",
     "restart-project": "node scripts/restart-project.js",
     "import-mock-users": "node scripts/create_users.js",
-    "test:unit": "jest",
+    "test:unit": "cross-env NODE_ENV=test jest",
     "test:unit:watch": "jest --watch",
     "test:unit:coverage": "jest --coverage",
     "test:e2e": "playwright test",
