@@ -134,6 +134,11 @@ Para más información sobre la configuración y uso del sistema, consulta los s
 - [Guía de despliegue](docs/DEPLOYMENT.md)
 - [Consideraciones de seguridad](docs/SECURITY.md)
 - [Documentación de tests](tests/README.md)
+- [Documentación de testing](docs/testing/README.md)
+  - [Mocking de Firebase en Tests](docs/testing/firebase-mocking.md)
+  - [Importancia de los Mocks en Tests Unitarios](docs/testing/importancia-mocks.md)
+  - [Manejo de Timeouts en Tests de Jest](docs/testing/manejo-timeouts-jest.md)
+  - [Configuración de Jest en el Proyecto](docs/testing/configuracion-jest.md)
 
 ## Licencia
 

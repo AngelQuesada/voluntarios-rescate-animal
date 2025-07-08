@@ -117,6 +117,8 @@ export default async function globalSetup() {
 - **Mapeo de módulos optimizado**: Alias `@/` para importaciones más claras
 - **Setup mejorado**: Configuración de mocks globales para dependencias comunes
 
+Para una documentación detallada sobre la configuración de Jest en el proyecto, consulta [Configuración de Jest](./testing/configuracion-jest.md).
+
 ### Playwright Configuration
 
 - **Proyectos específicos**: Tests organizados por funcionalidad:

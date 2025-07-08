@@ -2,6 +2,27 @@ import { renderHook, act } from '@testing-library/react';
 import { useShiftActions } from '../../schedule/useShiftActions';
 import { UserRoles } from '@/lib/constants';
 
+// Mock de Firebase Firestore
+const mockAddDoc = jest.fn().mockResolvedValue({ id: 'mock-doc-id' });
+const mockCollection = jest.fn().mockReturnValue('mocked-collection');
+
+// Mock de Firebase
+jest.mock('@/lib/firebase', () => ({
+  db: {},
+  auth: {},
+}));
+
+jest.mock('firebase/firestore', () => ({
+  collection: (...args) => mockCollection(...args),
+  addDoc: (...args) => mockAddDoc(...args),
+  initializeFirestore: jest.fn(),
+  Timestamp: {
+    now: jest.fn().mockReturnValue({
+      toDate: jest.fn().mockReturnValue(new Date()),
+    }),
+  },
+}));
+
 // Mock de RTK Query
 const mockModifyShift = jest.fn();
 jest.mock('@/store/api/shiftsApi', () => ({

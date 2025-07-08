@@ -218,7 +218,6 @@ test.describe('Autenticación Avanzada', () => {
       // Bucle para intentar el login hasta 5 veces
       while (attemptCount < 5 && !isBlocked) {
         attemptCount++;
-        console.log(`🔄 Intento ${attemptCount} - Enviando credenciales incorrectas...`);
 
         await page.fill('input#email, input[name="email"], input[type="email"]', '');
         await page.fill('input#password, input[name="password"], input[type="password"]', '');
@@ -245,7 +244,6 @@ test.describe('Autenticación Avanzada', () => {
           ]);
 
           if (await blockedAccountButton.isVisible()) {
-            console.log('✅ Mensaje/Botón de cuenta bloqueada detectado. Finalizando bucle.');
             isBlocked = true;
           }
         } catch (error) {

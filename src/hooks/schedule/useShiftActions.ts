@@ -2,10 +2,12 @@ import { createElement, Dispatch, Fragment, ReactNode, SetStateAction, useState 
 import { useModifyShiftMutation, ShiftAssignment } from '@/store/api/shiftsApi';
 import { triggerVibration } from '@/lib/vibration';
 import { UserRoles } from '@/lib/constants';
-import { CurrentUser, User } from '@/types/common';
+import { CurrentUser, User, UserAction } from '@/types/common';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ProcessedAssignments } from './useShiftsData';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
 interface ShiftActions {
   isUpdatingShift: { [key: string]: boolean };
@@ -102,6 +104,33 @@ export function useShiftActions({
         name: '',
         action: actionType,
       }).unwrap();
+
+      // Registrar la acción del usuario
+      try {
+        const actionToLog: Omit<UserAction, 'id'> = {
+          timestamp: Timestamp.now(),
+          userId: targetUserId,
+          userName: targetUserName,
+          shiftId: `${dateKey}_${shiftKey}`,
+          shiftDate: dateKey,
+          shiftPeriod: shiftKey === 'M' ? 'morning' : 'afternoon',
+          actionType: actionType === 'add' ? 'assign' : 'unassign',
+        };
+
+        const isAdminActingOnBehalf =
+          currentUser?.roles?.includes(UserRoles.ADMINISTRADOR) && currentUser.uid !== targetUserId;
+
+        if (isAdminActingOnBehalf && currentUser?.uid) {
+          actionToLog.performedByAdminId = currentUser.uid;
+          actionToLog.performedByAdminName = `${currentUser.name || ''} ${
+            currentUser.lastname || ''
+          }`.trim();
+        }
+
+        await addDoc(collection(db, 'userActions'), actionToLog);
+      } catch (logError) {
+        console.error('Error logging user action:', logError);
+      }
 
       let formattedDate = format(parseISO(dateKey), "EEEE d 'de' MMMM", { locale: es });
       const dateParts = formattedDate.split(' ');

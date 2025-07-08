@@ -1,4 +1,5 @@
 import { User as FirebaseUser, UserInfo } from 'firebase/auth';
+import { Timestamp } from 'firebase/firestore';
 
 export interface User {
   id?: string;
@@ -77,4 +78,18 @@ export interface DialogAction {
   label: string;
   action: () => void;
   variant?: 'primary' | 'secondary' | 'danger';
+}
+
+// Tipos para el historial de acciones de usuario
+export interface UserAction {
+  id?: string; // ID del documento en Firestore
+  timestamp: Timestamp; // Fecha y hora de la acción
+  userId: string; // ID del usuario que realizó la acción (voluntario)
+  userName: string; // Nombre del voluntario
+  shiftId: string; // ID del turno afectado
+  shiftDate: string; // Fecha del turno (YYYY-MM-DD)
+  shiftPeriod: 'morning' | 'afternoon'; // Mañana o tarde
+  actionType: 'assign' | 'unassign'; // Tipo de acción ('assign' para añadir, 'unassign' para eliminar)
+  performedByAdminId?: string; // ID del administrador si la acción fue hecha por un admin
+  performedByAdminName?: string; // Nombre del administrador
 }

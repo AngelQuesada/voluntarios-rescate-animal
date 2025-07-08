@@ -28,6 +28,7 @@ import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import PeopleIcon from '@mui/icons-material/People';
 import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
 import HistoryIcon from '@mui/icons-material/History';
+import ListAltIcon from '@mui/icons-material/ListAlt'; // Nueva importación
 import { useAdminPanel } from '@/hooks/use-admin-panel';
 import NotificationSnackbar from '../schedule/NotificationSnackbar';
 import { UserRoles, getRoleName } from '@/lib/constants';
@@ -39,6 +40,7 @@ import SearchInput from './SearchInput';
 import WeekViewPanel from './WeekViewPanel';
 
 const HistoryCalendar = lazy(() => import('../history/HistoryCalendar'));
+const UserActionsPanel = lazy(() => import('./UserActionsPanel'));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -372,7 +374,8 @@ export function AdminPanel() {
             >
               <Tab label="Usuarios" icon={<PeopleIcon />} />
               <Tab label="Vista Semanal" icon={<CalendarViewWeekIcon />} />
-              <Tab label="Historial" icon={<HistoryIcon />} />
+              <Tab label="Historial Voluntario" icon={<HistoryIcon />} />
+              <Tab label="Últimas Acciones" icon={<ListAltIcon />} />
             </Tabs>
           </Box>
 
@@ -385,8 +388,18 @@ export function AdminPanel() {
           </TabPanel>
 
           <TabPanel value={activeTab} index={2}>
-            <Suspense fallback={<CircularProgress />}>
+            <Suspense
+              fallback={<CircularProgress sx={{ display: 'block', margin: 'auto', mt: 4 }} />}
+            >
               <HistoryCalendar />
+            </Suspense>
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={3}>
+            <Suspense
+              fallback={<CircularProgress sx={{ display: 'block', margin: 'auto', mt: 4 }} />}
+            >
+              <UserActionsPanel />
             </Suspense>
           </TabPanel>
         </Box>

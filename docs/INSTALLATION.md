@@ -160,3 +160,5 @@ npm run test
 # Tests end-to-end
 npm run test:e2e
 ```
+
+Para más detalles sobre la configuración de Jest y las mejores prácticas de testing, consulta la [documentación de configuración de Jest](./testing/configuracion-jest.md).
