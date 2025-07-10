@@ -33,37 +33,33 @@ export async function GET(): Promise<Response> {
 
     let fileContent = await fs.readFile(templatePath, 'utf8');
 
-    fileContent = fileContent
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_API_KEY/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}'`
-      )
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}'`
-      )
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_PROJECT_ID/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}'`
-      )
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}'`
-      )
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}'`
-      )
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_APP_ID/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_APP_ID}'`
-      )
-      .replace(
-        /process\.env\.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID/g,
-        `'${process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}'`
-      );
+    const replacements = {
+      'process.env.NEXT_PUBLIC_FIREBASE_API_KEY': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+      ),
+      'process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+      ),
+      'process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      ),
+      'process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      ),
+      'process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+      ),
+      'process.env.NEXT_PUBLIC_FIREBASE_APP_ID': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+      ),
+      'process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID': JSON.stringify(
+        process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+      ),
+    };
 
-    console.log('Service Worker script generated successfully.');
+    Object.entries(replacements).forEach(([key, value]) => {
+      fileContent = fileContent.replace(new RegExp(key, 'g'), value);
+    });
 
     return new Response(fileContent, {
       headers: {

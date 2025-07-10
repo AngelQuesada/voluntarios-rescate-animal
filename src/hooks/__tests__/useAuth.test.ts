@@ -75,17 +75,6 @@ describe('useAuth Hook', () => {
     expect(result.current.password).toBe('password123');
   });
 
-  test('should show error for empty email', async () => {
-    const { result } = renderHook(() => useAuth());
-    const mockEvent = { preventDefault: jest.fn() } as unknown as React.FormEvent<HTMLFormElement>;
-
-    await act(async () => {
-      await result.current.handleSignIn(mockEvent);
-    });
-
-    expect(result.current.error).toBe('Por favor, introduce tu correo electrónico.');
-  });
-
   test('should show error for invalid email format', async () => {
     const { result } = renderHook(() => useAuth());
     const mockEvent = { preventDefault: jest.fn() } as unknown as React.FormEvent<HTMLFormElement>;
@@ -114,6 +103,21 @@ describe('useAuth Hook', () => {
     });
 
     expect(result.current.error).toBe('Por favor, introduce tu correo electrónico.');
+  });
+
+  test('should show error for empty password', async () => {
+    const { result } = renderHook(() => useAuth());
+    const mockEvent = { preventDefault: jest.fn() } as unknown as React.FormEvent<HTMLFormElement>;
+
+    act(() => {
+      result.current.setEmail('test@example.com');
+    });
+
+    await act(async () => {
+      await result.current.handleSignIn(mockEvent);
+    });
+
+    expect(result.current.error).toBe('Por favor, introduce tu contraseña.');
   });
 
   test('should show error for short password', async () => {

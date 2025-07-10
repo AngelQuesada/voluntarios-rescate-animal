@@ -19,7 +19,18 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
+    // Remove duplicate db declaration since it's declared again below
     const db = getAdminFirestore();
+    await db.collection('users').doc(userId).set(
+      {
+        fcmToken: token,
+      },
+      { merge: true }
+    ); // Validate userId format
+    if (typeof userId !== 'string' || userId.trim().length === 0) {
+      return NextResponse.json({ error: 'ID de usuario inválido' }, { status: 400 });
+    }
+
     await db.collection('users').doc(userId).update({
       fcmToken: token,
     });
@@ -49,6 +60,8 @@ export async function DELETE(request: Request): Promise<NextResponse> {
     await db.collection('users').doc(userId).update({
       fcmToken: null,
     });
+
+    //TODO: Verificar que el usuario solo puede borrar su propio token o es administrador
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,6 +1,6 @@
 // Scripts for firebase and firebase messaging
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging-compat.js');
 
 // Initialize the Firebase app in the service worker by passing in the messagingSenderId.
 const firebaseConfig = {
@@ -20,11 +20,15 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function (payload) {
   console.log('Received background message ', payload);
 
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/apple-touch-icon.png',
-  };
+  try {
+    const notificationTitle = payload.notification?.title || 'Nueva notificación';
+    const notificationOptions = {
+      body: payload.notification?.body || 'Tienes un nuevo mensaje',
+      icon: payload.notification?.icon || '/apple-touch-icon.png',
+    };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  } catch (error) {
+    console.error('Error mostrando la notificación:', error);
+  }
 });
