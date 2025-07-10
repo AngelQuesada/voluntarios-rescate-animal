@@ -10,6 +10,7 @@ import { ReduxProvider } from '@/store/provider';
 import Script from 'next/script';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import '@/styles/pwaStyles.css';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CssBaseline />
             <ReduxProvider>
               <AuthProvider>
+                <PushNotificationManager />
                 <Box sx={{ minHeight: '100vh' }}>{children}</Box>
               </AuthProvider>
             </ReduxProvider>

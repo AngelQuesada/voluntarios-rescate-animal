@@ -10,12 +10,12 @@ jest.mock('firebase/firestore', () => {
   class MockTimestamp {
     seconds: number;
     nanoseconds: number;
-    
+
     constructor(seconds: number, nanoseconds: number) {
       this.seconds = seconds;
       this.nanoseconds = nanoseconds;
     }
-    
+
     toDate(): Date {
       // Aseguramos que la fecha se crea correctamente
       const date = new Date(this.seconds * 1000);
@@ -23,24 +23,22 @@ jest.mock('firebase/firestore', () => {
       date.setMilliseconds(this.nanoseconds / 1000000);
       return date;
     }
-    
+
     static fromDate(date: Date): MockTimestamp {
       return new MockTimestamp(
         Math.floor(date.getTime() / 1000),
         (date.getTime() % 1000) * 1000000
       );
     }
-    
+
     static now(): MockTimestamp {
       return MockTimestamp.fromDate(new Date());
     }
   }
-  
+
   return {
     Timestamp: MockTimestamp,
-    // Añadimos un mock vacío para initializeFirestore para evitar el error
     initializeFirestore: jest.fn(),
-    // Añadimos mocks vacíos para las demás funciones que se usan en useUserActions
     collection: jest.fn(),
     query: jest.fn(),
     orderBy: jest.fn(),
@@ -100,12 +98,11 @@ const mockActions: UserAction[] = [
     userName: `Voluntario ${i + 3}`,
     shiftId: `shift-${i + 3}`,
     shiftDate: `2023-10-${28 + (i % 3)}`, // Variar fechas
-    shiftPeriod: (i % 2 === 0) ? 'morning' as const : 'afternoon' as const,
-    actionType: (i % 2 === 0) ? 'assign' as const : 'unassign' as const,
-    performedByAdminName: (i % 3 === 0) ? `Admin ${i%2}` : undefined,
+    shiftPeriod: i % 2 === 0 ? ('morning' as const) : ('afternoon' as const),
+    actionType: i % 2 === 0 ? ('assign' as const) : ('unassign' as const),
+    performedByAdminName: i % 3 === 0 ? `Admin ${i % 2}` : undefined,
   })),
 ];
-
 
 describe('UserActionsPanel', () => {
   beforeEach(() => {
@@ -115,6 +112,20 @@ describe('UserActionsPanel', () => {
       error: null,
       totalActions: 0,
       fetchActions: jest.fn(),
+    });
+
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // deprecated
+        removeListener: jest.fn(), // deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
     });
   });
 
@@ -133,7 +144,9 @@ describe('UserActionsPanel', () => {
       fetchActions: jest.fn(),
     });
     render(<UserActionsPanel />);
-    expect(screen.getByRole('alert')).toHaveTextContent('Error al cargar las acciones: Failed to fetch actions');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Error al cargar las acciones: Failed to fetch actions'
+    );
   });
 
   test('renders "no actions" message if there are no actions and not loading', () => {
@@ -145,7 +158,9 @@ describe('UserActionsPanel', () => {
       fetchActions: jest.fn(),
     });
     render(<UserActionsPanel />);
-    expect(screen.getByRole('alert')).toHaveTextContent('No hay acciones registradas por el momento.');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'No hay acciones registradas por el momento.'
+    );
   });
 
   test('renders table with actions data', async () => {
@@ -160,7 +175,7 @@ describe('UserActionsPanel', () => {
 
     // Verificar encabezados de tabla (considerando versión móvil y desktop)
     const headers = ['Acción', 'Usuario Turno', 'Turno', 'Realizado por Admin', 'Fecha y Hora'];
-    headers.forEach(header => {
+    headers.forEach((header) => {
       // En versión móvil, algunos encabezados pueden ser iconos en lugar de texto
       const headerElement = screen.queryByText(header);
       expect(headerElement || screen.queryByRole('columnheader')).toBeTruthy();
@@ -170,50 +185,40 @@ describe('UserActionsPanel', () => {
     expect(screen.getByText('Juan Perez')).toBeInTheDocument();
     expect(screen.getByText('Ana Gomez')).toBeInTheDocument();
     expect(screen.getByText('Admin Uno')).toBeInTheDocument();
-    
+
     // Verificar que hay un guión para el admin de la segunda acción
     const rows = screen.getAllByRole('row');
     expect(rows.length).toBe(21); // Encabezado + 20 filas de datos
-    
+
     // Verificar que la tabla contiene el texto "Mañana" o "M"
     const morningText = screen.getAllByText(/Mañana|M/i);
     expect(morningText.length).toBeGreaterThan(0);
-    
+
     // Verificar que la tabla contiene el texto "Tarde" o "T"
     const afternoonText = screen.getAllByText(/Tarde|T/i);
     expect(afternoonText.length).toBeGreaterThan(0);
-    
+
     // Verificar que la tabla contiene fechas de turno (27, 28)
     const cells = screen.getAllByRole('cell');
-    
+
     // Verificar que alguna celda contiene '27' (día del turno)
-    const hasDay27 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('27')
-    );
+    const hasDay27 = cells.some((cell) => cell.textContent && cell.textContent.includes('27'));
     expect(hasDay27).toBeTruthy();
-    
+
     // Verificar que alguna celda contiene '28' (día del turno)
-    const hasDay28 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('28')
-    );
+    const hasDay28 = cells.some((cell) => cell.textContent && cell.textContent.includes('28'));
     expect(hasDay28).toBeTruthy();
-    
+
     // Verificar que alguna celda contiene '26' (día del timestamp)
-    const hasDay26 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('26')
-    );
+    const hasDay26 = cells.some((cell) => cell.textContent && cell.textContent.includes('26'));
     expect(hasDay26).toBeTruthy();
-    
+
     // Verificar que alguna celda contiene '10' (hora del timestamp)
-    const hasHour10 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('10')
-    );
+    const hasHour10 = cells.some((cell) => cell.textContent && cell.textContent.includes('10'));
     expect(hasHour10).toBeTruthy();
-    
+
     // Verificar que alguna celda contiene '11' (hora del timestamp)
-    const hasHour11 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('11')
-    );
+    const hasHour11 = cells.some((cell) => cell.textContent && cell.textContent.includes('11'));
     expect(hasHour11).toBeTruthy();
   });
 
@@ -225,6 +230,7 @@ describe('UserActionsPanel', () => {
       totalActions: mockActions.length, // Total 25 acciones
       fetchActions: jest.fn(),
     });
+
     render(<UserActionsPanel />);
 
     // Inicialmente muestra 20 acciones
@@ -242,32 +248,24 @@ describe('UserActionsPanel', () => {
       expect(screen.getByText(`Voluntario ${20 + 3 - 2}`)).toBeInTheDocument(); // Verifica una de las últimas acciones
     });
 
-    // Cambiar filas por página (ej. a 40)
-    // Necesitaríamos más datos para probar esto de forma efectiva con el mock actual
-    // o ajustar el mock para que devuelva diferentes `actions` según la paginación.
-    // Por ahora, nos centramos en el cambio de página.
     const rowsPerPageSelect = screen.getByLabelText(/Acciones por página:/i);
     fireEvent.mouseDown(rowsPerPageSelect); // Abrir el select
-    // MUI Select usa listas, así que buscamos por el rol 'option'
-    // Asumimos que el componente UserActionsPanel tiene 40 y 60 como opciones
-    // Vamos a seleccionar 40
     const option40 = await screen.findByRole('option', { name: '40' });
     fireEvent.click(option40);
 
     await waitFor(() => {
-        // Con 25 acciones y 40 por página, todas deberían mostrarse
-        expect(screen.getAllByRole('row').length).toBe(25 + 1);
-        expect(screen.getByText('Juan Perez')).toBeInTheDocument();
+      expect(screen.getAllByRole('row').length).toBe(25 + 1);
+      expect(screen.getByText('Juan Perez')).toBeInTheDocument();
     });
-
   });
 
   test('displays correct date and time format', () => {
     // Creamos una fecha específica con hora 9:35:45
     // Nota: Usamos una fecha sin 'Z' para evitar conversiones de zona horaria
     const testDate = new Date(2024, 2, 15, 9, 35, 45); // Mes es 0-indexed, así que 2 = marzo
-    
-    const singleAction = [{
+
+    const singleAction = [
+      {
         id: 'single',
         timestamp: Timestamp.fromDate(testDate),
         userId: 'userS',
@@ -277,7 +275,8 @@ describe('UserActionsPanel', () => {
         shiftPeriod: 'morning' as const,
         actionType: 'assign' as const,
         performedByAdminName: undefined,
-    }];
+      },
+    ];
     mockUseUserActions.mockReturnValue({
       actions: singleAction,
       loading: false,
@@ -285,61 +284,72 @@ describe('UserActionsPanel', () => {
       totalActions: 1,
       fetchActions: jest.fn(),
     });
+
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+
     render(<UserActionsPanel />);
-    
+
     // Verificar datos básicos - considerando que en móvil puede ser un icono
     // Buscamos el icono o el texto "Asignado"
     const actionCell = screen.getAllByRole('cell')[0]; // Primera celda es la acción
     expect(
-      screen.queryByText('Asignado') !== null || 
-      actionCell.querySelector('svg') !== null
+      screen.queryByText('Asignado') !== null || actionCell.querySelector('svg') !== null
     ).toBeTruthy();
-    
+
     expect(screen.getByText('Single User')).toBeInTheDocument();
     expect(screen.getByText('-')).toBeInTheDocument(); // Guión para admin
-    
+
     // Verificar que la tabla contiene los datos correctos
     const rows = screen.getAllByRole('row');
     expect(rows.length).toBe(2); // Encabezado + 1 fila de datos
-    
+
     // Verificar que la tabla contiene el texto "Mañana" o "M"
     // Usamos una expresión regular más flexible para capturar variaciones
     const morningCells = screen.getAllByRole('cell');
-    const hasMorningText = morningCells.some(cell => 
-      cell.textContent && /mañana|m/i.test(cell.textContent)
+    const hasMorningText = morningCells.some(
+      (cell) => cell.textContent && /mañana|m/i.test(cell.textContent)
     );
     expect(hasMorningText).toBeTruthy();
-    
+
     // Verificar que la tabla contiene la fecha del turno y timestamp
     const cells = screen.getAllByRole('cell');
-    
+
     // Verificar fechas y horas - más flexible para adaptarse a diferentes formatos
     // Día del turno (16)
-    const hasDay16 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('16')
-    );
+    const hasDay16 = cells.some((cell) => cell.textContent && cell.textContent.includes('16'));
     expect(hasDay16).toBeTruthy();
-    
+
     // Mes del turno (03 o 3)
-    const hasMonth03 = cells.some(cell => 
-      cell.textContent && (cell.textContent.includes('03') || cell.textContent.includes('/3/'))
+    const hasMonth03 = cells.some(
+      (cell) =>
+        cell.textContent && (cell.textContent.includes('03') || cell.textContent.includes('/3/'))
     );
     expect(hasMonth03).toBeTruthy();
-    
+
     // Día del timestamp (15)
-    const hasDay15 = cells.some(cell => 
-      cell.textContent && cell.textContent.includes('15')
-    );
+    const hasDay15 = cells.some((cell) => cell.textContent && cell.textContent.includes('15'));
     expect(hasDay15).toBeTruthy();
-    
+
     // Hora del timestamp (09 o 9) - Verificamos que aparezca en algún formato
-    const hasHour09 = cells.some(cell => {
+    const hasHour09 = cells.some((cell) => {
       const content = cell.textContent || '';
       // Buscamos cualquier formato que pueda representar la hora 9
       return (
-        content.includes('09:') || 
-        content.includes('9:') || 
-        content.includes('09') || 
+        content.includes('09:') ||
+        content.includes('9:') ||
+        content.includes('09') ||
         // También verificamos si hay alguna fecha completa que incluya la hora
         /\d{2}\/\d{2}\/\d{2} 09/.test(content) ||
         /\d{2}\/\d{2}\/\d{2} 9:/.test(content)

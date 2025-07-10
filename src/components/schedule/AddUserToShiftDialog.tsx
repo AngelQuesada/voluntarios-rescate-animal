@@ -104,6 +104,7 @@ const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
                   <IconButton
                     edge="end"
                     aria-label="assign shift"
+                    data-testid={`assign-shift`}
                     onClick={() => {
                       onAddUser(user.id);
                       onClose();

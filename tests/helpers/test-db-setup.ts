@@ -501,13 +501,28 @@ export async function createTestShifts(
       const date = new Date(today);
       date.setDate(date.getDate() + i);
 
+      // Para los próximos 3 días, asignar 1-2 voluntarios a cada turno
+      // Para el resto de días, algunos turnos tendrán voluntarios asignados
+      let morningAssignedUsers: string[] = [];
+      let afternoonAssignedUsers: string[] = [];
+
+      if (i <= 3) {
+        // Próximos 3 días: siempre tener voluntarios asignados
+        morningAssignedUsers = i === 1 ? [voluntarioUid] : [voluntarioUid, adminUid];
+        afternoonAssignedUsers = i === 3 ? [voluntarioUid] : [voluntarioUid, adminUid];
+      } else {
+        // Días posteriores: asignar voluntarios ocasionalmente
+        morningAssignedUsers = i % 3 === 0 ? [voluntarioUid] : [];
+        afternoonAssignedUsers = [];
+      }
+
       shifts.push({
         date: date.toISOString().split('T')[0],
         startTime: '09:00',
         endTime: '13:00',
         location: 'Refugio Principal',
         maxVolunteers: 4,
-        assignedUsers: i % 3 === 0 ? [voluntarioUid] : [],
+        assignedUsers: morningAssignedUsers,
         createdBy: adminUid,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -519,18 +534,40 @@ export async function createTestShifts(
         endTime: '20:00',
         location: 'Refugio Principal',
         maxVolunteers: 3,
-        assignedUsers: [],
+        assignedUsers: afternoonAssignedUsers,
         createdBy: adminUid,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
     }
 
-    // Guardar turnos en Firestore
+    // Guardar turnos en Firestore con el formato correcto
     const batch = adminDb.batch();
     shifts.forEach((shift) => {
-      const shiftRef = adminDb.collection('shifts').doc();
-      batch.set(shiftRef, shift);
+      // Crear ID en formato YYYY-MM-DD_M o YYYY-MM-DD_T
+      const shiftKey = shift.startTime === '09:00' ? 'M' : 'T';
+      const docId = `${shift.date}_${shiftKey}`;
+      
+      const shiftRef = adminDb.collection('shifts').doc(docId);
+      
+      // Convertir assignedUsers a assignments con el formato correcto
+      const assignments = shift.assignedUsers.map(uid => ({ uid }));
+      
+      const shiftData = {
+        date: shift.date,
+        shift: shiftKey,
+        assignments: assignments,
+        notes: '',
+        lastUpdated: new Date(),
+        // Campos adicionales para compatibilidad
+        location: shift.location,
+        maxVolunteers: shift.maxVolunteers,
+        createdBy: shift.createdBy,
+        createdAt: shift.createdAt,
+        updatedAt: shift.updatedAt,
+      };
+      
+      batch.set(shiftRef, shiftData);
     });
 
     await batch.commit();
@@ -657,4 +694,14 @@ export async function cleanupTestDataConditional(): Promise<boolean> {
   }
   console.log('ℹ️ Limpieza automática desactivada');
   return true;
+}
+
+/**
+ * Obtiene la instancia de Firestore después de la inicialización
+ */
+export function getFirestoreInstance() {
+  if (!adminDb) {
+    throw new Error('Firebase Admin no está inicializado. Llama a initializeFirebaseAdmin() primero.');
+  }
+  return adminDb;
 }

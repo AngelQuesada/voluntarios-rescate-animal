@@ -787,11 +787,13 @@ async function globalSetup(_config: FullConfig) {
   console.log('🧹 Limpiando base de datos antes de inicializar tests...');
   await cleanupTestEnvironment();
 
-  // 3. Inicializar entorno de prueba con usuarios constantes
-  // Los datos variables (turnos, usuarios adicionales) se crearán en cada test según sea necesario
+  // 3. Inicializar entorno de prueba con usuarios constantes y turnos básicos
+  // Los turnos incluirán voluntarios asignados en los próximos 3 días para tests que los requieran
   const setupSuccess = await setupTestEnvironment({
     requireUsers: true,
-    requireShifts: false,
+    requireShifts: true,
+    pastDays: 0, // No crear turnos pasados para optimizar
+    futureDays: 3, // Solo crear turnos para los próximos 3 días
   });
 
   if (!setupSuccess) {

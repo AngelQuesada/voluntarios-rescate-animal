@@ -32,6 +32,7 @@ const ConfirmRemoveUserDialog: React.FC<ConfirmRemoveUserDialogProps> = ({
           Cancelar
         </Button>
         <Button
+          data-testid="confirm-remove-user-dialog-confirm-button"
           onClick={onConfirm}
           color="error"
           variant="contained"

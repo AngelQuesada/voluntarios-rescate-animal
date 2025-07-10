@@ -32,6 +32,7 @@ const ShiftAssignmentList: React.FC<ShiftAssignmentListProps> = ({
     isAdmin ? (
       <Tooltip title="Añadir usuario a este turno" arrow>
         <Box
+          data-testid="add-user-button"
           onClick={() => onAddUserClick(dayKey, shiftKey)}
           sx={{
             borderRadius: '8px',
@@ -143,6 +144,7 @@ const ShiftAssignmentList: React.FC<ShiftAssignmentListProps> = ({
               </Typography>
               {isAdmin && !isCurrentUser && (
                 <IconButton
+                  data-testid="unassign-user-button"
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();

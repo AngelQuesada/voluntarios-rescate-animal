@@ -97,12 +97,17 @@ export function useShiftActions({
     setIsUpdatingShift((prev) => ({ ...prev, [loadingIndicatorKey]: true }));
 
     try {
+      const isAdminAssignment =
+        currentUser?.roles?.includes(UserRoles.ADMINISTRADOR) && currentUser.uid !== targetUserId;
+
       await modifyShift({
         dateKey,
         shiftKey,
         uid: targetUserId,
         name: '',
         action: actionType,
+        performedByUid: currentUser.uid,
+        isAdminAssignment: isAdminAssignment,
       }).unwrap();
 
       // Registrar la acción del usuario

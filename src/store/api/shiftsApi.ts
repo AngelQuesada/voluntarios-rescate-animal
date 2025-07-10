@@ -1,27 +1,15 @@
-import {
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  Timestamp,
-} from 'firebase/firestore';
+import { collection, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { api } from './baseApi';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { UserRoles } from '@/lib/constants';
 import { User } from '@/types/common';
 
 // Definición de tipos
 export interface ShiftAssignment {
   uid: string;
-  name?: string; // Opcional, no se guardará en la BD
-  roles?: number[]; // Opcional, no se guardará en la BD
-  phone?: string; // Opcional, no se guardará en la BD
+  name?: string;
+  roles?: number[];
+  phone?: string;
 }
 
 export interface ProcessedShift {
@@ -44,9 +32,11 @@ export interface ModifyShiftParams {
   dateKey: string;
   shiftKey: 'M' | 'T';
   uid: string;
-  name: string; // Usado solo para la UI, no se guardará en la BD
-  roles?: number[]; // Usado solo para la UI, no se guardará en la BD
+  name: string;
+  roles?: number[];
   action: 'add' | 'remove';
+  performedByUid?: string;
+  isAdminAssignment?: boolean;
 }
 
 // Interfaz para las consultas de turnos con fechas serializables
@@ -95,24 +85,24 @@ export const shiftsApi = api.injectEndpoints({
               if (data.assignments && Array.isArray(data.assignments)) {
                 // Procesar las asignaciones utilizando el mapa de usuarios
                 const assignmentsWithUserData = data.assignments.map(
-                  (assignment: ShiftAssignment) => {
+                  (assignment: { uid: string }) => {
                     const user = users[assignment.uid];
 
                     // Si el usuario existe en nuestro mapa cargado, usar esos datos
                     if (user) {
                       return {
                         uid: assignment.uid,
-                        name: assignment.name || `${user.name} ${user.lastname}`,
+                        name: `${user.name} ${user.lastname}`,
                         roles: user.roles,
                         phone: user.phone,
                       };
                     }
 
-                    // Si no tenemos el usuario, usar los datos que ya tiene la asignación
+                    // Si no tenemos el usuario, usar datos por defecto
                     return {
                       uid: assignment.uid,
-                      name: assignment.name || 'Usuario',
-                      roles: assignment.roles || [UserRoles.VOLUNTARIO],
+                      name: 'Usuario',
+                      roles: [UserRoles.VOLUNTARIO],
                     };
                   }
                 );
@@ -135,7 +125,6 @@ export const shiftsApi = api.injectEndpoints({
     getUserShifts: builder.query<ProcessedShift, GetUserShiftsParams>({
       queryFn: async ({ userId, startDate, endDate, users = {} }) => {
         try {
-          // Convertir strings ISO a objetos Date
           const startDateObj = new Date(startDate);
           const endDateObj = new Date(endDate);
 
@@ -156,7 +145,7 @@ export const shiftsApi = api.injectEndpoints({
             if (docDate >= startDateObj && docDate <= endDateObj) {
               // Filtrar asignaciones por el userId
               const userAssignments = (data.assignments || []).filter(
-                (assignment: ShiftAssignment) => assignment.uid === userId
+                (assignment: { uid: string }) => assignment.uid === userId
               );
 
               if (userAssignments.length > 0) {
@@ -166,24 +155,24 @@ export const shiftsApi = api.injectEndpoints({
 
                 // Procesar las asignaciones utilizando el mapa de usuarios
                 const assignmentsWithUserData = userAssignments.map(
-                  (assignment: ShiftAssignment) => {
+                  (assignment: { uid: string }) => {
                     const user = users[assignment.uid];
 
                     // Si el usuario existe en nuestro mapa cargado, usar esos datos
                     if (user) {
                       return {
                         uid: assignment.uid,
-                        name: assignment.name || `${user.name} ${user.lastname}`,
+                        name: `${user.name} ${user.lastname}`,
                         roles: user.roles,
                         phone: user.phone,
                       };
                     }
 
-                    // Si no tenemos el usuario, usar los datos que ya tiene la asignación
+                    // Si no tenemos el usuario, usar datos por defecto
                     return {
                       uid: assignment.uid,
-                      name: assignment.name || 'Usuario',
-                      roles: assignment.roles || [UserRoles.VOLUNTARIO],
+                      name: 'Usuario',
+                      roles: [UserRoles.VOLUNTARIO],
                     };
                   }
                 );
@@ -204,44 +193,33 @@ export const shiftsApi = api.injectEndpoints({
 
     // Modificar un turno (añadir o quitar un voluntario)
     modifyShift: builder.mutation<{ success: boolean }, ModifyShiftParams>({
-      queryFn: async ({ dateKey, shiftKey, uid, action }) => {
+      queryFn: async ({ dateKey, shiftKey, uid, action, performedByUid, isAdminAssignment }) => {
         try {
-          const shiftId = `${dateKey}_${shiftKey}`;
-          const shiftRef = doc(db, 'shifts', shiftId);
-          const shiftDoc = await getDoc(shiftRef);
+          const response = await fetch('/api/shifts/assign', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              dateKey,
+              shiftKey,
+              uid,
+              action,
+              performedByUid,
+              isAdminAssignment,
+            }),
+          });
 
-          // Solo guardamos el uid en la BD
-          const userAssignment = { uid };
-
-          if (action === 'remove' && shiftDoc.exists()) {
-            // Remover el usuario del turno
-            await updateDoc(shiftRef, {
-              assignments: arrayRemove(
-                // Necesitamos encontrar el objeto exacto para removerlo
-                ...shiftDoc.data().assignments.filter((a: ShiftAssignment) => a.uid === uid)
-              ),
-              lastUpdated: Timestamp.now(),
-            });
-          } else if (action === 'add') {
-            // Añadir el usuario al turno
-            await setDoc(
-              shiftRef,
-              {
-                assignments: shiftDoc.exists() ? arrayUnion(userAssignment) : [userAssignment],
-                date: dateKey,
-                shift: shiftKey,
-                day: format(parseISO(dateKey), 'EEEE', { locale: es }),
-                lastUpdated: Timestamp.now(),
-              },
-              { merge: true }
-            );
+          if (!response.ok) {
+            const errorResult = await response.json().catch(() => ({}));
+            throw new Error(errorResult.message || 'Error al modificar el turno.');
           }
 
-          // Devolver un objeto con una propiedad específica en lugar de undefined
-          return { data: { success: true } };
-        } catch (error) {
+          const data = await response.json();
+          return { data };
+        } catch (error: any) {
           console.error('Error modifying shift:', error);
-          return { error: { message: 'Error al modificar el turno.' } };
+          return { error: { message: error.message || 'Error al modificar el turno.' } };
         }
       },
       // Invalidar la caché para que se actualice la UI

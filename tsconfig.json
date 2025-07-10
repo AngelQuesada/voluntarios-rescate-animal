@@ -34,7 +34,9 @@
     "jest.setup.js",
     "src/types/jest.d.ts",
     "scripts/restart-project.js",
-    "jest.config.js"
+    "jest.config.js",
+    "public/firebase-messaging-sw.js",
+    "src/lib/firebase-messaging-sw.template.js"
   ],
   "exclude": ["node_modules", "tests/e2e"]
 }

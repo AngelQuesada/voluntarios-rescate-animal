@@ -13,8 +13,8 @@ jest.mock('@/lib/firebase', () => ({
 }));
 
 jest.mock('firebase/firestore', () => ({
-  collection: (...args) => mockCollection(...args),
-  addDoc: (...args) => mockAddDoc(...args),
+  collection: (...args: unknown[]) => mockCollection(...args),
+  addDoc: (...args: unknown[]) => mockAddDoc(...args),
   initializeFirestore: jest.fn(),
   Timestamp: {
     now: jest.fn().mockReturnValue({
@@ -127,6 +127,20 @@ describe('useShiftActions Hook', () => {
     mockModifyShift.mockReturnValue({
       unwrap: jest.fn().mockResolvedValue({}),
     });
+
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(), // deprecated
+        removeListener: jest.fn(), // deprecated
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
   });
 
   test('should initialize with default state', () => {
@@ -180,7 +194,9 @@ describe('useShiftActions Hook', () => {
       shiftKey: 'M',
       uid: 'user2',
       name: '',
+      performedByUid: 'current-user-id',
       action: 'add',
+      isAdminAssignment: false,
     });
 
     expect(mockShowSnackbar).toHaveBeenCalledWith(expect.anything(), 'success');
@@ -199,6 +215,8 @@ describe('useShiftActions Hook', () => {
       uid: 'user1',
       name: '',
       action: 'remove',
+      performedByUid: 'current-user-id',
+      isAdminAssignment: false,
     });
 
     expect(mockShowSnackbar).toHaveBeenCalledWith(expect.anything(), 'info');
@@ -231,6 +249,8 @@ describe('useShiftActions Hook', () => {
       uid: mockCurrentUser.uid,
       name: '',
       action: 'add',
+      performedByUid: 'current-user-id',
+      isAdminAssignment: false,
     });
   });
 
@@ -260,6 +280,8 @@ describe('useShiftActions Hook', () => {
       uid: mockCurrentUser.uid,
       name: '',
       action: 'remove',
+      performedByUid: 'current-user-id',
+      isAdminAssignment: false,
     });
   });
 
@@ -402,6 +424,8 @@ describe('useShiftActions Hook', () => {
       uid: 'user2',
       name: '',
       action: 'add',
+      performedByUid: 'current-user-id',
+      isAdminAssignment: true,
     });
   });
 
