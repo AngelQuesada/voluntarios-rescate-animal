@@ -1,7 +1,5 @@
 import { initAdmin } from './firebaseAdmin';
 
-const admin = initAdmin();
-
 /**
  * Envía una notificación push a un usuario específico.
  * @param {string} fcmToken - El token de FCM del dispositivo del usuario.
@@ -9,7 +7,12 @@ const admin = initAdmin();
  * @param {string} body - El cuerpo de la notificación.
  * @returns {Promise<void>}
  */
-export const sendNotification = async (fcmToken: string, title: string, body: string): Promise<void> => {
+export const sendNotification = async (
+  fcmToken: string,
+  title: string,
+  body: string
+): Promise<void> => {
+  const admin = initAdmin();
   const message = {
     token: fcmToken,
     notification: {

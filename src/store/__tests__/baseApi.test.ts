@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { api } from '../api/baseApi';
+import { api } from '@/store/api/baseApi';
 
 describe('Base API Configuration', () => {
   test('should create API slice with correct configuration', () => {

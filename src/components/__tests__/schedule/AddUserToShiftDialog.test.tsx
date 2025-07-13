@@ -1,9 +1,38 @@
 import * as React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render as customRender } from '../../../../__tests__/test-utils';
+import { render as rtlRender } from '@testing-library/react';
 import AddUserToShiftDialog from '../../schedule/AddUserToShiftDialog';
 import { UserRoles } from '../../../lib/constants';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from '../../../theme/theme';
+import { ReduxProvider } from '../../../store/provider';
+
+const customRender = (ui: React.ReactElement, options?: any) => {
+  return rtlRender(
+    <ReduxProvider>
+      <ThemeProvider theme={theme}>
+        {ui}
+      </ThemeProvider>
+    </ReduxProvider>,
+    options
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const mockUsers = [
   {
@@ -17,6 +46,7 @@ const mockUsers = [
     birthdate: '1990-01-01',
     phone: '123456789',
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     isEnabled: true,
   },
   {
@@ -30,6 +60,7 @@ const mockUsers = [
     birthdate: '1985-05-15',
     phone: '987654321',
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     isEnabled: true,
   },
   {
@@ -43,6 +74,7 @@ const mockUsers = [
     birthdate: '1992-08-20',
     phone: '555666777',
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     isEnabled: false,
   },
 ];

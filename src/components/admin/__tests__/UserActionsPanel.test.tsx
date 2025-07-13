@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import UserActionsPanel from '../UserActionsPanel'; // Importación Default
+import UserActionsPanel from '@/components/admin/UserActionsPanel'; // Importación Default
 import { useUserActions } from '@/hooks/admin/useUserActions';
 import { UserAction } from '@/types/common';
 

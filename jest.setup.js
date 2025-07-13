@@ -1,9 +1,13 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import fetch, { Request, Response } from 'node-fetch';
 
 // Polyfills para Node.js
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
+global.fetch = fetch;
+global.Request = Request;
+global.Response = Response;
 
 // Mock NextAuth
 jest.mock('next-auth/react', () => ({
@@ -48,6 +52,21 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
+}));
+
+// Mock jose
+jest.mock('jose', () => ({
+  compactDecrypt: jest.fn(),
+  jwtVerify: jest.fn(),
+}));
+
+// Mock jwks-rsa
+jest.mock('jwks-rsa', () => ({
+  JwksClient: jest.fn(() => ({
+    getSigningKey: jest.fn(() => ({
+      getPublicKey: jest.fn(() => 'mock-public-key'),
+    })),
+  })),
 }));
 
 // Suppress console errors during tests

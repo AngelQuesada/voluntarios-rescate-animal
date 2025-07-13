@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useAuth } from '../useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { getDoc } from 'firebase/firestore';
 import { auth } from '@/lib/firebase';
@@ -47,11 +47,6 @@ describe('useAuth Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     document.cookie = '';
-    // Reset window.location.protocol for cookie tests
-    Object.defineProperty(window, 'location', {
-      value: { protocol: 'https:' },
-      writable: true,
-    });
   });
 
   test('should initialize with empty values', () => {

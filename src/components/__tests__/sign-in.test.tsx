@@ -1,7 +1,6 @@
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import { render as customRender } from '../../../__tests__/test-utils';
-import SignIn from '../sign-in';
+import { render, screen, waitFor } from '@testing-library/react';
+import SignIn from '@/components/sign-in';
 
 // Mock del hook useAuth
 jest.mock('@/hooks/useAuth', () => ({
@@ -22,7 +21,7 @@ jest.mock('@/styles/formStyles', () => ({
 
 describe('SignIn Component', () => {
   test('should render sign in form after mount', async () => {
-    customRender(<SignIn />);
+    render(<SignIn />); // Usar render directamente
 
     await waitFor(() => {
       expect(screen.getByRole('img', { name: /logo rescate animal granada/i })).toBeInTheDocument();
@@ -37,14 +36,14 @@ describe('SignIn Component', () => {
       .spyOn(React, 'useState')
       .mockImplementationOnce(() => [false, mockSetState]);
 
-    const { container } = customRender(<SignIn />);
+    const { container } = render(<SignIn />); // Usar render directamente
     expect(container.firstChild).not.toBeNull(); // El componente siempre renderiza algo, solo cambia el contenido
 
     mockUseState.mockRestore();
   });
 
   test('should render logo with correct attributes', async () => {
-    customRender(<SignIn />);
+    render(<SignIn />); // Usar render directamente
 
     await waitFor(() => {
       const logo = screen.getByAltText('Logo Rescate Animal Granada');
@@ -54,7 +53,7 @@ describe('SignIn Component', () => {
   });
 
   test('should render copyright component', async () => {
-    customRender(<SignIn />);
+    render(<SignIn />); // Usar render directamente
 
     await waitFor(() => {
       expect(screen.getByText(/Copyright ©/)).toBeInTheDocument();

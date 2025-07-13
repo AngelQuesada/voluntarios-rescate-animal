@@ -15,6 +15,7 @@ const mockUseSession = jest.fn(() => ({
 }));
 
 const mockSignIn = jest.fn(() => Promise.resolve({ ok: true, error: null }));
+
 const mockSignOut = jest.fn(() => Promise.resolve());
 const mockGetSession = jest.fn(() => Promise.resolve(mockSession));
 

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import Copyright from '../Copyright';
+import Copyright from '@/components/Copyright';
 
 describe('Copyright Component', () => {
   test('should render copyright text with current year', () => {

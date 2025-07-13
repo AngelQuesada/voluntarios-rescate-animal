@@ -2,16 +2,17 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": [
-      "@playwright/test",
-      "node"
-    ]
+    "types": ["@playwright/test", "node", "jest"]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "jest.setup.js",
+    "helpers/global-setup.ts",
+    "helpers/global-teardown.ts",
+    "helpers/__mocks__/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

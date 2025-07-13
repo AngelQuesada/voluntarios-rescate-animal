@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useUserActions } from '../useUserActions';
+import { useUserActions } from '@/hooks/admin/useUserActions';
 import { db } from '@/lib/firebase'; // Necesitaremos mockear esto
 import { collection, orderBy, limit, getDocs } from 'firebase/firestore';
 import { Timestamp } from 'firebase/firestore';

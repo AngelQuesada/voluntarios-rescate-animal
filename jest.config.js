@@ -10,14 +10,15 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^tests/helpers/(.*)$': '<rootDir>/tests/helpers/$1',
+    '^tests/helpers/__mocks__/(.*)$': '<rootDir>/tests/helpers/__mocks__/$1',
   },
-  testPathIgnorePatterns: [
-    '<rootDir>/node_modules/',
-    '<rootDir>/.next/',
-    '<rootDir>/tests/e2e/',
-    '<rootDir>/__tests__/',
-  ],
-  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  transform: {
+    '^.+\.(ts|tsx|js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],
+    'node_modules/jose/.+\.(js|jsx|ts|tsx)$': 'babel-jest',
+    'node_modules/jwks-rsa/.+\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
+  transformIgnorePatterns: ['/node_modules/(?!(jose|jwks-rsa|firebase-admin|next-auth)/)'],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
@@ -35,6 +36,7 @@ const customJestConfig = {
       statements: 70,
     },
   },
+  testMatch: ['<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}'],
 };
 
 module.exports = createJestConfig(customJestConfig);
