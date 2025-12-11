@@ -155,29 +155,36 @@ const UserActionsPanel: React.FC = () => {
                     textAlign: 'center',
                   }}
                 >
-                  {action.actionType === 'assign' ? (
-                    <Box display="flex" alignItems="center" justifyContent="center">
-                      {isMobile ? (
-                        <GroupAddIcon color="success" fontSize="small" />
-                      ) : (
+                  <Box
+                    display="flex"
+                    alignItems={isMobile ? 'center' : 'left'}
+                    justifyContent={isMobile ? 'center' : 'left'}
+                  >
+                    {action.actionType === 'assign' ? (
+                      <>
                         <AddCircleIcon color="success" fontSize="small" />
-                      )}
-                      {!isMobile && (
-                        <Typography variant="body2" sx={{ ml: 1 }}>
+                        <Typography
+                          display={isMobile ? 'none' : 'block'}
+                          variant="body2"
+                          sx={{ ml: 1 }}
+                        >
                           Asignado
                         </Typography>
-                      )}
-                    </Box>
-                  ) : (
-                    <Box display="flex" alignItems="center" justifyContent="center">
-                      <RemoveCircleIcon color="error" fontSize="small" />
-                      {!isMobile && (
-                        <Typography variant="body2" sx={{ ml: 1 }}>
+                      </>
+                    ) : (
+                      <>
+                        <RemoveCircleIcon color="error" fontSize="small" />
+
+                        <Typography
+                          display={isMobile ? 'none' : 'block'}
+                          variant="body2"
+                          sx={{ ml: 1 }}
+                        >
                           Desasignado
                         </Typography>
-                      )}
-                    </Box>
-                  )}
+                      </>
+                    )}
+                  </Box>
                 </TableCell>
                 <TableCell
                   sx={{
