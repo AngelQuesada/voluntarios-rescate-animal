@@ -39,6 +39,7 @@ import ContactDialog from '../schedule/ContactDialog';
 import UserForm from './UserForm';
 import SearchInput from './SearchInput';
 import WeekViewPanel from './WeekViewPanel';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HistoryCalendar = lazy(() => import('../history/HistoryCalendar'));
 const UserActionsPanel = lazy(() => import('./UserActionsPanel'));
@@ -120,6 +121,8 @@ export function AdminPanel() {
     isEditingUser,
     isDeletingUser,
   } = useAdminPanel();
+
+  const isMobile = useIsMobile();
 
   const sortedFilteredUsers = useMemo(() => {
     return filteredUsers.sort((a, b) => {
@@ -369,16 +372,17 @@ export function AdminPanel() {
             <Tabs
               value={activeTab}
               onChange={handleTabChange}
-              variant="fullWidth"
+              variant={isMobile ? 'standard' : 'fullWidth'}
+              centered={isMobile}
               indicatorColor="primary"
               textColor="primary"
               aria-label="admin panel tabs"
             >
-              <Tab label="Usuarios" icon={<PeopleIcon />} />
-              <Tab label="Vista Semanal" icon={<CalendarViewWeekIcon />} />
-              <Tab label="Historial Voluntario" icon={<HistoryIcon />} />
-              <Tab label="Últimas Acciones" icon={<ListAltIcon />} />
-              <Tab label="Ajustes" icon={<SettingsIcon />} />
+              <Tab label={isMobile ? '' : 'Usuarios'} icon={<PeopleIcon />} />
+              <Tab label={isMobile ? '' : 'Vista Semanal'} icon={<CalendarViewWeekIcon />} />
+              <Tab label={isMobile ? '' : 'Historial Voluntario'} icon={<HistoryIcon />} />
+              <Tab label={isMobile ? '' : 'Últimas Acciones'} icon={<ListAltIcon />} />
+              <Tab label={isMobile ? '' : 'Ajustes'} icon={<SettingsIcon />} />
             </Tabs>
           </Box>
 
