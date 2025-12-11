@@ -291,14 +291,28 @@ export default function ScheduleContent({ startDate, endDate }: ScheduleContentP
 
         {activeTab === 1 && (
           <>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {daysToDisplay.map((date) => renderMyShiftsDay(date)).filter(Boolean)}
-            </Box>
-            <InfiniteScrollLoader
-              isVisible={shouldShowLoader}
-              onIntersect={handleLoaderIntersection}
-            />
-            <Box sx={{ height: '100px' }} /> {/* Espacio PWA */}
+            {myShiftsCount === 0 ? (
+              <Box sx={{ p: { xs: 1, sm: 2 } }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontStyle: 'italic', mt: 2, textAlign: 'center' }}
+                >
+                  No tienes turnos próximamente.
+                </Typography>
+              </Box>
+            ) : (
+              <>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {daysToDisplay.map((date) => renderMyShiftsDay(date)).filter(Boolean)}
+                </Box>
+                <InfiniteScrollLoader
+                  isVisible={shouldShowLoader}
+                  onIntersect={handleLoaderIntersection}
+                />
+                <Box sx={{ height: '100px' }} /> {/* Espacio PWA */}
+              </>
+            )}
           </>
         )}
 

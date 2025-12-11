@@ -32,7 +32,11 @@ const renderShiftsTable = (
   // Si no hay turnos...
   if (shiftsData.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mt: 2 }}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ fontStyle: 'italic', mt: 2, textAlign: 'center' }}
+      >
         No hay turnos para mostrar.
       </Typography>
     );
@@ -129,11 +133,6 @@ const UserHistoryTab: FC<UserHistoryTabProps> = ({ currentUser }) => {
 
   return (
     <Box sx={{ p: { xs: 1, sm: 2 } }}>
-      {' '}
-      {/* Responsive padding */}
-      <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-        Mi historial de turnos
-      </Typography>
       {renderShiftsTable(shifts, currentPage, totalPages, handlePageChange, ITEMS_PER_PAGE)}
     </Box>
   );
