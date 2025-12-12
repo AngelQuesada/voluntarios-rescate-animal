@@ -44,11 +44,11 @@ export const TEST_USERS: Record<'ADMIN' | 'RESPONSABLE' | 'VOLUNTARIO', TestUser
     password: 'testing',
     userData: {
       uid: '', // Se asignará automáticamente por Firebase Auth
-      username: 'admin_test',
+      userName: 'admin_test',
       roles: [3], // Administrador
       name: 'Admin',
-      lastname: 'Test',
-      birthdate: '1990-01-01',
+      lastName: 'Test',
+      birthDate: '1990-01-01',
       email: 'administradortest@voluntario.com',
       phone: '+34600000001',
       job: 'Administrador de Sistema',
@@ -63,11 +63,11 @@ export const TEST_USERS: Record<'ADMIN' | 'RESPONSABLE' | 'VOLUNTARIO', TestUser
     password: 'testing',
     userData: {
       uid: '', // Se asignará automáticamente por Firebase Auth
-      username: 'responsable_test',
+      userName: 'responsable_test',
       roles: [2], // Responsable
       name: 'Responsable',
-      lastname: 'Test',
-      birthdate: '1985-05-15',
+      lastName: 'Test',
+      birthDate: '1985-05-15',
       email: 'responsabletest@voluntario.com',
       phone: '+34600000002',
       job: 'Coordinador',
@@ -82,11 +82,11 @@ export const TEST_USERS: Record<'ADMIN' | 'RESPONSABLE' | 'VOLUNTARIO', TestUser
     password: 'testing',
     userData: {
       uid: '', // Se asignará automáticamente por Firebase Auth
-      username: 'voluntario_test',
+      userName: 'voluntario_test',
       roles: [1], // Voluntario
       name: 'Voluntario',
-      lastname: 'Test',
-      birthdate: '1995-12-20',
+      lastName: 'Test',
+      birthDate: '1995-12-20',
       email: 'voluntariotest@voluntario.com',
       phone: '+34600000003',
       job: 'Estudiante',
@@ -106,11 +106,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing',
     userData: {
       uid: '', // Se asignará automáticamente por Firebase Auth
-      username: 'voluntario1_test',
+      userName: 'voluntario1_test',
       roles: [1],
       name: 'María',
-      lastname: 'García',
-      birthdate: '1992-03-10',
+      lastName: 'García',
+      birthDate: '1992-03-10',
       email: 'voluntario1@test.com',
       phone: '+34600000004',
       job: 'Enfermera',
@@ -125,11 +125,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing',
     userData: {
       uid: '', // Se asignará automáticamente por Firebase Auth
-      username: 'voluntario2_test',
+      userName: 'voluntario2_test',
       roles: [1],
       name: 'Carlos',
-      lastname: 'López',
-      birthdate: '1988-07-25',
+      lastName: 'López',
+      birthDate: '1988-07-25',
       email: 'voluntario2@test.com',
       phone: '+34600000005',
       job: 'Veterinario',
@@ -144,11 +144,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing',
     userData: {
       uid: 'test-resp2-uid',
-      username: 'responsable2_test',
+      userName: 'responsable2_test',
       roles: [2],
       name: 'Ana',
-      lastname: 'Martínez',
-      birthdate: '1983-11-08',
+      lastName: 'Martínez',
+      birthDate: '1983-11-08',
       email: 'responsable2@test.com',
       phone: '+34600000006',
       job: 'Coordinadora',
@@ -164,11 +164,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing123',
     userData: {
       uid: 'nuevo-voluntario-uid',
-      username: 'nuevo_voluntario',
+      userName: 'nuevo_voluntario',
       roles: [1], // Voluntario
       name: 'Nuevo',
-      lastname: 'Voluntario',
-      birthdate: '1990-01-01',
+      lastName: 'Voluntario',
+      birthDate: '1990-01-01',
       email: 'nuevo.voluntario@test.com',
       phone: '+34600111111',
       job: 'Estudiante',
@@ -183,11 +183,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing123',
     userData: {
       uid: 'nuevo-responsable-uid',
-      username: 'nuevo_responsable',
+      userName: 'nuevo_responsable',
       roles: [2], // Responsable
       name: 'Nuevo',
-      lastname: 'Responsable',
-      birthdate: '1985-01-01',
+      lastName: 'Responsable',
+      birthDate: '1985-01-01',
       email: 'nuevo.responsable@test.com',
       phone: '+34600222222',
       job: 'Coordinador',
@@ -202,11 +202,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing123',
     userData: {
       uid: 'nuevo-admin-uid',
-      username: 'nuevo_admin',
+      userName: 'nuevo_admin',
       roles: [3], // Administrador
       name: 'Nuevo',
-      lastname: 'Administrador',
-      birthdate: '1980-01-01',
+      lastName: 'Administrador',
+      birthDate: '1980-01-01',
       email: 'nuevo.admin@test.com',
       phone: '+34600333333',
       job: 'Administrador',
@@ -222,11 +222,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing123',
     userData: {
       uid: 'disabled-user-uid',
-      username: 'disabled_user',
+      userName: 'disabled_user',
       roles: [1], // Voluntario
       name: 'Usuario',
-      lastname: 'Deshabilitado',
-      birthdate: '1990-01-01',
+      lastName: 'Deshabilitado',
+      birthDate: '1990-01-01',
       email: 'disabled.user@test.com',
       phone: '+34600444444',
       job: 'Tester',
@@ -241,11 +241,11 @@ export const VARIABLE_TEST_USERS: TestUser[] = [
     password: 'testing123',
     userData: {
       uid: 'failed-attempts-uid',
-      username: 'failed_attempts',
+      userName: 'failed_attempts',
       roles: [1], // Voluntario
       name: 'Usuario',
-      lastname: 'Intentos Fallidos',
-      birthdate: '1990-01-01',
+      lastName: 'Intentos Fallidos',
+      birthDate: '1990-01-01',
       email: 'failed.attempts@test.com',
       phone: '+34600555555',
       job: 'Tester',
@@ -342,7 +342,7 @@ export async function createConstantUsers(): Promise<boolean> {
             userRecord = await adminAuth.createUser({
               email: testUser.email,
               password: testUser.password,
-              displayName: `${testUser.userData.name} ${testUser.userData.lastname}`,
+              displayName: `${testUser.userData.name} ${testUser.userData.lastName}`,
               emailVerified: true,
               disabled: false,
             });
@@ -401,11 +401,13 @@ export async function createVariableUsers(): Promise<boolean> {
             userRecord = await adminAuth.createUser({
               email: testUser.email,
               password: testUser.password,
-              displayName: `${testUser.userData.name} ${testUser.userData.lastname}`,
+              displayName: `${testUser.userData.name} ${testUser.userData.lastName}`,
               emailVerified: true,
               disabled: false,
             });
-            console.log(`✅ Usuario variable ${testUser.userData.name} creado en Auth con UID: ${userRecord.uid}`);
+            console.log(
+              `✅ Usuario variable ${testUser.userData.name} creado en Auth con UID: ${userRecord.uid}`
+            );
           } else {
             throw error;
           }
@@ -418,7 +420,9 @@ export async function createVariableUsers(): Promise<boolean> {
           uid: userRecord.uid, // Usar la UID real generada por Firebase Auth
         });
 
-        console.log(`✅ Usuario variable ${testUser.userData.name} creado/actualizado en Firestore`);
+        console.log(
+          `✅ Usuario variable ${testUser.userData.name} creado/actualizado en Firestore`
+        );
       } catch (error: any) {
         console.error(`❌ Error al crear usuario variable ${testUser.userData.name}:`, error);
       }
@@ -451,11 +455,11 @@ export async function createTestShifts(
     // Obtener UIDs reales de los usuarios desde Firebase Auth
     let adminUid: string;
     let voluntarioUid: string;
-    
+
     try {
       const adminRecord = await adminAuth.getUserByEmail(TEST_USERS.ADMIN.email);
       adminUid = adminRecord.uid;
-      
+
       const voluntarioRecord = await adminAuth.getUserByEmail(TEST_USERS.VOLUNTARIO.email);
       voluntarioUid = voluntarioRecord.uid;
     } catch (error) {
@@ -547,12 +551,12 @@ export async function createTestShifts(
       // Crear ID en formato YYYY-MM-DD_M o YYYY-MM-DD_T
       const shiftKey = shift.startTime === '09:00' ? 'M' : 'T';
       const docId = `${shift.date}_${shiftKey}`;
-      
+
       const shiftRef = adminDb.collection('shifts').doc(docId);
-      
+
       // Convertir assignedUsers a assignments con el formato correcto
-      const assignments = shift.assignedUsers.map(uid => ({ uid }));
-      
+      const assignments = shift.assignedUsers.map((uid) => ({ uid }));
+
       const shiftData = {
         date: shift.date,
         shift: shiftKey,
@@ -566,7 +570,7 @@ export async function createTestShifts(
         createdAt: shift.createdAt,
         updatedAt: shift.updatedAt,
       };
-      
+
       batch.set(shiftRef, shiftData);
     });
 
@@ -598,11 +602,11 @@ export async function cleanupVariableData(): Promise<boolean> {
         let userRecord;
         try {
           userRecord = await adminAuth.getUserByEmail(testUser.email);
-          
+
           // Eliminar de Firebase Auth
           await adminAuth.deleteUser(userRecord.uid);
           console.log(`✅ Usuario variable ${testUser.userData.name} eliminado de Auth`);
-          
+
           // Eliminar documento de Firestore usando la UID real
           await adminDb.collection('users').doc(userRecord.uid).delete();
           console.log(`✅ Usuario variable ${testUser.userData.name} eliminado de Firestore`);
@@ -614,10 +618,7 @@ export async function cleanupVariableData(): Promise<boolean> {
           }
         }
       } catch (error) {
-        console.error(
-          `❌ Error al procesar usuario variable ${testUser.userData.name}:`,
-          error
-        );
+        console.error(`❌ Error al procesar usuario variable ${testUser.userData.name}:`, error);
       }
     }
 
@@ -659,10 +660,10 @@ export async function cleanupAllTestData(): Promise<boolean> {
         let userRecord;
         try {
           userRecord = await adminAuth.getUserByEmail(testUser.email);
-          
+
           // Eliminar de Firebase Auth
           await adminAuth.deleteUser(userRecord.uid);
-          
+
           // Eliminar documento de Firestore usando la UID real
           await adminDb.collection('users').doc(userRecord.uid).delete();
           console.log(`✅ Usuario constante ${userType} eliminado`);
@@ -701,7 +702,9 @@ export async function cleanupTestDataConditional(): Promise<boolean> {
  */
 export function getFirestoreInstance() {
   if (!adminDb) {
-    throw new Error('Firebase Admin no está inicializado. Llama a initializeFirebaseAdmin() primero.');
+    throw new Error(
+      'Firebase Admin no está inicializado. Llama a initializeFirebaseAdmin() primero.'
+    );
   }
   return adminDb;
 }

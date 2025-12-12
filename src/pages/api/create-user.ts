@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userRecord = await getAdminAuth().createUser({
       email,
       password,
-      displayName: `${userData.name} ${userData.lastname}`,
+      displayName: `${userData.name} ${userData.lastName}`,
     });
 
     // Asignar claims basados en los roles
@@ -36,10 +36,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentTimestamp = new Date().toISOString();
     const userDocumentData = {
       email,
-      username: userData.username || '',
+      userName: userData.userName || '',
       name: userData.name || '',
-      lastname: userData.lastname || '',
-      birthdate: userData.birthdate || '',
+      lastName: userData.lastName || '',
+      birthDate: userData.birthDate || '',
       phone: userData.phone || '',
       job: userData.job || '',
       location: userData.location || '',

@@ -10,11 +10,11 @@ const DISABLED_USER = {
   password: 'testing123',
   userData: {
     // NOTA: Las UIDs se generarán automáticamente por Firebase Auth
-    username: 'disabled_test',
+    userName: 'disabled_test',
     roles: [1],
     name: 'Usuario',
-    lastname: 'Deshabilitado',
-    birthdate: '1990-01-01',
+    lastName: 'Deshabilitado',
+    birthDate: '1990-01-01',
     email: 'disabled@test.com',
     phone: '+34600000001',
     job: 'Test',
@@ -30,11 +30,11 @@ const FAILED_ATTEMPTS_USER = {
   password: 'testing123',
   userData: {
     // NOTA: Las UIDs se generarán automáticamente por Firebase Auth
-    username: 'failed_test',
+    userName: 'failed_test',
     roles: [1],
     name: 'Usuario',
-    lastname: 'Intentos',
-    birthdate: '1990-01-01',
+    lastName: 'Intentos',
+    birthDate: '1990-01-01',
     email: 'failedattempts@test.com',
     phone: '+34600000002',
     job: 'Test',
@@ -119,7 +119,7 @@ test.describe('Autenticación Avanzada', () => {
       const userRecord = await adminAuth.createUser({
         email: DISABLED_USER.email,
         password: DISABLED_USER.password,
-        displayName: `${DISABLED_USER.userData.name} ${DISABLED_USER.userData.lastname}`,
+        displayName: `${DISABLED_USER.userData.name} ${DISABLED_USER.userData.lastName}`,
         emailVerified: true,
         disabled: false,
       });
@@ -195,7 +195,7 @@ test.describe('Autenticación Avanzada', () => {
       const userRecord = await adminAuth.createUser({
         email: FAILED_ATTEMPTS_USER.email,
         password: FAILED_ATTEMPTS_USER.password,
-        displayName: `${FAILED_ATTEMPTS_USER.userData.name} ${FAILED_ATTEMPTS_USER.userData.lastname}`,
+        displayName: `${FAILED_ATTEMPTS_USER.userData.name} ${FAILED_ATTEMPTS_USER.userData.lastName}`,
         emailVerified: true,
         disabled: false,
       });
@@ -351,11 +351,11 @@ test.describe('Autenticación Avanzada', () => {
       email: 'usuariotemporal@test.com',
       password: 'testing123',
       userData: {
-        username: 'temp_test',
+        userName: 'temp_test',
         roles: [1],
         name: 'Usuario',
-        lastname: 'Temporal',
-        birthdate: '1990-01-01',
+        lastName: 'Temporal',
+        birthDate: '1990-01-01',
         email: 'usuariotemporal@test.com',
         phone: '+34600000097',
         job: 'Test',
@@ -385,7 +385,7 @@ test.describe('Autenticación Avanzada', () => {
       const userRecord = await adminAuth.createUser({
         email: tempUser.email,
         password: tempUser.password,
-        displayName: `${tempUser.userData.name} ${tempUser.userData.lastname}`,
+        displayName: `${tempUser.userData.name} ${tempUser.userData.lastName}`,
         emailVerified: true,
         disabled: false,
       });

@@ -1,26 +1,22 @@
 [
   {
-    "username": "dlopez",
+    "userName": "dlopez",
     "name": "David",
-    "lastname": "López",
-    "birthdate": "1995-04-02",
+    "lastName": "López",
+    "birthDate": "1995-04-02",
     "email": "david.lopez@email.com",
     "phone": "699001122",
     "job": "Camarero",
     "location": "Madrid",
-    "roles": [
-      1
-    ],
+    "roles": [1],
     "isEnabled": true
   },
   {
-    "username": "olopez",
-    "roles": [
-      1
-    ],
+    "userName": "olopez",
+    "roles": [1],
     "name": "Osvaldo",
-    "lastname": "Lopez",
-    "birthdate": "2000-05-05",
+    "lastName": "Lopez",
+    "birthDate": "2000-05-05",
     "email": "olopez@voluntario.com",
     "phone": "666333222",
     "job": "Contable",
@@ -28,14 +24,11 @@
     "isEnabled": true
   },
   {
-    "username": "rtest",
-    "roles": [
-      1,
-      2
-    ],
+    "userName": "rtest",
+    "roles": [1, 2],
     "name": "Responsable",
-    "lastname": "Test",
-    "birthdate": "2005-12-15",
+    "lastName": "Test",
+    "birthDate": "2005-12-15",
     "email": "responsabletest@voluntario.com",
     "phone": "666555444",
     "job": "Psiquiatra",
@@ -43,56 +36,47 @@
     "isEnabled": true
   },
   {
-    "username": "aquesada",
+    "userName": "aquesada",
     "name": "Angel",
-    "lastname": "Quesada",
-    "birthdate": "1985-05-15",
+    "lastName": "Quesada",
+    "birthDate": "1985-05-15",
     "email": "angel.quesada@refugio.org",
     "phone": "611223344",
     "job": "Coordinador de Refugio",
     "location": "Granada",
-    "roles": [
-      1,
-      3
-    ],
+    "roles": [1, 3],
     "isEnabled": true
   },
   {
-    "username": "perezj",
+    "userName": "perezj",
     "name": "Juan",
-    "lastname": "Pérez",
-    "birthdate": "1975-12-25",
+    "lastName": "Pérez",
+    "birthDate": "1975-12-25",
     "email": "jperez@email.net",
     "phone": "677889900",
     "job": "Camarero",
     "location": "Sevilla",
-    "roles": [
-      1
-    ],
+    "roles": [1],
     "isEnabled": true
   },
   {
-    "username": "sanchez_a",
+    "userName": "sanchez_a",
     "name": "Ana",
-    "lastname": "Sánchez",
-    "birthdate": "2003-06-18",
+    "lastName": "Sánchez",
+    "birthDate": "2003-06-18",
     "email": "ana.sanchez@email.org",
     "phone": "688990011",
     "job": "Estudiante",
     "location": "Granada",
-    "roles": [
-      2
-    ],
+    "roles": [2],
     "isEnabled": true
   },
   {
-    "username": "cgrant",
-    "roles": [
-      1
-    ],
+    "userName": "cgrant",
+    "roles": [1],
     "name": "Charles",
-    "lastname": "Grant",
-    "birthdate": "2001-01-28",
+    "lastName": "Grant",
+    "birthDate": "2001-01-28",
     "email": "pycides@voluntario.com",
     "phone": "6722496537",
     "job": "Jardinero",
@@ -100,13 +84,11 @@
     "isEnabled": true
   },
   {
-    "username": "squesada",
-    "roles": [
-      1
-    ],
+    "userName": "squesada",
+    "roles": [1],
     "name": "Sara",
-    "lastname": "Quesada",
-    "birthdate": "1988-06-18",
+    "lastName": "Quesada",
+    "birthDate": "1988-06-18",
     "email": "squesada@voluntario.com",
     "phone": "656555666",
     "job": "Agente Social",
@@ -114,58 +96,47 @@
     "isEnabled": true
   },
   {
-    "username": "jtirado",
+    "userName": "jtirado",
     "name": "Javier",
-    "lastname": "Tirado",
-    "birthdate": "1988-07-30",
+    "lastName": "Tirado",
+    "birthDate": "1988-07-30",
     "email": "javier.tirado@refugio.org",
     "phone": "644556677",
     "job": "Informático",
     "location": "Granada",
-    "roles": [
-      1,
-      2,
-      3
-    ],
+    "roles": [1, 2, 3],
     "isEnabled": true
   },
   {
-    "username": "eruiz",
+    "userName": "eruiz",
     "name": "Elena",
-    "lastname": "Ruiz",
-    "birthdate": "1999-10-28",
+    "lastName": "Ruiz",
+    "birthDate": "1999-10-28",
     "email": "elena.r@voluntarios.org",
     "phone": "600112233",
     "job": "Camarero",
     "location": "Granada",
-    "roles": [
-      1
-    ],
+    "roles": [1],
     "isEnabled": true
   },
   {
-    "username": "lpedorra",
+    "userName": "lpedorra",
     "name": "Lucia",
-    "lastname": "Pedorra",
-    "birthdate": "1992-11-08",
+    "lastName": "Pedorra",
+    "birthDate": "1992-11-08",
     "email": "lucia.p@voluntarios.org",
     "phone": "622334455",
     "job": "Veterinaria",
     "location": "Granada",
-    "roles": [
-      1,
-      2
-    ],
+    "roles": [1, 2],
     "isEnabled": true
   },
   {
-    "username": "dtontito",
-    "roles": [
-      1
-    ],
+    "userName": "dtontito",
+    "roles": [1],
     "name": "Diego",
-    "lastname": "Tontito",
-    "birthdate": "1968-12-14",
+    "lastName": "Tontito",
+    "birthDate": "1968-12-14",
     "email": "dtontito@voluntario.com",
     "phone": "666999666",
     "job": "Entrenador",
@@ -173,14 +144,11 @@
     "isEnabled": true
   },
   {
-    "username": "atest",
-    "roles": [
-      1,
-      3
-    ],
+    "userName": "atest",
+    "roles": [1, 3],
     "name": "Administrador",
-    "lastname": "Test",
-    "birthdate": "1989-07-14",
+    "lastName": "Test",
+    "birthDate": "1989-07-14",
     "email": "administradortest@voluntario.com",
     "phone": "666555444",
     "job": "Cirujano",
@@ -188,13 +156,11 @@
     "isEnabled": true
   },
   {
-    "username": "emerida",
-    "roles": [
-      1
-    ],
+    "userName": "emerida",
+    "roles": [1],
     "name": "Elena",
-    "lastname": "Merida",
-    "birthdate": "2001-12-14",
+    "lastName": "Merida",
+    "birthDate": "2001-12-14",
     "email": "emerida@voluntario.com",
     "phone": "666555111",
     "job": "Marketing",
@@ -202,13 +168,11 @@
     "isEnabled": true
   },
   {
-    "username": "vtest",
-    "roles": [
-      1
-    ],
+    "userName": "vtest",
+    "roles": [1],
     "name": "Voluntario",
-    "lastname": "Test",
-    "birthdate": "2001-06-09",
+    "lastName": "Test",
+    "birthDate": "2001-06-09",
     "email": "voluntariotest@voluntario.com",
     "phone": "666999666",
     "job": "Medico",
@@ -216,46 +180,39 @@
     "isEnabled": true
   },
   {
-    "username": "mfernandez",
+    "userName": "mfernandez",
     "name": "María",
-    "lastname": "Fernández",
-    "birthdate": "1998-09-05",
+    "lastName": "Fernández",
+    "birthDate": "1998-09-05",
     "email": "maria.f@email.com",
     "phone": "666778899",
     "job": "Diseñadora Gráfica",
     "location": "Granada",
-    "roles": [
-      1
-    ],
+    "roles": [1],
     "isEnabled": false
   },
   {
-    "username": "cgarcia",
+    "userName": "cgarcia",
     "name": "Carlos",
-    "lastname": "García",
-    "birthdate": "2001-01-10",
+    "lastName": "García",
+    "birthDate": "2001-01-10",
     "email": "carlos.g@email.com",
     "phone": "655667788",
     "job": "Estudiante",
     "location": "Granada",
-    "roles": [
-      1
-    ],
+    "roles": [1],
     "isEnabled": true
   },
   {
-    "username": "ppedorra",
+    "userName": "ppedorra",
     "name": "Patricia",
-    "lastname": "Pedorra",
-    "birthdate": "1990-03-22",
+    "lastName": "Pedorra",
+    "birthDate": "1990-03-22",
     "email": "patricia.p@voluntarios.org",
     "phone": "633445566",
     "job": "Profesora",
     "location": "Málaga",
-    "roles": [
-      1,
-      2
-    ],
+    "roles": [1, 2],
     "isEnabled": true
   }
 ]

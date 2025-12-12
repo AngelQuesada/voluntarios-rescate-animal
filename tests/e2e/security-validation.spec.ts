@@ -237,8 +237,8 @@ test.describe('Tests de Seguridad y Validación', () => {
 
       const fieldsToTest = [
         'input[name="name"]',
-        'input[name="lastname"]',
-        'input[name="username"]',
+        'input[name="lastName"]',
+        'input[name="userName"]',
         'input[name="job"]',
         'input[name="location"]',
       ];

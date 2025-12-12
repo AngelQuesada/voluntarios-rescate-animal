@@ -4,11 +4,11 @@ import { Timestamp } from 'firebase/firestore';
 export interface User {
   id?: string;
   uid: string;
-  username: string;
+  userName: string;
   roles: number[];
   name: string;
-  lastname: string;
-  birthdate: string;
+  lastName: string;
+  birthDate: string;
   email: string;
   phone: string;
   job?: string;
@@ -23,7 +23,7 @@ export interface CurrentUser extends Omit<FirebaseUser, 'providerData'> {
   email: string;
   uid: string;
   name?: string;
-  lastname?: string;
+  lastName?: string;
   roles?: number[];
   phone?: string;
   isEnabled: boolean;
@@ -35,10 +35,10 @@ export interface HeaderProps {
 
 // Tipos para formularios de usuario
 export interface UserInfoForForm {
-  username: string;
+  userName: string;
   name: string;
-  lastname: string;
-  birthdate: string;
+  lastName: string;
+  birthDate: string;
   email: string;
   phone: string;
   job?: string;
@@ -49,10 +49,10 @@ export interface UserInfoForForm {
 
 // Estados para el panel de administración
 export interface NewUserInfoState {
-  username: string;
+  userName: string;
   name: string;
-  lastname: string;
-  birthdate: string;
+  lastName: string;
+  birthDate: string;
   email: string;
   phone: string;
   job: string;
@@ -62,10 +62,10 @@ export interface NewUserInfoState {
 }
 
 export interface EditUserInfoState {
-  username: string;
+  userName: string;
   name: string;
-  lastname: string;
-  birthdate: string;
+  lastName: string;
+  birthDate: string;
   email: string;
   phone: string;
   job: string;

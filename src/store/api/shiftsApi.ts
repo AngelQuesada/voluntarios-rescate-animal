@@ -92,7 +92,7 @@ export const shiftsApi = api.injectEndpoints({
                     if (user) {
                       return {
                         uid: assignment.uid,
-                        name: `${user.name} ${user.lastname}`,
+                        name: `${user.name} ${user.lastName}`,
                         roles: user.roles,
                         phone: user.phone,
                       };
@@ -162,7 +162,7 @@ export const shiftsApi = api.injectEndpoints({
                     if (user) {
                       return {
                         uid: assignment.uid,
-                        name: `${user.name} ${user.lastname}`,
+                        name: `${user.name} ${user.lastName}`,
                         roles: user.roles,
                         phone: user.phone,
                       };

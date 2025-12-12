@@ -48,11 +48,11 @@ export const useAdminPanel = () => {
 
   // Estados del formulario usando el tipo correcto
   const [newUserInfo, setNewUserInfo] = useState<ExtendedUserFormData>({
-    username: '',
+    userName: '',
     roles: [],
     name: '',
-    lastname: '',
-    birthdate: '',
+    lastName: '',
+    birthDate: '',
     email: '',
     phone: '',
     job: '',
@@ -62,11 +62,11 @@ export const useAdminPanel = () => {
   });
 
   const [editUserInfo, setEditUserInfo] = useState<ExtendedUserFormData>({
-    username: '',
+    userName: '',
     roles: [],
     name: '',
-    lastname: '',
-    birthdate: '',
+    lastName: '',
+    birthDate: '',
     email: '',
     phone: '',
     job: '',
@@ -114,8 +114,8 @@ export const useAdminPanel = () => {
       const matchesSearch =
         !searchTerm ||
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.lastname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesRole =
@@ -176,10 +176,10 @@ export const useAdminPanel = () => {
 
   // Validaciones
   const validateUserInfo = useCallback((userInfo: ExtendedUserFormData): string | null => {
-    const { email, name, username, phone, password } = userInfo;
+    const { email, name, userName, phone, password } = userInfo;
 
     // Validaciones básicas requeridas
-    if (!email?.trim() || !name?.trim() || !username?.trim() || !phone?.trim()) {
+    if (!email?.trim() || !name?.trim() || !userName?.trim() || !phone?.trim()) {
       return 'Todos los campos obligatorios deben estar completos';
     }
 
@@ -237,10 +237,10 @@ export const useAdminPanel = () => {
         body: JSON.stringify({
           email: newUserInfo.email,
           password: newUserInfo.password,
-          username: newUserInfo.username,
+          userName: newUserInfo.userName,
           name: newUserInfo.name,
-          lastname: newUserInfo.lastname,
-          birthdate: newUserInfo.birthdate,
+          lastName: newUserInfo.lastName,
+          birthDate: newUserInfo.birthDate,
           phone: newUserInfo.phone,
           job: newUserInfo.job,
           location: newUserInfo.location,
@@ -260,11 +260,11 @@ export const useAdminPanel = () => {
       setUsers((prev) => [...prev, userData] as User[]);
       setIsAddDialogOpen(false);
       setNewUserInfo({
-        username: '',
+        userName: '',
         roles: [],
         name: '',
-        lastname: '',
-        birthdate: '',
+        lastName: '',
+        birthDate: '',
         email: '',
         phone: '',
         job: '',
@@ -275,7 +275,7 @@ export const useAdminPanel = () => {
       setAddSubmitAttempted(false);
 
       // Mensaje personalizado con nombre y apellidos en negrita
-      const fullName = `${newUserInfo.name} ${newUserInfo.lastname}`.trim();
+      const fullName = `${newUserInfo.name} ${newUserInfo.lastName}`.trim();
       setSnackbarMessage(
         createElement(
           Fragment,
@@ -315,13 +315,13 @@ export const useAdminPanel = () => {
   const openEditDialog = (user: User) => {
     setUserToEdit(user);
     setEditUserInfo({
-      username: user.username || '',
+      userName: user.userName || '',
       roles: Array.isArray(user.roles)
         ? user.roles.filter((role) => role !== UserRoles.VOLUNTARIO)
         : [],
       name: user.name || '',
-      lastname: user.lastname || '',
-      birthdate: user.birthdate || '',
+      lastName: user.lastName || '',
+      birthDate: user.birthDate || '',
       email: user.email || '',
       phone: user.phone || '',
       job: user.job || '',
@@ -367,7 +367,7 @@ export const useAdminPanel = () => {
       setEditSubmitAttempted(false);
 
       // Mensaje personalizado con nombre y apellidos en negrita
-      const fullName = `${editUserInfo.name} ${editUserInfo.lastname}`.trim();
+      const fullName = `${editUserInfo.name} ${editUserInfo.lastName}`.trim();
       setSnackbarMessage(
         createElement(
           Fragment,
@@ -412,7 +412,7 @@ export const useAdminPanel = () => {
       closeDeleteDialog();
 
       // Mensaje personalizado con nombre y apellidos en negrita
-      const fullName = `${userToDelete.name} ${userToDelete.lastname}`.trim();
+      const fullName = `${userToDelete.name} ${userToDelete.lastName}`.trim();
       setSnackbarMessage(
         createElement(
           Fragment,

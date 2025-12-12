@@ -11,39 +11,22 @@ import { ReduxProvider } from '../../../store/provider';
 const customRender = (ui: React.ReactElement, options?: any) => {
   return rtlRender(
     <ReduxProvider>
-      <ThemeProvider theme={theme}>
-        {ui}
-      </ThemeProvider>
+      <ThemeProvider theme={theme}>{ui}</ThemeProvider>
     </ReduxProvider>,
     options
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const mockUsers = [
   {
     id: 'user1',
     uid: 'user1',
     name: 'Ana',
-    lastname: 'García',
+    lastName: 'García',
     email: 'ana@example.com',
-    username: 'ana.garcia',
+    userName: 'ana.garcia',
     roles: [UserRoles.VOLUNTARIO],
-    birthdate: '1990-01-01',
+    birthDate: '1990-01-01',
     phone: '123456789',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -53,11 +36,11 @@ const mockUsers = [
     id: 'user2',
     uid: 'user2',
     name: 'Carlos',
-    lastname: 'Ruiz',
+    lastName: 'Ruiz',
     email: 'carlos@example.com',
-    username: 'carlos.ruiz',
+    userName: 'carlos.ruiz',
     roles: [UserRoles.RESPONSABLE],
-    birthdate: '1985-05-15',
+    birthDate: '1985-05-15',
     phone: '987654321',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -67,11 +50,11 @@ const mockUsers = [
     id: 'user3',
     uid: 'user3',
     name: 'María',
-    lastname: 'López',
+    lastName: 'López',
     email: 'maria@example.com',
-    username: 'maria.lopez',
+    userName: 'maria.lopez',
     roles: [UserRoles.VOLUNTARIO],
-    birthdate: '1992-08-20',
+    birthDate: '1992-08-20',
     phone: '555666777',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -205,11 +188,11 @@ describe('AddUserToShiftDialog', () => {
           id: 'user-no-name',
           uid: 'user-no-name',
           email: 'noname@example.com',
-          username: 'noname',
+          userName: 'noname',
           name: '',
-          lastname: '',
+          lastName: '',
           roles: [UserRoles.VOLUNTARIO],
-          birthdate: '1990-01-01',
+          birthDate: '1990-01-01',
           phone: '123456789',
           createdAt: new Date().toISOString(),
           isEnabled: true,

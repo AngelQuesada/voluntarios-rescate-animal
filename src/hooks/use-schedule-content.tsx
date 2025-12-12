@@ -35,7 +35,7 @@ interface UseScheduleContentResult {
   // Desde useShiftsData
   processedAssignments: ProcessedAssignments;
   filteredAssignments: ProcessedAssignments;
-  allUsersList: { id: string; name?: string; lastname?: string; roles?: number[] }[];
+  allUsersList: { id: string; name?: string; lastName?: string; roles?: number[] }[];
   usersMap: { [uid: string]: User };
   shiftsLoading: boolean;
   userShiftsLoading: boolean;
@@ -268,7 +268,7 @@ export function useScheduleContent({
             }
 
             const assignmentName = userDetails?.name || assignment.name || 'Usuario';
-            const assignmentLastname = userDetails?.lastname || '';
+            const assignmentLastname = userDetails?.lastName || '';
             const displayName = `${assignmentName}${assignmentLastname ? ' ' + assignmentLastname : ''}`;
 
             const Content = (

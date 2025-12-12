@@ -16,13 +16,13 @@ export function formatDate(date: string | Date): string {
 
 /**
  * Calcula la edad basada en la fecha de nacimiento
- * @param birthdate Fecha de nacimiento (string o Date)
+ * @param birthDate Fecha de nacimiento (string o Date)
  * @returns Edad en años como number
  */
-export function calculateAge(birthdate: string | Date): number {
-  if (!birthdate) return 0;
+export function calculateAge(birthDate: string | Date): number {
+  if (!birthDate) return 0;
 
-  const birthDateObj = typeof birthdate === 'string' ? new Date(birthdate) : birthdate;
+  const birthDateObj = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
   const today = new Date();
 
   let age = today.getFullYear() - birthDateObj.getFullYear();

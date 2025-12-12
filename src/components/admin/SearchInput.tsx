@@ -94,7 +94,7 @@ const SearchInput: FC<SearchInputProps> = ({
     >
       {showSearchInput ? (
         <TextField
-          label="Buscar Usuario por nombre, apellidos o username"
+          label="Buscar Usuario por nombre, apellidos o userName"
           variant="outlined"
           fullWidth
           value={searchTerm}

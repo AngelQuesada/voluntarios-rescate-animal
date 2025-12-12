@@ -91,7 +91,7 @@ const ShiftAssignmentList: React.FC<ShiftAssignmentListProps> = ({
           const roleColor = getRoleColor(assignment.roles);
           const userDetails = usersMap[assignment.uid];
           const assignmentName = userDetails?.name || assignment.name || 'Usuario';
-          const assignmentLastname = userDetails?.lastname || '';
+          const assignmentLastname = userDetails?.lastName || '';
           const displayName = `${assignmentName}${assignmentLastname ? ' ' + assignmentLastname : ''}`;
 
           let canContact = false;

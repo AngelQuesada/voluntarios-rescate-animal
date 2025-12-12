@@ -11,25 +11,27 @@ function initializeFirebaseAdmin() {
   try {
     // En desarrollo local, intentar cargar desde archivo primero
     const serviceAccountPath = path.join(__dirname, '../serviceAccountKey.json');
-    
+
     if (fs.existsSync(serviceAccountPath)) {
       // Usar archivo de credenciales en desarrollo local
       const serviceAccount = require(serviceAccountPath);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.project_id
+        projectId: serviceAccount.project_id,
       });
       console.log('Firebase Admin inicializado con archivo de credenciales');
       return;
     }
-    
+
     // Si no hay archivo, usar variables de entorno
     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-    
+
     if (!privateKey || !process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL) {
-      throw new Error('No se encontró serviceAccountKey.json ni variables de entorno configuradas correctamente');
+      throw new Error(
+        'No se encontró serviceAccountKey.json ni variables de entorno configuradas correctamente'
+      );
     }
-    
+
     const credentials = {
       type: 'service_account',
       project_id: process.env.FIREBASE_PROJECT_ID,
@@ -41,14 +43,14 @@ function initializeFirebaseAdmin() {
       token_uri: 'https://oauth2.googleapis.com/token',
       auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
       client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
-      universe_domain: 'googleapis.com'
+      universe_domain: 'googleapis.com',
     };
 
     admin.initializeApp({
       credential: admin.credential.cert(credentials),
-      projectId: process.env.FIREBASE_PROJECT_ID
+      projectId: process.env.FIREBASE_PROJECT_ID,
     });
-    
+
     console.log('Firebase Admin inicializado con variables de entorno');
   } catch (error) {
     console.error('Error inicializando Firebase Admin:', error.message);
@@ -90,7 +92,7 @@ async function importUsersFromJson() {
   let errorsCount = 0;
 
   for (const userRecord of usersToImport) {
-    const { uid, email, name, lastname, roles, ...firestoreData } = userRecord;
+    const { uid, email, name, lastName, roles, ...firestoreData } = userRecord;
 
     if (!email) {
       console.error(`Usuario omitido: Falta el campo email. UID original: ${uid || 'N/A'}`);
@@ -104,7 +106,7 @@ async function importUsersFromJson() {
       const createUserRequest = {
         email: email,
         password: DEFAULT_PASSWORD,
-        displayName: `${name || ''} ${lastname || ''}`.trim(),
+        displayName: `${name || ''} ${lastName || ''}`.trim(),
         disabled: !(firestoreData.isEnabled === true), // Si isEnabled no es true, se deshabilita
       };
       // Si el UID original existe en el JSON, intentamos usarlo.
@@ -131,23 +133,25 @@ async function importUsersFromJson() {
       const userDocumentData = {
         email, // Guardamos el email también en Firestore por consistencia con tu estructura User
         name,
-        lastname,
+        lastName,
         roles,
         ...firestoreData, // El resto de los campos, incluyendo isEnabled
         uid: userAuthRecord.uid, // Aseguramos que el uid en Firestore coincida con el de Auth
         createdAt: firestoreData.createdAt || currentTimestamp,
-        updatedAt: currentTimestamp, 
+        updatedAt: currentTimestamp,
       };
-      
+
       // Eliminar campos que no queremos duplicar o que no pertenecen a la colección users
       delete userDocumentData.password; // No guardar contraseñas en Firestore
-      
+
       const userDocRef = db.collection('users').doc(userAuthRecord.uid);
       firestoreBatch.set(userDocRef, userDocumentData);
       firestoreDocsCreated++;
-
     } catch (error) {
-      console.error(`Error al procesar/importar usuario (Email: ${email}, UID original: ${uid || 'N/A'}):`, error.message);
+      console.error(
+        `Error al procesar/importar usuario (Email: ${email}, UID original: ${uid || 'N/A'}):`,
+        error.message
+      );
       errorsCount++;
       // Si la creación en Auth falló, no intentamos crear en Firestore para este usuario.
       // Si el error fue por UID duplicado y quieres actualizar, la lógica sería más compleja.
@@ -172,8 +176,10 @@ async function importUsersFromJson() {
   }
 }
 
-importUsersFromJson().then(() => {
-  console.log('\nScript de importación finalizado.');
-}).catch(error => {
-  console.error('\nEl script de importación falló con un error general:', error);
-});
+importUsersFromJson()
+  .then(() => {
+    console.log('\nScript de importación finalizado.');
+  })
+  .catch((error) => {
+    console.error('\nEl script de importación falló con un error general:', error);
+  });

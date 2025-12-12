@@ -78,12 +78,12 @@ const VolunteersList: FC<VolunteersListProps> = ({ selectedDate }) => {
                   id: volunteerData.uid,
                   uid: volunteerData.uid,
                   name: userData.name,
-                  lastname: userData.lastname,
+                  lastName: userData.lastName,
                   email: userData.email || volunteerData.email || '',
                   phone: userData.phone || volunteerData.phone || '',
                   roles: userData.roles || volunteerData.roles || [],
-                  username: userData.username || volunteerData.username || '',
-                  birthdate: userData.birthdate || volunteerData.birthdate || '',
+                  userName: userData.userName || volunteerData.userName || '',
+                  birthDate: userData.birthDate || volunteerData.birthDate || '',
                   createdAt: userData.createdAt || volunteerData.createdAt || '',
                   updatedAt: userData.updatedAt || volunteerData.updatedAt || '',
                   shift: shiftType,
@@ -94,12 +94,12 @@ const VolunteersList: FC<VolunteersListProps> = ({ selectedDate }) => {
                   id: volunteerData.uid,
                   uid: volunteerData.uid,
                   name: volunteerData.name,
-                  lastname: volunteerData.lastname || '',
+                  lastName: volunteerData.lastName || '',
                   email: volunteerData.email || '',
                   phone: volunteerData.phone || '',
                   roles: volunteerData.roles || [],
-                  username: volunteerData.username || '',
-                  birthdate: volunteerData.birthdate || '',
+                  userName: volunteerData.userName || '',
+                  birthDate: volunteerData.birthDate || '',
                   createdAt: volunteerData.createdAt || '',
                   updatedAt: volunteerData.updatedAt || '',
                   shift: shiftType,
@@ -231,7 +231,7 @@ const VolunteersList: FC<VolunteersListProps> = ({ selectedDate }) => {
                   cursor: 'pointer',
                 }}
               >
-                {`${volunteer.name} ${volunteer.lastname}`.trim()}
+                {`${volunteer.name} ${volunteer.lastName}`.trim()}
                 {isCurrentUser && ' (Tú)'}
               </Typography>
             </Box>
@@ -284,12 +284,12 @@ const VolunteersList: FC<VolunteersListProps> = ({ selectedDate }) => {
             id: selectedVolunteer.id,
             uid: selectedVolunteer.uid,
             name: selectedVolunteer.name,
-            lastname: selectedVolunteer.lastname,
+            lastName: selectedVolunteer.lastName,
             email: selectedVolunteer.email,
             phone: selectedVolunteer.phone,
             roles: selectedVolunteer.roles,
-            username: selectedVolunteer.username,
-            birthdate: selectedVolunteer.birthdate,
+            userName: selectedVolunteer.userName,
+            birthDate: selectedVolunteer.birthDate,
             createdAt: selectedVolunteer.createdAt,
             updatedAt: selectedVolunteer.updatedAt,
           }}

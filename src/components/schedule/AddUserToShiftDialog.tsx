@@ -43,11 +43,11 @@ const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
       if (!searchTerm.trim()) return true;
 
       // Si hay término de búsqueda, verificar coincidencias
-      const fullName = `${user.name || ''} ${user.lastname || ''}`.trim();
+      const fullName = `${user.name || ''} ${user.lastName || ''}`.trim();
       return (
         fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.lastname || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (user.lastName || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     })
     .sort((a, b) => {
@@ -64,7 +64,7 @@ const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
       if (!aIsResponsable && bIsResponsable) return 1;
 
       // Si ambos son responsables o ninguno lo es, ordenar alfabéticamente
-      return `${a.name} ${a.lastname}`.localeCompare(`${b.name} ${b.lastname}`);
+      return `${a.name} ${a.lastName}`.localeCompare(`${b.name} ${b.lastName}`);
     });
 
   return (
@@ -90,13 +90,13 @@ const AddUserToShiftDialog: React.FC<AddUserToShiftDialogProps> = ({
                   primary={
                     user.roles?.includes(UserRoles.RESPONSABLE) ? (
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {`${user.name || ''} ${user.lastname || ''}`.trim() || 'Usuario sin nombre'}
+                        {`${user.name || ''} ${user.lastName || ''}`.trim() || 'Usuario sin nombre'}
                         <FiberManualRecordIcon
                           sx={{ color: 'green', fontSize: '0.8rem', ml: 0.5 }}
                         />
                       </Box>
                     ) : (
-                      `${user.name || ''} ${user.lastname || ''}`.trim() || 'Usuario sin nombre'
+                      `${user.name || ''} ${user.lastName || ''}`.trim() || 'Usuario sin nombre'
                     )
                   }
                 />

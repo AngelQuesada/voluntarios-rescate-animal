@@ -33,6 +33,7 @@ GET /api/users/me
 Devuelve la información del usuario autenticado actualmente.
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "uid": "string",
@@ -40,14 +41,14 @@ Devuelve la información del usuario autenticado actualmente.
   "email": "string",
   "photoURL": "string|null",
   "roles": "number[]",
-  "isEnabled": "boolean", 
+  "isEnabled": "boolean",
   "name": "string",
-  "lastname": "string",
-  "username": "string",
+  "lastName": "string",
+  "userName": "string",
   "phone": "string",
   "location": "string|null",
   "occupation": "string|null",
-  "birthdate": "string|null"
+  "birthDate": "string|null"
 }
 ```
 
@@ -60,6 +61,7 @@ GET /api/users/{uid}
 Devuelve la información de un usuario específico. Requiere rol de administrador o ser el propio usuario.
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "uid": "string",
@@ -68,12 +70,12 @@ Devuelve la información de un usuario específico. Requiere rol de administrado
   "roles": "number[]",
   "isEnabled": "boolean",
   "name": "string",
-  "lastname": "string",
-  "username": "string",
+  "lastName": "string",
+  "userName": "string",
   "phone": "string",
   "location": "string|null",
   "occupation": "string|null",
-  "birthdate": "string|null"
+  "birthDate": "string|null"
 }
 ```
 
@@ -86,23 +88,25 @@ POST /api/users
 Crea un nuevo usuario. Requiere rol de administrador.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "email": "string",
   "password": "string",
   "name": "string",
-  "lastname": "string",
-  "username": "string",
+  "lastName": "string",
+  "userName": "string",
   "roles": "number[]",
   "phone": "string",
   "location": "string",
   "job": "string",
-  "birthdate": "string",
+  "birthDate": "string",
   "isEnabled": "boolean"
 }
 ```
 
 **Respuesta exitosa (201):**
+
 ```json
 {
   "uid": "string",
@@ -121,31 +125,33 @@ POST /api/create-user
 Crea un nuevo usuario en Firebase Authentication y Firestore. Requiere rol de administrador.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "email": "string",
   "password": "string",
   "name": "string",
-  "lastname": "string",
-  "username": "string",
+  "lastName": "string",
+  "userName": "string",
   "phone": "string",
   "job": "string",
   "location": "string",
-  "birthdate": "string",
+  "birthDate": "string",
   "roles": "number[]",
   "isEnabled": "boolean"
 }
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "uid": "string",
   "email": "string",
-  "username": "string",
+  "userName": "string",
   "name": "string",
-  "lastname": "string",
-  "birthdate": "string",
+  "lastName": "string",
+  "birthDate": "string",
   "phone": "string",
   "job": "string",
   "location": "string",
@@ -157,6 +163,7 @@ Crea un nuevo usuario en Firebase Authentication y Firestore. Requiere rol de ad
 ```
 
 **Errores comunes:**
+
 - **400**: Datos faltantes o inválidos
 - **500**: Error al crear usuario en Firebase Auth o Firestore
 
@@ -169,21 +176,23 @@ PUT /api/users/{uid}
 Actualiza la información de un usuario existente. Requiere rol de administrador o ser el propio usuario. Los administradores pueden actualizar todos los campos, mientras que los usuarios normales solo pueden actualizar ciertos campos personales.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "name": "string",
-  "lastname": "string",
-  "username": "string",
+  "lastName": "string",
+  "userName": "string",
   "phone": "string",
   "location": "string",
-  "job": "string", 
-  "birthdate": "string",
-  "roles": "number[]", 
+  "job": "string",
+  "birthDate": "string",
+  "roles": "number[]",
   "isEnabled": "boolean"
 }
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "uid": "string",
@@ -202,6 +211,7 @@ DELETE /api/users/{uid}
 Elimina un usuario. Requiere rol de administrador.
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "message": "Usuario eliminado correctamente"
@@ -217,10 +227,12 @@ GET /api/users
 Obtiene la lista de todos los usuarios. Requiere rol de administrador.
 
 **Parámetros de consulta opcionales:**
+
 - `role`: Filtrar por rol específico (número)
 - `enabled`: Filtrar por estado de habilitación (true/false)
 
 **Respuesta exitosa (200):**
+
 ```json
 [
   {
@@ -230,8 +242,8 @@ Obtiene la lista de todos los usuarios. Requiere rol de administrador.
     "roles": "number[]",
     "isEnabled": "boolean",
     "name": "string",
-    "lastname": "string",
-    "username": "string"
+    "lastName": "string",
+    "userName": "string"
   }
 ]
 ```
@@ -247,10 +259,12 @@ GET /api/shifts
 Obtiene los turnos para un rango de fechas específico.
 
 **Parámetros de consulta:**
+
 - `startDate`: Fecha de inicio (formato YYYY-MM-DD)
 - `endDate`: Fecha de fin (formato YYYY-MM-DD)
 
 **Respuesta exitosa (200):**
+
 ```json
 [
   {
@@ -279,6 +293,7 @@ GET /api/shifts/{shiftId}
 Obtiene información detallada de un turno específico.
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "id": "string",
@@ -305,6 +320,7 @@ POST /api/shifts
 Crea un nuevo turno o actualiza uno existente. Requiere rol de responsable o administrador.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "date": "string",
@@ -315,6 +331,7 @@ Crea un nuevo turno o actualiza uno existente. Requiere rol de responsable o adm
 ```
 
 **Respuesta exitosa (201/200):**
+
 ```json
 {
   "id": "string",
@@ -334,6 +351,7 @@ POST /api/shifts/{shiftId}/assign
 Asigna un usuario a un turno específico.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "uid": "string"
@@ -341,6 +359,7 @@ Asigna un usuario a un turno específico.
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "success": true,
@@ -357,6 +376,7 @@ POST /api/shifts/{shiftId}/unassign
 Elimina la asignación de un usuario a un turno.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "uid": "string"
@@ -364,6 +384,7 @@ Elimina la asignación de un usuario a un turno.
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "success": true,
@@ -382,10 +403,12 @@ GET /api/history
 Obtiene el historial de turnos pasados. Requiere rol de administrador.
 
 **Parámetros de consulta:**
+
 - `startDate`: Fecha de inicio (formato YYYY-MM-DD)
 - `endDate`: Fecha de fin (formato YYYY-MM-DD)
 
 **Respuesta exitosa (200):**
+
 ```json
 [
   {
@@ -415,6 +438,7 @@ GET /api/settings
 Obtiene la configuración general de la aplicación.
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "maxVolunteersPerShift": "number",
@@ -436,6 +460,7 @@ POST /api/settings
 Actualiza la configuración de la aplicación. Requiere rol de administrador.
 
 **Cuerpo de la solicitud:**
+
 ```json
 {
   "maxVolunteersPerShift": "number",
@@ -449,6 +474,7 @@ Actualiza la configuración de la aplicación. Requiere rol de administrador.
 ```
 
 **Respuesta exitosa (200):**
+
 ```json
 {
   "success": true,

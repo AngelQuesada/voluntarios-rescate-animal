@@ -48,11 +48,11 @@ describe('useShiftActions Hook', () => {
   const mockCurrentUser = {
     uid: 'current-user-id',
     name: 'Juan',
-    lastname: 'Pérez',
+    lastName: 'Pérez',
     email: 'juan@example.com',
     roles: [UserRoles.VOLUNTARIO],
-    username: 'juan.perez',
-    birthdate: '1990-01-01',
+    userName: 'juan.perez',
+    birthDate: '1990-01-01',
     phone: '123456789',
     isEnabled: true,
     emailVerified: true,
@@ -82,11 +82,11 @@ describe('useShiftActions Hook', () => {
     user1: {
       uid: 'user1',
       name: 'Ana',
-      lastname: 'García',
+      lastName: 'García',
       email: 'ana@example.com',
-      username: 'ana.garcia',
+      userName: 'ana.garcia',
       roles: [UserRoles.VOLUNTARIO],
-      birthdate: '1990-01-01',
+      birthDate: '1990-01-01',
       phone: '123456789',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -94,11 +94,11 @@ describe('useShiftActions Hook', () => {
     user2: {
       uid: 'user2',
       name: 'Carlos',
-      lastname: 'Ruiz',
+      lastName: 'Ruiz',
       email: 'carlos@example.com',
-      username: 'carlos.ruiz',
+      userName: 'carlos.ruiz',
       roles: [UserRoles.RESPONSABLE],
-      birthdate: '1990-01-01',
+      birthDate: '1990-01-01',
       phone: '123456789',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -157,7 +157,7 @@ describe('useShiftActions Hook', () => {
   });
 
   test('should show warning for incomplete profile', async () => {
-    const incompleteUser = { ...mockCurrentUser, name: '', lastname: '' };
+    const incompleteUser = { ...mockCurrentUser, name: '', lastName: '' };
     const { result } = renderHook(() =>
       useShiftActions({ ...defaultProps, currentUser: incompleteUser })
     );

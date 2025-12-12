@@ -97,22 +97,22 @@ test.describe('Tests de CRUD de Usuarios', () => {
     const newUser = {
       email: 'nuevo.voluntario@test.com',
       name: 'Nuevo',
-      lastname: 'Voluntario',
-      username: 'nuevo_voluntario',
+      lastName: 'Voluntario',
+      userName: 'nuevo_voluntario',
       phone: '+34600111111',
-      birthdate: '1990-01-01',
+      birthDate: '1990-01-01',
       job: 'Estudiante',
       location: 'Albolote',
       password: 'testing123',
     };
 
     // Llenar el formulario
-    await page.fill('input[name="username"]', newUser.username);
+    await page.fill('input[name="userName"]', newUser.userName);
     await page.fill('input[name="name"]', newUser.name);
-    await page.fill('input[name="lastname"]', newUser.lastname);
+    await page.fill('input[name="lastName"]', newUser.lastName);
     await page.fill('input[name="email"]', newUser.email);
     await page.fill('input[name="phone"]', newUser.phone);
-    await page.fill('input[name="birthdate"]', newUser.birthdate);
+    await page.fill('input[name="birthDate"]', newUser.birthDate);
     await page.fill('input[name="job"]', newUser.job);
     await page.fill('input[name="password"]', newUser.password);
     await page.fill('input[name="passwordConfirm"]', newUser.password);
@@ -140,7 +140,7 @@ test.describe('Tests de CRUD de Usuarios', () => {
       .catch(() => false);
 
     // Verificar que el usuario aparece en la lista
-    await expect(page.locator(`td:has-text("${newUser.name} ${newUser.lastname}")`)).toBeVisible({
+    await expect(page.locator(`td:has-text("${newUser.name} ${newUser.lastName}")`)).toBeVisible({
       timeout: 5000,
     });
 
@@ -164,11 +164,11 @@ test.describe('Tests de CRUD de Usuarios', () => {
       email: 'usuarioeditar@test.com',
       password: 'testing123',
       userData: {
-        username: 'edit_test',
+        userName: 'edit_test',
         roles: [1],
         name: 'Usuario',
-        lastname: 'Editar',
-        birthdate: '1990-01-01',
+        lastName: 'Editar',
+        birthDate: '1990-01-01',
         email: 'usuarioeditar@test.com',
         phone: '+34600000002',
         job: 'Test',
@@ -197,7 +197,7 @@ test.describe('Tests de CRUD de Usuarios', () => {
       const userRecord = await adminAuth.createUser({
         email: tempUser.email,
         password: tempUser.password,
-        displayName: `${tempUser.userData.name} ${tempUser.userData.lastname}`,
+        displayName: `${tempUser.userData.name} ${tempUser.userData.lastName}`,
         emailVerified: true,
         disabled: false,
       });
@@ -229,7 +229,7 @@ test.describe('Tests de CRUD de Usuarios', () => {
 
       // Buscar el usuario en la lista y hacer clic en editar
       const userRow = page
-        .locator(`tr:has-text("${tempUser.userData.name} ${tempUser.userData.lastname}")`)
+        .locator(`tr:has-text("${tempUser.userData.name} ${tempUser.userData.lastName}")`)
         .first();
       await expect(userRow).toBeVisible({ timeout: 10000 });
 
@@ -303,11 +303,11 @@ test.describe('Tests de CRUD de Usuarios', () => {
       email: 'usuarioeliminar@test.com',
       password: 'testing123',
       userData: {
-        username: 'delete_test',
+        userName: 'delete_test',
         roles: [1],
         name: 'Usuario',
-        lastname: 'Eliminar',
-        birthdate: '1990-01-01',
+        lastName: 'Eliminar',
+        birthDate: '1990-01-01',
         email: 'usuarioeliminar@test.com',
         phone: '+34600000003',
         job: 'Test',
@@ -337,7 +337,7 @@ test.describe('Tests de CRUD de Usuarios', () => {
       const userRecord = await adminAuth.createUser({
         email: tempUser.email,
         password: tempUser.password,
-        displayName: `${tempUser.userData.name} ${tempUser.userData.lastname}`,
+        displayName: `${tempUser.userData.name} ${tempUser.userData.lastName}`,
         emailVerified: true,
         disabled: false,
       });
@@ -369,7 +369,7 @@ test.describe('Tests de CRUD de Usuarios', () => {
 
       // Buscar el usuario en la lista
       const userRow = page
-        .locator(`tr:has-text("${tempUser.userData.name} ${tempUser.userData.lastname}")`)
+        .locator(`tr:has-text("${tempUser.userData.name} ${tempUser.userData.lastName}")`)
         .first();
       await expect(userRow).toBeVisible({ timeout: 10000 });
 
@@ -470,10 +470,10 @@ test.describe('Tests de CRUD de Usuarios', () => {
     const newVoluntario = {
       email: 'nuevo.voluntario@test.com',
       name: 'Nuevo',
-      lastname: 'Voluntario',
-      username: 'nuevo_voluntario',
+      lastName: 'Voluntario',
+      userName: 'nuevo_voluntario',
       phone: '+34600111111',
-      birthdate: '1990-01-01',
+      birthDate: '1990-01-01',
       job: 'Estudiante',
       location: 'Jun',
     };
@@ -481,10 +481,10 @@ test.describe('Tests de CRUD de Usuarios', () => {
     // Llenar formulario
     await page.fill('input[name="email"]', newVoluntario.email);
     await page.fill('input[name="name"]', newVoluntario.name);
-    await page.fill('input[name="lastname"]', newVoluntario.lastname);
-    await page.fill('input[name="username"]', newVoluntario.username);
+    await page.fill('input[name="lastName"]', newVoluntario.lastName);
+    await page.fill('input[name="userName"]', newVoluntario.userName);
     await page.fill('input[name="phone"]', newVoluntario.phone);
-    await page.fill('input[name="birthdate"], input[type="date"]', newVoluntario.birthdate);
+    await page.fill('input[name="birthDate"], input[type="date"]', newVoluntario.birthDate);
     await page.fill('input[name="job"]', newVoluntario.job);
 
     const locationInput = page.getByLabel('Localidad');
@@ -557,10 +557,10 @@ test.describe('Tests de CRUD de Usuarios', () => {
     const newResponsable = {
       email: 'nuevo.responsable@test.com',
       name: 'Nuevo',
-      lastname: 'Responsable',
-      username: 'nuevo_responsable',
+      lastName: 'Responsable',
+      userName: 'nuevo_responsable',
       phone: '+34600222222',
-      birthdate: '1985-01-01',
+      birthDate: '1985-01-01',
       job: 'Coordinador',
       location: 'Alfacar',
     };
@@ -568,10 +568,10 @@ test.describe('Tests de CRUD de Usuarios', () => {
     // Llenar formulario
     await page.fill('input[name="email"]', newResponsable.email);
     await page.fill('input[name="name"]', newResponsable.name);
-    await page.fill('input[name="lastname"]', newResponsable.lastname);
-    await page.fill('input[name="username"]', newResponsable.username);
+    await page.fill('input[name="lastName"]', newResponsable.lastName);
+    await page.fill('input[name="userName"]', newResponsable.userName);
     await page.fill('input[name="phone"]', newResponsable.phone);
-    await page.fill('input[name="birthdate"], input[type="date"]', newResponsable.birthdate);
+    await page.fill('input[name="birthDate"], input[type="date"]', newResponsable.birthDate);
     await page.fill('input[name="job"]', newResponsable.job);
 
     const locationInput = page.getByLabel('Localidad');
@@ -642,10 +642,10 @@ test.describe('Tests de CRUD de Usuarios', () => {
     const newAdmin = {
       email: 'nuevo.admin@test.com',
       name: 'Nuevo',
-      lastname: 'Administrador',
-      username: 'nuevo_admin',
+      lastName: 'Administrador',
+      userName: 'nuevo_admin',
       phone: '+34600333333',
-      birthdate: '1980-01-01',
+      birthDate: '1980-01-01',
       job: 'Administrador',
       location: 'Beas de Granada',
       password: 'testing123',
@@ -654,10 +654,10 @@ test.describe('Tests de CRUD de Usuarios', () => {
     // Llenar formulario
     await page.fill('input[name="email"]', newAdmin.email);
     await page.fill('input[name="name"]', newAdmin.name);
-    await page.fill('input[name="lastname"]', newAdmin.lastname);
-    await page.fill('input[name="username"]', newAdmin.username);
+    await page.fill('input[name="lastName"]', newAdmin.lastName);
+    await page.fill('input[name="userName"]', newAdmin.userName);
     await page.fill('input[name="phone"]', newAdmin.phone);
-    await page.fill('input[name="birthdate"], input[type="date"]', newAdmin.birthdate);
+    await page.fill('input[name="birthDate"], input[type="date"]', newAdmin.birthDate);
     await page.fill('input[name="job"]', newAdmin.job);
     await page.fill('input[name="password"]', newAdmin.password);
     await page.fill('input[name="passwordConfirm"]', newAdmin.password);

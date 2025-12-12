@@ -18,7 +18,7 @@ interface ShiftsData {
   processedAssignments: ProcessedAssignments;
   filteredAssignments: ProcessedAssignments;
   usersMap: { [uid: string]: User };
-  allUsersList: { id: string; name?: string; lastname?: string; roles?: number[] }[];
+  allUsersList: { id: string; name?: string; lastName?: string; roles?: number[] }[];
   shiftsLoading: boolean;
   userShiftsLoading: boolean;
   usersLoading: boolean;
@@ -43,7 +43,7 @@ export function useShiftsData({
     return Object.entries(usersMap).map(([uid, user]) => ({
       id: uid,
       name: user.name,
-      lastname: user.lastname,
+      lastName: user.lastName,
       roles: user.roles,
     }));
   }, [usersMap]);

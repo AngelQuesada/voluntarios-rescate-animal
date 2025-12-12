@@ -15,11 +15,11 @@ interface ShiftData {
 export interface UserData {
   uid: string;
   name?: string;
-  lastname?: string;
-  username?: string;
+  lastName?: string;
+  userName?: string;
   email?: string;
   phone?: string;
-  birthdate?: string;
+  birthDate?: string;
   job?: string;
   location?: string;
   roles?: number[];

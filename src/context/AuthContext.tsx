@@ -20,7 +20,7 @@ type AuthContextType = {
   user:
     | (User & {
         name?: string;
-        lastname?: string;
+        lastName?: string;
         roles?: number[];
       })
     | null;
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser({
             ...auth.currentUser,
             name: userData.name,
-            lastname: userData.lastname,
+            lastName: userData.lastName,
             roles: userData.roles === undefined ? [UserRoles.VOLUNTARIO] : userData.roles,
           });
         }
@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser({
                   ...firebaseUser,
                   name: userData.name,
-                  lastname: userData.lastname,
+                  lastName: userData.lastName,
                   roles: userData.roles === undefined ? [UserRoles.VOLUNTARIO] : userData.roles,
                 });
               } else {

@@ -169,15 +169,15 @@ const UserForm = forwardRef<UserFormRef, UserFormProps>(
       >
         {/* Campo de usuario */}
         <TextField
-          name="username"
+          name="userName"
           label="Usuario"
-          value={userData.username || ''}
+          value={userData.userName || ''}
           onChange={handleChange}
           fullWidth
           required
           disabled={!isAddMode}
-          error={submitAttempted && !userData.username}
-          helperText={submitAttempted && !userData.username ? 'Campo requerido' : ''}
+          error={submitAttempted && !userData.userName}
+          helperText={submitAttempted && !userData.userName ? 'Campo requerido' : ''}
           sx={{ marginTop: 2 }}
         />
 
@@ -194,14 +194,14 @@ const UserForm = forwardRef<UserFormRef, UserFormProps>(
             helperText={submitAttempted && !userData.name ? 'Campo requerido' : ''}
           />
           <TextField
-            name="lastname"
+            name="lastName"
             label="Apellidos"
-            value={userData.lastname || ''}
+            value={userData.lastName || ''}
             onChange={handleChange}
             fullWidth
             required
-            error={submitAttempted && !userData.lastname}
-            helperText={submitAttempted && !userData.lastname ? 'Campo requerido' : ''}
+            error={submitAttempted && !userData.lastName}
+            helperText={submitAttempted && !userData.lastName ? 'Campo requerido' : ''}
           />
         </Box>
 
@@ -291,10 +291,10 @@ const UserForm = forwardRef<UserFormRef, UserFormProps>(
 
         {/* Campos opcionales */}
         <TextField
-          name="birthdate"
+          name="birthDate"
           label="Fecha de nacimiento"
           type="date"
-          value={userData.birthdate || ''}
+          value={userData.birthDate || ''}
           onChange={handleChange}
           fullWidth
           InputLabelProps={{ shrink: true }}

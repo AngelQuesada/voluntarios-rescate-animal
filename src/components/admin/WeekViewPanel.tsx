@@ -172,13 +172,13 @@ const WeekViewPanel: React.FC<WeekViewPanelProps> = ({ onUserClick }) => {
                 borderRadius: 1,
                 transition: 'background-color 0.2s ease',
                 '&:hover': {
-                  backgroundColor: 'action.hover'
+                  backgroundColor: 'action.hover',
                 },
                 py: 1,
-                px: 2
+                px: 2,
               }}
             >
-              <ListItemText primary={`${volunteer.name} ${volunteer.lastname}`} />
+              <ListItemText primary={`${volunteer.name} ${volunteer.lastName}`} />
             </ListItem>
           ))}
         </List>

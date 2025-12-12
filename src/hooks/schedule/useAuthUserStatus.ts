@@ -31,7 +31,7 @@ export function useAuthUserStatus({ showSnackbar }: UseAuthUserStatusProps) {
               email: user.email || '',
               uid: user.uid,
               name: userData.name,
-              lastname: userData.lastname,
+              lastName: userData.lastName,
               roles: userData.roles,
               phone: userData.phone,
               isEnabled: userData.isEnabled !== undefined ? userData.isEnabled : true,

@@ -197,7 +197,7 @@ const UserDetailDialog: FC<UserDetailDialogProps> = ({ open, onClose, userId, us
         {/* Información del usuario */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="body1" gutterBottom>
-            {userData.name} {userData.lastname}
+            {userData.name} {userData.lastName}
           </Typography>
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
@@ -207,7 +207,7 @@ const UserDetailDialog: FC<UserDetailDialogProps> = ({ open, onClose, userId, us
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" color="text.secondary">
-                Usuario: <strong>{userData.username || 'No disponible'}</strong>
+                Usuario: <strong>{userData.userName || 'No disponible'}</strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Correo: <strong>{userData.email || 'No disponible'}</strong>
@@ -220,7 +220,7 @@ const UserDetailDialog: FC<UserDetailDialogProps> = ({ open, onClose, userId, us
               <Typography variant="body2" color="text.secondary">
                 Edad:{' '}
                 <strong>
-                  {userData.birthdate ? calculateAge(userData.birthdate) : 'No disponible'}
+                  {userData.birthDate ? calculateAge(userData.birthDate) : 'No disponible'}
                 </strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">

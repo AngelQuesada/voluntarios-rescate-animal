@@ -26,9 +26,9 @@ users/
       |-- occupation: string          # Ocupación del usuario (opcional)
       |-- phone: string               # Teléfono del usuario
       |-- name: string                # Nombre del usuario
-      |-- lastname: string            # Apellido del usuario
-      |-- username: string            # Nombre de usuario
-      |-- birthdate: string           # Fecha de nacimiento (opcional, formato YYYY-MM-DD)
+      |-- lastName: string            # Apellido del usuario
+      |-- userName: string            # Nombre de usuario
+      |-- birthDate: string           # Fecha de nacimiento (opcional, formato YYYY-MM-DD)
       |-- job: string                 # Trabajo/ocupación del usuario (opcional)
 ```
 
@@ -79,40 +79,41 @@ settings/
 ## Consultas comunes
 
 ### Obtener todos los usuarios activos
+
 ```javascript
-db.collection('users').where('isEnabled', '==', true).get()
+db.collection('users').where('isEnabled', '==', true).get();
 ```
 
 ### Obtener administradores
+
 ```javascript
-db.collection('users').where('roles', 'array-contains', 3).get()
+db.collection('users').where('roles', 'array-contains', 3).get();
 ```
 
 ### Obtener usuarios responsables
+
 ```javascript
-db.collection('users').where('roles', 'array-contains', 2).get()
+db.collection('users').where('roles', 'array-contains', 2).get();
 ```
 
 ### Obtener turnos para una semana específica
+
 ```javascript
 const startDate = '2023-06-05';
 const endDate = '2023-06-11';
-db.collection('shifts')
-  .where('date', '>=', startDate)
-  .where('date', '<=', endDate)
-  .get()
+db.collection('shifts').where('date', '>=', startDate).where('date', '<=', endDate).get();
 ```
 
 ### Obtener turnos asignados a un usuario específico
+
 ```javascript
-db.collection('shifts')
-  .where('assignments', 'array-contains', {uid: 'user123'})
-  .get()
+db.collection('shifts').where('assignments', 'array-contains', { uid: 'user123' }).get();
 ```
 
 ### Obtener configuración de la aplicación
+
 ```javascript
-db.collection('settings').doc('application').get()
+db.collection('settings').doc('application').get();
 ```
 
 ## Relaciones entre colecciones

@@ -84,7 +84,7 @@ export function useShiftActions({
     targetUserName: string,
     actionType: 'add' | 'remove' = 'add'
   ) => {
-    if (targetUserId === currentUser?.uid && (!currentUser?.name || !currentUser?.lastname)) {
+    if (targetUserId === currentUser?.uid && (!currentUser?.name || !currentUser?.lastName)) {
       showSnackbar('Perfil incompleto (nombre/apellido).', 'warning');
       return;
     }
@@ -128,7 +128,7 @@ export function useShiftActions({
         if (isAdminActingOnBehalf && currentUser?.uid) {
           actionToLog.performedByAdminId = currentUser.uid;
           actionToLog.performedByAdminName = `${currentUser.name || ''} ${
-            currentUser.lastname || ''
+            currentUser.lastName || ''
           }`.trim();
         }
 
@@ -197,7 +197,7 @@ export function useShiftActions({
       showSnackbar('Usuario no disponible o no autenticado.', 'warning');
       return;
     }
-    if (!currentUser.name || !currentUser.lastname) {
+    if (!currentUser.name || !currentUser.lastName) {
       showSnackbar('Perfil incompleto (nombre/apellido).', 'warning');
       return;
     }
@@ -211,7 +211,7 @@ export function useShiftActions({
       return;
     }
 
-    const currentUserName = `${currentUser.name} ${currentUser.lastname}`;
+    const currentUserName = `${currentUser.name} ${currentUser.lastName}`;
     await executeModifyShift(
       dateKey,
       shiftKey,
@@ -224,7 +224,7 @@ export function useShiftActions({
   const confirmShiftAction = async () => {
     triggerVibration(50);
     if (shiftToAction && currentUser && currentUser.uid) {
-      if (!currentUser.name || !currentUser.lastname) {
+      if (!currentUser.name || !currentUser.lastName) {
         showSnackbar(
           'No se puede realizar la acción, falta información del usuario (nombre/apellido).',
           'warning'
@@ -237,7 +237,7 @@ export function useShiftActions({
         shiftToAction.dateKey,
         shiftToAction.shiftKey,
         currentUser.uid,
-        `${currentUser.name} ${currentUser.lastname}`,
+        `${currentUser.name} ${currentUser.lastName}`,
         'add'
       );
       setConfirmDialogOpen(false);
@@ -268,7 +268,7 @@ export function useShiftActions({
 
     if (userDetails) {
       displayName =
-        `${userDetails.name || ''} ${userDetails.lastname || ''}`.trim() || 'Usuario desconocido';
+        `${userDetails.name || ''} ${userDetails.lastName || ''}`.trim() || 'Usuario desconocido';
     }
 
     setUserToRemoveDetails({ uid: assignment.uid, name: displayName, dateKey, shiftKey });
@@ -315,7 +315,7 @@ export function useShiftActions({
         dateKey,
         shiftKey,
         userId,
-        `${userToAdd.name || ''} ${userToAdd.lastname || ''}`.trim() || 'Usuario sin nombre',
+        `${userToAdd.name || ''} ${userToAdd.lastName || ''}`.trim() || 'Usuario sin nombre',
         'add'
       );
       setAddUserDialogOpen(false);

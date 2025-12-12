@@ -128,7 +128,7 @@ export function AdminPanel() {
     return filteredUsers.sort((a, b) => {
       if (a.isEnabled !== false && b.isEnabled === false) return -1;
       if (a.isEnabled === false && b.isEnabled !== false) return 1;
-      return `${a.name} ${a.lastname}`.localeCompare(`${b.name} ${b.lastname}`);
+      return `${a.name} ${a.lastName}`.localeCompare(`${b.name} ${b.lastName}`);
     });
   }, [filteredUsers]);
 
@@ -256,7 +256,7 @@ export function AdminPanel() {
                             }}
                             onClick={() => handleOpenUserDetailDialog(user)}
                           >
-                            {`${user.name} ${user.lastname}`}
+                            {`${user.name} ${user.lastName}`}
                           </Typography>
                           {Array.isArray(user.roles) &&
                             user.roles.includes(UserRoles.ADMINISTRADOR) && (

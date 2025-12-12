@@ -78,7 +78,7 @@ export function Header() {
             )}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {user?.name && user?.lastname && (
+            {user?.name && user?.lastName && (
               <Typography
                 variant="body1"
                 sx={{
@@ -86,7 +86,7 @@ export function Header() {
                   color: 'primary.main',
                 }}
               >
-                {`${user.name} ${user.lastname}`}
+                {`${user.name} ${user.lastName}`}
               </Typography>
             )}
             {isAdmin && (
