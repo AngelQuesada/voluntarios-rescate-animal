@@ -1,0 +1,584 @@
+[
+  {
+    "userName": "dlopez",
+    "name": "David",
+    "lastName": "López",
+    "birthDate": "1995-04-02",
+    "email": "david.lopez@email.com",
+    "phone": "699001122",
+    "job": "Camarero",
+    "location": "Madrid",
+    "roles": [
+      1
+    ],
+    "isEnabled": true,
+    "uid": "0d61e7da-014c-4de7-9677-51af820b04b8"
+  },
+  {
+    "userName": "olopez",
+    "roles": [
+      1
+    ],
+    "name": "Osvaldo",
+    "lastName": "Lopez",
+    "birthDate": "2000-05-05",
+    "email": "olopez@voluntario.com",
+    "phone": "666333222",
+    "job": "Contable",
+    "location": "Madrid",
+    "isEnabled": true,
+    "uid": "609581ac-e931-4519-91a3-ad2bcb687264"
+  },
+  {
+    "userName": "rtest",
+    "roles": [
+      1,
+      2
+    ],
+    "name": "Responsable",
+    "lastName": "Test",
+    "birthDate": "2005-12-15",
+    "email": "responsabletest@voluntario.com",
+    "phone": "666555444",
+    "job": "Psiquiatra",
+    "location": "Granada",
+    "isEnabled": true,
+    "uid": "9d992754-0abe-45fd-9e2e-a2aa52c649a3"
+  },
+  {
+    "userName": "aquesada",
+    "name": "Angel",
+    "lastName": "Quesada",
+    "birthDate": "1985-05-15",
+    "email": "angel.quesada@refugio.org",
+    "phone": "611223344",
+    "job": "Coordinador de Refugio",
+    "location": "Granada",
+    "roles": [
+      1,
+      3
+    ],
+    "isEnabled": true,
+    "uid": "8d7608e2-cef8-4bd1-ab75-21992e7e6dd7"
+  },
+  {
+    "userName": "perezj",
+    "name": "Juan",
+    "lastName": "Pérez",
+    "birthDate": "1975-12-25",
+    "email": "jperez@email.net",
+    "phone": "677889900",
+    "job": "Camarero",
+    "location": "Sevilla",
+    "roles": [
+      1
+    ],
+    "isEnabled": true,
+    "uid": "3889f442-671a-47c2-b413-cd0d382e2175"
+  },
+  {
+    "userName": "sanchez_a",
+    "name": "Ana",
+    "lastName": "Sánchez",
+    "birthDate": "2003-06-18",
+    "email": "ana.sanchez@email.org",
+    "phone": "688990011",
+    "job": "Estudiante",
+    "location": "Granada",
+    "roles": [
+      2
+    ],
+    "isEnabled": true,
+    "uid": "f3fe2efc-1b53-4d32-b1f2-a47c9116b82a"
+  },
+  {
+    "userName": "cgrant",
+    "roles": [
+      1
+    ],
+    "name": "Charles",
+    "lastName": "Grant",
+    "birthDate": "2001-01-28",
+    "email": "pycides@voluntario.com",
+    "phone": "6722496537",
+    "job": "Jardinero",
+    "location": "Huetor Tajaar",
+    "isEnabled": true,
+    "uid": "a2b4c810-b0cb-4509-b9ec-ad4eb718dab2"
+  },
+  {
+    "userName": "squesada",
+    "roles": [
+      1
+    ],
+    "name": "Sara",
+    "lastName": "Quesada",
+    "birthDate": "1988-06-18",
+    "email": "squesada@voluntario.com",
+    "phone": "656555666",
+    "job": "Agente Social",
+    "location": "Granada",
+    "isEnabled": true,
+    "uid": "528dea9b-27a9-4965-88ba-44e5d3203a26"
+  },
+  {
+    "userName": "jtirado",
+    "name": "Javier",
+    "lastName": "Tirado",
+    "birthDate": "1988-07-30",
+    "email": "javier.tirado@refugio.org",
+    "phone": "644556677",
+    "job": "Informático",
+    "location": "Granada",
+    "roles": [
+      1,
+      2,
+      3
+    ],
+    "isEnabled": true,
+    "uid": "b856c575-b904-46f3-8e9e-cb439c107573"
+  },
+  {
+    "userName": "eruiz",
+    "name": "Elena",
+    "lastName": "Ruiz",
+    "birthDate": "1999-10-28",
+    "email": "elena.r@voluntarios.org",
+    "phone": "600112233",
+    "job": "Camarero",
+    "location": "Granada",
+    "roles": [
+      1
+    ],
+    "isEnabled": true,
+    "uid": "adf68d80-3a0c-4bbb-9aad-78e990dcebea"
+  },
+  {
+    "userName": "lpedorra",
+    "name": "Lucia",
+    "lastName": "Pedorra",
+    "birthDate": "1992-11-08",
+    "email": "lucia.p@voluntarios.org",
+    "phone": "622334455",
+    "job": "Veterinaria",
+    "location": "Granada",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true,
+    "uid": "ed498d15-0480-429f-a687-9ad610b3a864"
+  },
+  {
+    "userName": "dtontito",
+    "roles": [
+      1
+    ],
+    "name": "Diego",
+    "lastName": "Tontito",
+    "birthDate": "1968-12-14",
+    "email": "dtontito@voluntario.com",
+    "phone": "666999666",
+    "job": "Entrenador",
+    "location": "Granada",
+    "isEnabled": true,
+    "uid": "1f42fa82-415d-4b4d-87ac-9b249784e599"
+  },
+  {
+    "userName": "atest",
+    "roles": [
+      1,
+      3
+    ],
+    "name": "Administrador",
+    "lastName": "Test",
+    "birthDate": "1989-07-14",
+    "email": "administradortest@voluntario.com",
+    "phone": "666555444",
+    "job": "Cirujano",
+    "location": "Granada",
+    "isEnabled": true,
+    "uid": "b72877ea-6047-4d96-ba3a-90ecf4bbea91"
+  },
+  {
+    "userName": "emerida",
+    "roles": [
+      1
+    ],
+    "name": "Elena",
+    "lastName": "Merida",
+    "birthDate": "2001-12-14",
+    "email": "emerida@voluntario.com",
+    "phone": "666555111",
+    "job": "Marketing",
+    "location": "Granada",
+    "isEnabled": true,
+    "uid": "a8195046-3359-4968-bbc7-2bd7141f0d46"
+  },
+  {
+    "userName": "vtest",
+    "roles": [
+      1
+    ],
+    "name": "Voluntario",
+    "lastName": "Test",
+    "birthDate": "2001-06-09",
+    "email": "voluntariotest@voluntario.com",
+    "phone": "666999666",
+    "job": "Medico",
+    "location": "Granada",
+    "isEnabled": true,
+    "uid": "61a8b58a-0fbe-4d7d-af6f-59f1f29d73a2"
+  },
+  {
+    "userName": "mfernandez",
+    "name": "María",
+    "lastName": "Fernández",
+    "birthDate": "1998-09-05",
+    "email": "maria.f@email.com",
+    "phone": "666778899",
+    "job": "Diseñadora Gráfica",
+    "location": "Granada",
+    "roles": [
+      1
+    ],
+    "isEnabled": false,
+    "uid": "515dd76a-31d1-4d95-9031-33d4583636ad"
+  },
+  {
+    "userName": "cgarcia",
+    "name": "Carlos",
+    "lastName": "García",
+    "birthDate": "2001-01-10",
+    "email": "carlos.g@email.com",
+    "phone": "655667788",
+    "job": "Estudiante",
+    "location": "Granada",
+    "roles": [
+      1
+    ],
+    "isEnabled": true,
+    "uid": "c2bfcacc-9725-41e2-9ccb-5af833fe7203"
+  },
+  {
+    "userName": "ppedorra",
+    "name": "Patricia",
+    "lastName": "Pedorra",
+    "birthDate": "1990-03-22",
+    "email": "patricia.p@voluntarios.org",
+    "phone": "633445566",
+    "job": "Profesora",
+    "location": "Málaga",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true,
+    "uid": "2346cc73-05a4-4e8f-88b3-0695916a5116"
+  },
+  {
+    "uid": "66243bc5-5677-4c21-8f8d-934babcff5bd",
+    "userName": "malvarez586",
+    "name": "Maria",
+    "lastName": "Alvarez",
+    "birthDate": "1985-07-16",
+    "email": "malvarez586@generated.com",
+    "phone": "633408172",
+    "job": "Cocinero",
+    "location": "Málaga",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "ab7e539d-1413-4fc8-a139-a768ea4813ab",
+    "userName": "drodriguez346",
+    "name": "Daniel",
+    "lastName": "Rodriguez",
+    "birthDate": "1991-08-10",
+    "email": "drodriguez346@generated.com",
+    "phone": "690596584",
+    "job": "Psicólogo",
+    "location": "Valencia",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "531c0797-fcca-4c51-afe9-15c7587fae7c",
+    "userName": "lperez746",
+    "name": "Luis",
+    "lastName": "Perez",
+    "birthDate": "1991-07-05",
+    "email": "lperez746@generated.com",
+    "phone": "697585981",
+    "job": "Estudiante",
+    "location": "Sevilla",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "154d09a9-a4a7-4f6b-b353-addcbe39406f",
+    "userName": "mfernandez591",
+    "name": "Marta",
+    "lastName": "Fernandez",
+    "birthDate": "2000-05-04",
+    "email": "mfernandez591@generated.com",
+    "phone": "669511890",
+    "job": "Médico",
+    "location": "Valencia",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "fd79de63-de91-47e9-9a37-65053487b911",
+    "userName": "agomez268",
+    "name": "Ana",
+    "lastName": "Gomez",
+    "birthDate": "1977-10-01",
+    "email": "agomez268@generated.com",
+    "phone": "673727284",
+    "job": "Estudiante",
+    "location": "Barcelona",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "2413bbe8-457b-461c-ad03-4ba3694cb109",
+    "userName": "lmartinez711",
+    "name": "Lucia",
+    "lastName": "Martinez",
+    "birthDate": "1973-04-22",
+    "email": "lmartinez711@generated.com",
+    "phone": "688650507",
+    "job": "Cocinero",
+    "location": "Madrid",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "1828b113-2c73-42e3-80cc-4fa338a18a76",
+    "userName": "mgutierrez185",
+    "name": "Maria",
+    "lastName": "Gutierrez",
+    "birthDate": "2003-11-02",
+    "email": "mgutierrez185@generated.com",
+    "phone": "638989261",
+    "job": "Médico",
+    "location": "Murcia",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "298546dd-e0ba-43e7-a6d9-fff5672c3745",
+    "userName": "calvarez993",
+    "name": "Carlos",
+    "lastName": "Alvarez",
+    "birthDate": "1991-09-20",
+    "email": "calvarez993@generated.com",
+    "phone": "672449301",
+    "job": "Enfermero",
+    "location": "Granada",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "7a5e9075-abeb-4452-82f9-c2693be4a463",
+    "userName": "mgarcia219",
+    "name": "Marta",
+    "lastName": "Garcia",
+    "birthDate": "1997-12-03",
+    "email": "mgarcia219@generated.com",
+    "phone": "665683027",
+    "job": "Enfermero",
+    "location": "Málaga",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "98111fdc-ea2a-40da-ba66-6aba84b0312f",
+    "userName": "mhernandez864",
+    "name": "Miguel",
+    "lastName": "Hernandez",
+    "birthDate": "1993-04-12",
+    "email": "mhernandez864@generated.com",
+    "phone": "680082987",
+    "job": "Cocinero",
+    "location": "Barcelona",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "78ffc8ea-0727-4cae-8ff1-5f018476002a",
+    "userName": "mmoreno113",
+    "name": "Marta",
+    "lastName": "Moreno",
+    "birthDate": "1986-03-02",
+    "email": "mmoreno113@generated.com",
+    "phone": "665493526",
+    "job": "Diseñador",
+    "location": "Zaragoza",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "c9acb3d9-476f-4761-a794-3b4d9909a051",
+    "userName": "pfernandez788",
+    "name": "Pablo",
+    "lastName": "Fernandez",
+    "birthDate": "1979-12-06",
+    "email": "pfernandez788@generated.com",
+    "phone": "645209614",
+    "job": "Estudiante",
+    "location": "Barcelona",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "a4ad0ac8-93f4-4c96-b317-32e017f149d8",
+    "userName": "cgarcia253",
+    "name": "Carmen",
+    "lastName": "Garcia",
+    "birthDate": "1980-02-18",
+    "email": "cgarcia253@generated.com",
+    "phone": "676269895",
+    "job": "Ingeniero",
+    "location": "Murcia",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "65c0d318-0a15-485f-b6ff-c06cf34957d9",
+    "userName": "lgarcia435",
+    "name": "Lucia",
+    "lastName": "Garcia",
+    "birthDate": "2003-08-04",
+    "email": "lgarcia435@generated.com",
+    "phone": "689134273",
+    "job": "Arquitecto",
+    "location": "Granada",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "b9d59c4d-beb5-43e3-b286-cc661fdadde3",
+    "userName": "clopez788",
+    "name": "Carmen",
+    "lastName": "Lopez",
+    "birthDate": "1974-11-18",
+    "email": "clopez788@generated.com",
+    "phone": "689489936",
+    "job": "Veterinario",
+    "location": "Granada",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "64759001-35eb-4903-af2f-fb292c1b76f7",
+    "userName": "sfernandez747",
+    "name": "Sofia",
+    "lastName": "Fernandez",
+    "birthDate": "2002-02-05",
+    "email": "sfernandez747@generated.com",
+    "phone": "606323810",
+    "job": "Camarero",
+    "location": "Madrid",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "4d1291b1-780a-47d3-a439-8d0a14ea0505",
+    "userName": "jhernandez697",
+    "name": "Jorge",
+    "lastName": "Hernandez",
+    "birthDate": "1993-01-17",
+    "email": "jhernandez697@generated.com",
+    "phone": "624963970",
+    "job": "Médico",
+    "location": "Valencia",
+    "roles": [
+      1,
+      2
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "c9d24b3f-ee1d-4025-ba4e-6ddc2297ddf7",
+    "userName": "sgomez636",
+    "name": "Sofia",
+    "lastName": "Gomez",
+    "birthDate": "1990-10-11",
+    "email": "sgomez636@generated.com",
+    "phone": "695933794",
+    "job": "Carpintero",
+    "location": "Málaga",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "9141a3a4-6c80-4a28-9403-2703d0382e9c",
+    "userName": "dmartinez893",
+    "name": "Daniel",
+    "lastName": "Martinez",
+    "birthDate": "1991-03-11",
+    "email": "dmartinez893@generated.com",
+    "phone": "662620963",
+    "job": "Ingeniero",
+    "location": "Málaga",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  },
+  {
+    "uid": "9b28cf0d-030f-4569-b1a2-369493d9c66e",
+    "userName": "cromero828",
+    "name": "Carmen",
+    "lastName": "Romero",
+    "birthDate": "1996-02-01",
+    "email": "cromero828@generated.com",
+    "phone": "694585757",
+    "job": "Enfermero",
+    "location": "Valencia",
+    "roles": [
+      1
+    ],
+    "isEnabled": true
+  }
+]

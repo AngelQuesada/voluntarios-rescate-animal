@@ -40,7 +40,8 @@ async function restartProject() {
   try {
     log('start', 'Iniciando reinicio completo del proyecto...');
 
-    // Paso 1: Limpiar directorios y archivos
+    // Paso 1: Limpiar directorios y archivos (DESACTIVADO DURANTE DESARROLLO DE DB)
+    /*
     log('clean', 'Limpiando archivos y directorios...');
 
     const itemsToClean = [
@@ -89,11 +90,32 @@ async function restartProject() {
       log('error', 'Error: node_modules no fue creado');
       process.exit(1);
     }
+    */
+    // Paso 4: Popular base de datos (Usuarios y Turnos)
+    // Paso 4: Limpiar y Popular base de datos
+    log('info', 'Limpiando base de datos (Firestore y Auth)...');
+    executeCommand(
+      'npx ts-node --project scripts/tsconfig.json scripts/clean-db.ts',
+      'Limpieza de BD (clean-db.ts)'
+    );
 
-    // Paso 4: Iniciar servidor de desarrollo
-    log('dev', 'Iniciando servidor de desarrollo...');
-    log('info', 'El servidor se iniciará en http://localhost:3000');
-    executeCommand('npm run dev', 'Servidor de desarrollo');
+    log('info', 'Populando base de datos...');
+    executeCommand(
+      'npx ts-node --project scripts/tsconfig.json scripts/create_users.ts',
+      'Importación de usuarios (create_users.ts)'
+    );
+    executeCommand(
+      'npx ts-node --project scripts/tsconfig.json scripts/create-shifts.ts',
+      'Importación de turnos (create-shifts.ts)'
+    );
+
+    log('info', 'Verificando datos insertados...');
+    executeCommand(
+      'npx ts-node --project scripts/tsconfig.json scripts/verify-seed-data.ts',
+      'Verificación de datos'
+    );
+
+    log('info', 'Se ha completado el proceso de reinicio de proyecto');
   } catch (error) {
     log('error', `Error durante el reinicio del proyecto: ${error.message}`);
     process.exit(1);
