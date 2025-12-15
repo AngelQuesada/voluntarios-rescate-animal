@@ -11,9 +11,9 @@ const icons = {
   install: '📦',
   success: '✅',
   error: '❌',
-  warning: '⚠️',
-  info: 'ℹ️',
-  dev: '🔧',
+  warning: '🚧',
+  info: '💡',
+  dev: '🛠️',
 };
 
 // Función para mostrar logs con formato
@@ -40,8 +40,8 @@ async function restartProject() {
   try {
     log('start', 'Iniciando reinicio completo del proyecto...');
 
-    // Paso 1: Limpiar directorios y archivos (DESACTIVADO DURANTE DESARROLLO DE DB)
-    /*
+    // Paso 1: Limpiar directorios y archivos
+
     log('clean', 'Limpiando archivos y directorios...');
 
     const itemsToClean = [
@@ -60,7 +60,7 @@ async function restartProject() {
           if (item.type === 'directory') {
             // Para directorios grandes como node_modules, mostrar progreso
             if (item.path === 'node_modules') {
-              log('warning', 'Eliminando node_modules... esto puede tardar unos momentos');
+              log('info', 'Eliminando node_modules... esto puede tardar unos momentos');
             }
             fs.rmSync(itemPath, { recursive: true, force: true });
             log('success', `✓ Eliminado directorio: ${item.path}`);
@@ -76,7 +76,7 @@ async function restartProject() {
       }
     }
 
-    log('success', '✓ Limpieza completada');
+    log('success', 'Limpieza completada');
 
     // Paso 2: Reinstalar dependencias
     log('install', 'Reinstalando dependencias...');
@@ -90,8 +90,7 @@ async function restartProject() {
       log('error', 'Error: node_modules no fue creado');
       process.exit(1);
     }
-    */
-    // Paso 4: Popular base de datos (Usuarios y Turnos)
+
     // Paso 4: Limpiar y Popular base de datos
     log('info', 'Limpiando base de datos (Firestore y Auth)...');
     executeCommand(

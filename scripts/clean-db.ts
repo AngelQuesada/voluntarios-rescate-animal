@@ -20,7 +20,7 @@ function initializeFirebaseAdmin() {
 
     const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
     if (!privateKey || !process.env.FIREBASE_PROJECT_ID) {
-      // Fallback for when running via script without explicit env vars sometimes
+      // Si no se encuentra el service account o las variables de entorno
       throw new Error('No Service Account or Env Vars found');
     }
 
@@ -62,7 +62,6 @@ async function deleteQueryBatch(
 
   const batchSize = snapshot.size;
   if (batchSize === 0) {
-    // When there are no documents left, we are done
     resolve();
     return;
   }
@@ -73,8 +72,7 @@ async function deleteQueryBatch(
   });
   await batch.commit();
 
-  // Recurse on the next process tick, to avoid
-  // exploding the stack.
+  // Recursividad para borrar los documentos de la colección
   process.nextTick(() => {
     deleteQueryBatch(db, query, resolve);
   });
@@ -82,18 +80,31 @@ async function deleteQueryBatch(
 
 async function cleanAuthUsers() {
   console.log('Limpiando usuarios de Firebase Auth...');
-  let nextPageToken;
+  let result: admin.auth.ListUsersResult;
   let count = 0;
+
   do {
-    const result = await auth.listUsers(1000, nextPageToken);
+    // Los borramos de 100 en 100 para no sobrecargar el servidor
+    result = await auth.listUsers(100);
     const uids = result.users.map((user) => user.uid);
+
     if (uids.length > 0) {
-      await auth.deleteUsers(uids);
+      const deleteResult = await auth.deleteUsers(uids);
       count += uids.length;
-      console.log(`Eliminados ${uids.length} usuarios de Auth.`);
+      console.log(
+        `Eliminados ${deleteResult.successCount} usuarios de Auth (${deleteResult.failureCount} fallos).`
+      );
+
+      if (deleteResult.failureCount > 0) {
+        deleteResult.errors.forEach((err) => {
+          console.error(`Error eliminando usuario: ${JSON.stringify(err)}`);
+        });
+      }
+      // Añadimos un pequeño limite para permitir la propagación y reiniciar rate limits
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
-    nextPageToken = result.pageToken;
-  } while (nextPageToken);
+  } while (result.users.length > 0);
+
   console.log(`Total usuarios eliminados de Auth: ${count}`);
 }
 
@@ -101,17 +112,17 @@ async function cleanDatabase() {
   try {
     console.log('--- Iniciando limpieza de Base de Datos ---');
 
-    // 1. Clean Firestore Collections
+    // 1. Borramos colecciones firestore
     for (const collectionName of COLLECTIONS_TO_CLEAN) {
       console.log(`Limpiando colección: ${collectionName}...`);
       await deleteCollection(collectionName);
       console.log(`Colección ${collectionName} limpiada.`);
     }
 
-    // 2. Clean Auth Users
+    // 2. Borramos usuarios de Firebase Auth
     await cleanAuthUsers();
 
-    // 3. Verification
+    // 3. Verificación
     console.log('--- Verificando limpieza ---');
     let allClean = true;
     for (const collectionName of COLLECTIONS_TO_CLEAN) {
