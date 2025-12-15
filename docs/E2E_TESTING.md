@@ -47,16 +47,20 @@ La configuración está optimizada para testing eficiente:
 Los tests están organizados en proyectos específicos para ejecución selectiva:
 
 ### 1. Login Tests (`login-tests`)
+
 **Archivo**: `login.spec.ts`
 **Propósito**: Tests básicos de autenticación
+
 - Login con credenciales válidas
 - Manejo de credenciales inválidas
 - Redirección después del login
 - Persistencia de sesión
 
 ### 2. Advanced Auth Tests (`advanced-auth-tests`)
+
 **Archivo**: `advanced-auth.spec.ts`
 **Propósito**: Tests avanzados de autenticación y seguridad
+
 - Validación de usuarios deshabilitados
 - Manejo de intentos fallidos consecutivos
 - Tests de seguridad de tokens
@@ -64,8 +68,10 @@ Los tests están organizados en proyectos específicos para ejecución selectiva
 - Limpieza de sesión en logout
 
 ### 3. Security Validation Tests (`security-validation-tests`)
+
 **Archivo**: `security-validation.spec.ts`
 **Propósito**: Tests de validación y seguridad
+
 - Validación de formato de email
 - Tests de inyección SQL y XSS
 - Validación de campos obligatorios
@@ -73,8 +79,10 @@ Los tests están organizados en proyectos específicos para ejecución selectiva
 - Validación de entrada de datos
 
 ### 4. User CRUD Tests (`user-crud-tests`)
+
 **Archivo**: `user-crud.spec.ts`
 **Propósito**: Tests de operaciones CRUD de usuarios
+
 - Creación de usuarios
 - Lectura y visualización de datos
 - Actualización de información
@@ -82,31 +90,39 @@ Los tests están organizados en proyectos específicos para ejecución selectiva
 - Validación de permisos por rol
 
 ### 5. Role Assignment Tests (`role-assignment-tests`)
+
 **Archivo**: `shift-assignment-by-role.spec.ts`
 **Propósito**: Tests de asignación de turnos y roles
+
 - Asignación de turnos por rol
 - Validación de permisos de asignación
 - Tests de conflictos de horarios
 - Validación de capacidad máxima
 
 ### 6. History View Tests (`history-view-tests`)
+
 **Archivo**: `history-view.spec.ts`
 **Propósito**: Tests de visualización de historial
+
 - Visualización de historial de turnos
 - Filtros y búsquedas
 - Paginación de resultados
 - Exportación de datos
 
 ### 7. User History Tests (`user-history-tests`)
+
 **Archivo**: `user-history.spec.ts`
 **Propósito**: Tests específicos de historial de usuarios
+
 - Historial personal de turnos
 - Estadísticas de participación
 - Validación de datos históricos
 
 ### 8. Admin Features Tests (`admin-features-tests`)
+
 **Archivo**: `admin-permissions-and-features.spec.ts`
 **Propósito**: Tests de funcionalidades administrativas
+
 - Panel de administración
 - Gestión de usuarios
 - Configuraciones del sistema
@@ -119,7 +135,9 @@ Los tests están organizados en proyectos específicos para ejecución selectiva
 Contiene funciones helper comunes para todos los tests:
 
 #### `loginUser(page, options)`
+
 Función mejorada para login con opciones avanzadas:
+
 ```typescript
 interface LoginOptions {
   email?: string;
@@ -132,7 +150,9 @@ interface LoginOptions {
 ```
 
 #### `checkServerStatus(page, request, options)`
+
 Verificación optimizada del estado del servidor:
+
 ```typescript
 interface ServerCheckOptions {
   timeout?: number; // Default: 60000ms
@@ -141,11 +161,13 @@ interface ServerCheckOptions {
 ```
 
 #### `checkPageLoad(page)`
+
 Verificación de carga correcta de páginas con timeouts configurables.
 
 ### server-utils.ts (Nuevo)
 
 Utilidades específicas para manejo de servidor en tests:
+
 - Funciones de verificación de conectividad
 - Helpers para setup y teardown
 - Utilidades de monitoreo de estado
@@ -230,33 +252,58 @@ ADMIN_TEST_PASSWORD=adminpassword123
 
 El sistema incluye setup y teardown globales:
 
-- **global-setup.ts**: Inicializa el entorno de testing
+- **global-setup.ts**: Inicializa el entorno de testing con gestión inteligente de compilación
 - **global-teardown.ts**: Limpia el entorno después de los tests
-- **setup-test-environment.ts**: Optimización de compilación para tests
+- **setup-test-environment.ts**: Gestión de base de datos y usuarios
+
+### Sistema de Caché de Compilación
+
+El sistema implementa un mecanismo inteligente para evitar recompilaciones innecesarias:
+
+1. **Detección de Cambios**: Calcula hashes de archivos clave (`package.json`, `next.config.ts`, `playwright.config.ts`, código fuente clave, etc.).
+2. **Caché Persistente**: Almacena el estado de la compilación en `.next/compilation-cache.json`.
+3. **Validación**:
+   - Si no hay cambios significativos, reutiliza la compilación anterior.
+   - Si hay cambios, fuerza una recompilación del servidor.
+
+### Gestión Robusta del Servidor (Windows/Linux)
+
+El setup global incluye lógica avanzada para manejo de procesos:
+
+- **Detección de Puertos**: Verifica si el puerto 3001 está en uso.
+- **Limpieza Forzada**:
+  - En Windows, utiliza `taskkill` y análisis de `Get-NetTCPConnection` para asegurar que el puerto esté libre.
+  - Identifica y elimina procesos "zombies" de Node.js que puedan haber quedado de ejecuciones anteriores.
+- **Timeouts Inteligentes**: Espera a que el servidor esté completamente "Ready" y compilado antes de iniciar los tests, con verificaciones activas (polling).
 
 ## Mejores Prácticas
 
 ### 1. Organización de Tests
+
 - Agrupa tests relacionados en el mismo archivo
 - Usa `describe` blocks para organizar funcionalidades
 - Nombra los tests de forma descriptiva
 
 ### 2. Manejo de Estado
+
 - Limpia el estado entre tests usando `beforeEach`
 - Usa datos de test independientes
 - Evita dependencias entre tests
 
 ### 3. Timeouts y Esperas
+
 - Usa `waitForSelector` en lugar de `setTimeout`
 - Configura timeouts apropiados para operaciones lentas
 - Usa `waitForLoadState` para navegación
 
 ### 4. Datos de Test
+
 - Usa datos de test consistentes y predecibles
 - Implementa factories para crear datos de test
 - Limpia datos de test después de cada ejecución
 
 ### 5. Debugging
+
 - Usa `--headed` para ver la ejecución en tiempo real
 - Usa `--debug` para pausar en breakpoints
 - Revisa screenshots y videos en caso de fallos
@@ -266,12 +313,14 @@ El sistema incluye setup y teardown globales:
 ### Problemas Comunes
 
 #### 1. Timeouts
+
 ```bash
 # Aumentar timeout global
 npm run test:e2e -- --timeout=60000
 ```
 
 #### 2. Servidor no disponible
+
 ```bash
 # Verificar que el servidor esté ejecutándose
 npm run dev
@@ -280,11 +329,13 @@ npm run test:e2e
 ```
 
 #### 3. Tests flaky
+
 - Aumentar timeouts específicos
 - Mejorar selectores de elementos
 - Agregar esperas explícitas
 
 #### 4. Problemas de autenticación
+
 - Verificar variables de entorno
 - Limpiar cookies y localStorage
 - Verificar configuración de Firebase
@@ -330,6 +381,7 @@ Playwright genera reportes detallados:
 - **JSON**: Para procesamiento automatizado
 
 Los reportes incluyen:
+
 - Tiempo de ejecución por test
 - Screenshots de fallos
 - Videos de ejecución
@@ -339,12 +391,14 @@ Los reportes incluyen:
 ## Mantenimiento
 
 ### Actualización de Tests
+
 - Revisar tests después de cambios en la UI
 - Actualizar selectores cuando cambien elementos
 - Mantener datos de test actualizados
 - Revisar y optimizar timeouts regularmente
 
 ### Monitoreo
+
 - Revisar reportes de ejecución regularmente
 - Identificar tests flaky y mejorarlos
 - Monitorear tiempos de ejecución

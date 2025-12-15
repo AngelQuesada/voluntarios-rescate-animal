@@ -102,8 +102,8 @@ npx playwright install
 # Ejecutar todos los tests E2E
 npm run test:e2e
 
-# Ejecutar tests E2E en un navegador específico
-npm run test:e2e -- --project=chrome
+# Ejecutar tests E2E de un proyecto específico (ej. login)
+npm run test:e2e -- --project=login-tests
 
 # Ejecutar un test específico
 npm run test:e2e -- tests/e2e/login.spec.ts
@@ -122,23 +122,14 @@ Los tests utilizan una configuración automática que inicializa la base de dato
 Puedes configurar qué datos se inicializan para cada test:
 
 ```typescript
-// Test con usuario administrador y turnos
-test(
-  'Ver historial como administrador',
-  async ({ page }) => {
-    // El test aquí...
-  },
-  { userType: 'ADMIN', requireShifts: true, pastDays: 14, futureDays: 7 }
-);
+import { test } from '@playwright/test';
+import { loginUser } from './helpers/e2e-utils';
 
-// Test solo con usuario voluntario sin turnos
-test(
-  'Perfil de usuario',
-  async ({ page }) => {
-    // El test aquí...
-  },
-  { userType: 'VOLUNTARIO', requireShifts: false }
-);
+test('Ver historial como administrador', async ({ page }) => {
+  // Inicialización explícita o login helper
+  await loginUser(page, { userType: 'ADMIN' });
+  // El test aquí...
+});
 ```
 
 ## Utilidades para Tests

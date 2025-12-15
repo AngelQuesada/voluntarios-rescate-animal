@@ -8,7 +8,8 @@ Este proyecto es una aplicación web diseñada para coordinar y gestionar volunt
 - Sistema de roles (Administrador, Responsable, Voluntario)
 - Calendario interactivo para asignación de turnos
 - Panel de administración para gestión de usuarios
-- Notificaciones y recordatorios
+- Notificaciones Push (Firebase Cloud Messaging) y recordatorios
+- Soporte PWA (Progressive Web App)
 
 ## Tecnologías utilizadas
 
@@ -26,12 +27,14 @@ Este proyecto es una aplicación web diseñada para coordinar y gestionar volunt
 ## Instalación
 
 1. Clonar el repositorio:
+
    ```bash
    git clone https://github.com/tu-usuario/rescate-animal-voluntariado.git
    cd rescate-animal-voluntariado
    ```
 
 2. Instalar dependencias:
+
    ```bash
    npm install
    # o
@@ -41,6 +44,7 @@ Este proyecto es una aplicación web diseñada para coordinar y gestionar volunt
 3. Configurar variables de entorno (ver sección de configuración)
 
 4. Iniciar el servidor de desarrollo:
+
    ```bash
    npm run dev
    # o
@@ -61,6 +65,7 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
 NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=your-vapid-key
 
 # Firebase Admin SDK (Backend/API Routes)
 FIREBASE_PROJECT_ID=your-project-id
@@ -84,7 +89,7 @@ FIREBASE_CLIENT_X509_CERT_URL=your-cert-url
 {
   "type": "service_account",
   "project_id": "tu-proyecto-id", // → FIREBASE_PROJECT_ID
-  "private_key_id": "tu-private-key-id", // → FIREBASE_PRIVATE_KEY_ID  
+  "private_key_id": "tu-private-key-id", // → FIREBASE_PRIVATE_KEY_ID
   "private_key": "-----BEGIN PRIVATE KEY-----\n...", // → FIREBASE_PRIVATE_KEY
   "client_email": "firebase-adminsdk-xxxxx@tu-proyecto.iam.gserviceaccount.com", // → FIREBASE_CLIENT_EMAIL
   "client_id": "123456789", // → FIREBASE_CLIENT_ID
@@ -92,7 +97,8 @@ FIREBASE_CLIENT_X509_CERT_URL=your-cert-url
 }
 ```
 
-**Importante**: 
+**Importante**:
+
 - Para desarrollo local, configura estas variables en tu archivo `.env.local`
 - Para producción (Vercel), configúralas en el panel de Environment Variables
 - Nunca subas archivos de credenciales al repositorio Git
@@ -102,16 +108,19 @@ FIREBASE_CLIENT_X509_CERT_URL=your-cert-url
 El proyecto incluye una suite completa de tests para garantizar la calidad y seguridad del sistema:
 
 ### Tests de Seguridad y Permisos
+
 - **Control de acceso por roles**: Verificación de que solo los administradores pueden acceder a funcionalidades críticas
 - **Permisos de asignación de turnos**: Tests que aseguran que solo usuarios autorizados pueden asignar voluntarios a turnos
 - **Acceso al panel de administración**: Validación de restricciones de acceso según el rol del usuario
 
 ### Tipos de Tests
+
 - **Tests unitarios**: Con Jest y React Testing Library
 - **Tests E2E**: Con Playwright para flujos completos de usuario
 - **Tests de integración**: Verificación de interacciones entre componentes
 
 Para ejecutar los tests:
+
 ```bash
 # Tests unitarios
 npm test
