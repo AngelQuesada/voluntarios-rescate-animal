@@ -56,8 +56,10 @@
     "react-redux": "^9.2.0"
   },
   "devDependencies": {
+    "@babel/helper-define-polyfill-provider": "^0.6.5",
     "@eslint/compat": "^1.2.3",
     "@eslint/js": "^9.17.0",
+    "@js-sdsl/ordered-map": "^4.4.2",
     "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -71,6 +73,7 @@
     "@typescript-eslint/parser": "^8.18.1",
     "babel-jest": "^30.0.4",
     "cross-env": "^7.0.3",
+    "cross-port-killer": "^1.4.0",
     "dotenv": "^16.4.7",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.1.3",

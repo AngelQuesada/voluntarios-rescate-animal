@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { useRouter, usePathname } from 'next/navigation';
+import { Box, CircularProgress, Typography, Button } from '@mui/material';
 
 interface RoleProtectedProps {
   children: React.ReactNode;
@@ -23,8 +23,9 @@ export default function RoleProtected({
   requiredRoles = [],
   fallbackUrl = '/schedule',
 }: RoleProtectedProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, clearAuthState } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -51,10 +52,10 @@ export default function RoleProtected({
 
   // Efectuar la redirección si es necesario
   useEffect(() => {
-    if (shouldRedirect) {
+    if (shouldRedirect && shouldRedirect !== pathname) {
       router.push(shouldRedirect);
     }
-  }, [shouldRedirect, router]);
+  }, [shouldRedirect, router, pathname]);
 
   // Si está cargando o verificando, mostrar spinner
   if (loading || checkingAuth) {
@@ -69,6 +70,8 @@ export default function RoleProtected({
 
   // Si necesita redirección, mostrar mensaje mientras se redirige
   if (shouldRedirect) {
+    const isLooping = shouldRedirect === pathname;
+
     return (
       <Box
         sx={{
@@ -77,15 +80,40 @@ export default function RoleProtected({
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '100vh',
+          gap: 2,
         }}
       >
         <Typography variant="h5" color="error">
           Acceso denegado
         </Typography>
         <Typography variant="body1">No tienes permisos para acceder a esta página</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Redirigiendo...
-        </Typography>
+
+        {!isLooping && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+            <CircularProgress size={24} />
+            <Typography variant="body2" color="text.secondary">
+              Redirigiendo...
+            </Typography>
+          </Box>
+        )}
+
+        {isLooping && (
+          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <Button variant="outlined" onClick={() => router.push('/')}>
+              Ir al inicio
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                clearAuthState();
+                router.push('/');
+              }}
+            >
+              Cerrar sesión
+            </Button>
+          </Box>
+        )}
       </Box>
     );
   }

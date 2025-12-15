@@ -210,6 +210,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!isUnmountedRef.current) {
             setUser(null);
 
+            // IMPORTANTE: Limpiar cookie de auth para evitar bucles con el middleware
+            document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+
             // Solo redirigir si estamos en una ruta protegida
             const isProtectedRoute =
               pathname !== '/' &&
