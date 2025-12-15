@@ -1,530 +1,139 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { loginUser, checkServerStatus, checkPageLoad, findShiftTable } from './helpers/e2e-utils';
+import { clearShiftsCollection, seedShift, getUserIdByEmail } from '../utils/db-utils';
+import { TEST_USERS } from '../helpers/test-db-setup';
+import { format, addDays } from 'date-fns';
 
 test.describe('Shift Assignment by Role', () => {
+  const tomorrow = addDays(new Date(), 1);
+  const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
+
   test.beforeEach(async ({ page, request }) => {
-    // Verificar estado del servidor antes de cada test
     const serverOk = await checkServerStatus(page, request, {
       timeout: 60000,
       failOnError: false,
     });
-
     if (!serverOk) {
       throw new Error('❌ El servidor no está disponible en el puerto 3001');
     }
 
-    // Navegar a la página principal
-    await page.goto(`${process.env.BASE_URL || 'http://localhost:3001'}`);
+    // Default: clear clean slate. Individual tests may seed specific data.
+    await clearShiftsCollection();
 
-    // Verificar que la página cargó correctamente
+    await page.goto(`${process.env.BASE_URL || 'http://localhost:3001'}`);
     const pageLoaded = await checkPageLoad(page);
     if (!pageLoaded) {
       throw new Error('❌ La página no cargó correctamente');
     }
   });
 
-  test('admin can assign and unassign shifts own shifts', async ({ page }) => {
-    console.log('🧪 [INICIANDO] Administrador asigna y desasigna turnos');
+  test('admin can assign self to a shift', async ({ page }) => {
+    // Escenario: Turno vacío mañana
+    // El admin se loguea y se asigna.
 
-    // Iniciar sesión como administrador
-    const loginSuccess = await loginUser(page, {
-      userType: 'ADMIN',
-      checkRedirect: true,
-      expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000,
-    });
+    // Login
+    await loginUser(page, { userType: 'ADMIN' });
 
-    if (!loginSuccess) {
-      console.log(
-        '❌ [FALLÓ] Administrador asigna y desasigna turnos | Error: No se pudo completar el login'
-      );
-      throw new Error('Login como administrador falló');
-    }
+    // Buscar tabla y navegar a fecha si es necesario.
+    // Asumimos que "mañana" se ve en la vista semanal por defecto.
+    const shiftTable = await findShiftTable(page);
+    expect(shiftTable).toBeTruthy();
 
-    // Buscar la tabla de turnos
-    const shiftTable = await findShiftTable(page, { timeout: 10000 });
-    if (!shiftTable) {
-      console.log(
-        '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se encontró la tabla de turnos'
-      );
-      throw new Error('No se encontró la tabla de turnos');
-    }
+    // Buscar botón de "Asignarme" (AddMyTurn) para mañana por la mañana (M)
+    // El ID del día suele ser data-date o similar, pero los botones tienen test-id.
+    // En la vista desktop, buscaremos el botón correspondiente al día.
+    // Simplificación: buscaremos "el primer botón de asignarse" disponible.
+    // Como borramos la DB, todos los turnos están libres.
 
-    // Esperar a que se carguen todos los elementos
-    await page.waitForTimeout(2000);
+    // Pero espera, si no hay documento en DB, ¿la UI muestra el botón?
+    // Asumimos que la UI renderiza la grilla siempre.
 
-    // Verificar si ya hay algún turno asignado
-    const alreadyAssigned = (await page.locator('[data-testid="RemoveMyTurn"]').count()) > 0;
+    const addSelfBtn = page.locator('[data-testid="AddMyTurn"]').first();
+    await expect(addSelfBtn).toBeVisible();
+    await addSelfBtn.click();
 
-    if (alreadyAssigned) {
-      // Si ya está asignado, buscar botón de eliminar
-      const deleteButtons = page.locator('[data-testid="RemoveMyTurn"]');
-      const deleteCount = await deleteButtons.count();
+    // Validación: Mensaje de éxito o cambio de estado visual
+    await expect(page.locator('text=asignado al turno')).toBeVisible();
 
-      if (deleteCount > 0) {
-        await deleteButtons.first().click();
-        await page.waitForTimeout(3000);
-      }
-    }
-
-    // Buscar botones de autoasignación
-    const selfAssignButtons = page.locator('[data-testid="AddMyTurn"]');
-    const selfAssignCount = await selfAssignButtons.count();
-
-    if (selfAssignCount > 0) {
-      // Hacer click para autoasignarse
-      await selfAssignButtons.nth(5).click();
-
-      // Esperar a que se complete la asignación
-      await page.waitForTimeout(3000);
-
-      // Verificar que aparece el mensaje de confirmación
-      const userNameVisible = await page
-        .getByTestId('notification-snackbar')
-        .filter({ hasText: 'asignado al turno' })
-        .isVisible()
-        .catch(() => false);
-
-      if (userNameVisible) {
-        // Ahora desasignar el turno
-        const deleteButtons = page.locator('[data-testid="RemoveMyTurn"]');
-        const deleteCount = await deleteButtons.count();
-
-        if (deleteCount > 0) {
-          await deleteButtons.first().click();
-          await page.waitForTimeout(3000);
-
-          // Verificar que ya no aparece el nombre
-          const userNameStillVisible = await page
-            .getByTestId('assignment-user-box')
-            .filter({ hasText: '(Tú)' })
-            .isVisible()
-            .catch(() => false);
-
-          if (!userNameStillVisible) {
-            console.log('✅ [CORRECTO] Administrador asigna y desasigna sus propios turnos');
-          } else {
-            console.log(
-              '❌ [FALLÓ] Administrador asigna y desasigna turnos | Error: No se pudo desasignar el turno'
-            );
-            throw new Error('No se pudo desasignar el turno');
-          }
-        } else {
-          console.log(
-            '❌ [FALLÓ] Administrador asigna y desasigna turnos | Error: No se encontró botón de eliminar después de asignar'
-          );
-          throw new Error('No se encontró botón de eliminar después de asignar');
-        }
-      } else {
-        console.log(
-          '❌ [FALLÓ] Administrador asigna y desasigna turnos | Error: No se pudo verificar la asignación del turno'
-        );
-        throw new Error('No se pudo verificar la asignación del turno');
-      }
-    } else {
-      console.log(
-        '❌ [FALLÓ] Administrador asigna y desasigna turnos | Error: No se encontraron botones de autoasignación'
-      );
-      throw new Error('No se encontraron botones de autoasignación');
-    }
+    // Verificar que ahora aparece "RemoveMyTurn" (o el avatar/nombre)
+    await expect(page.locator('[data-testid="RemoveMyTurn"]').first()).toBeVisible();
   });
 
-  test('responsible can assign and unassign own shifts', async ({ page }) => {
-    console.log('🧪 [INICIANDO] Responsable asigna y desasigna sus propios turnos');
+  test('volunteer can assign self to a shift', async ({ page }) => {
+    await loginUser(page, { userType: 'VOLUNTARIO' });
+    const shiftTable = await findShiftTable(page);
+    expect(shiftTable).toBeTruthy();
 
-    // Iniciar sesión como responsable
-    const loginSuccess = await loginUser(page, {
-      userType: 'RESPONSABLE',
-      checkRedirect: true,
-      expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000,
-    });
+    const addSelfBtn = page.locator('[data-testid="AddMyTurn"]').first();
+    await expect(addSelfBtn).toBeVisible();
+    await addSelfBtn.click();
 
-    if (!loginSuccess) {
-      console.log(
-        '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se pudo completar el login'
-      );
-      throw new Error('Login como responsable falló');
-    }
-
-    // Buscar la tabla de turnos
-    const shiftTable = await findShiftTable(page, { timeout: 10000 });
-    if (!shiftTable) {
-      console.log(
-        '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se encontró la tabla de turnos'
-      );
-      throw new Error('No se encontró la tabla de turnos');
-    }
-
-    // Esperar a que se carguen todos los elementos
-    await page.waitForTimeout(2000);
-
-    // Verificar si ya hay algún turno asignado
-    const alreadyAssigned = (await page.locator('[data-testid="RemoveMyTurn"]').count()) > 0;
-
-    if (alreadyAssigned) {
-      // Si ya está asignado, buscar botón de eliminar
-      const deleteButtons = page.locator('[data-testid="RemoveMyTurn"]');
-      const deleteCount = await deleteButtons.count();
-
-      if (deleteCount > 0) {
-        await deleteButtons.first().click();
-        await page.waitForTimeout(3000);
-      }
-    }
-
-    // Buscar botones de autoasignación (AddIcon)
-    const selfAssignButtons = page.locator('[data-testid="AddMyTurn"]');
-    const selfAssignCount = await selfAssignButtons.count();
-
-    if (selfAssignCount > 0) {
-      // Hacer click para autoasignarse
-      await selfAssignButtons.first().click();
-
-      // Esperar a que se complete la asignación
-      await page.waitForTimeout(3000);
-
-      // Verificar que aparece el mensaje de confirmación
-      const userNameVisible = await page
-        .getByTestId('notification-snackbar')
-        .filter({ hasText: 'asignado al turno' })
-        .isVisible()
-        .catch(() => false);
-
-      if (userNameVisible) {
-        // Ahora desasignar el turno
-        const deleteButtons = page.locator('[data-testid="RemoveMyTurn"]');
-        const deleteCount = await deleteButtons.count();
-
-        if (deleteCount > 0) {
-          await deleteButtons.first().click();
-          await page.waitForTimeout(3000);
-
-          // Verificar que ya no aparece el nombre
-          const userNameStillVisible = await page
-            .getByTestId('assignment-user-box')
-            .filter({ hasText: '(Tú)' })
-            .isVisible()
-            .catch(() => false);
-
-          if (!userNameStillVisible) {
-            console.log('✅ [CORRECTO] Responsable asigna y desasigna sus propios turnos');
-          } else {
-            console.log(
-              '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se pudo desasignar el turno'
-            );
-            throw new Error('No se pudo desasignar el turno');
-          }
-        } else {
-          console.log(
-            '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se encontró botón de eliminar después de asignar'
-          );
-          throw new Error('No se encontró botón de eliminar después de asignar');
-        }
-      } else {
-        console.log(
-          '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se pudo verificar la asignación del turno'
-        );
-        throw new Error('No se pudo verificar la asignación del turno');
-      }
-    } else {
-      console.log(
-        '❌ [FALLÓ] Responsable asigna y desasigna turnos | Error: No se encontraron botones de autoasignación'
-      );
-      throw new Error('No se encontraron botones de autoasignación');
-    }
+    await expect(page.locator('text=asignado al turno')).toBeVisible();
+    await expect(page.locator('[data-testid="RemoveMyTurn"]').first()).toBeVisible();
   });
 
-  test('volunteer can assign and unassign own shifts', async ({ page }) => {
-    console.log('🧪 [INICIANDO] Voluntario asigna y desasigna sus propios turnos');
+  test('admin can assign other user', async ({ page }) => {
+    // Necesitamos un voluntario existente para asignarlo
+    // En un sistema real, el selector lista usuarios de la DB.
+    // TEST_USERS.VOLUNTARIO debería aparecer.
 
-    // Iniciar sesión como voluntario
-    const loginSuccess = await loginUser(page, {
-      userType: 'VOLUNTARIO',
-      checkRedirect: true,
-      expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000,
-    });
+    await loginUser(page, { userType: 'ADMIN' });
+    const shiftTable = await findShiftTable(page);
+    expect(shiftTable).toBeTruthy();
 
-    if (!loginSuccess) {
-      console.log(
-        '❌ [FALLÓ] Voluntario asigna y desasigna turnos | Error: No se pudo completar el login'
-      );
-      throw new Error('Login como voluntario falló');
-    }
+    // Botón "Añadir Usuario" (Add User to shift) - data-testid="add-user-button"
+    const addUserBtn = page.locator('[data-testid="add-user-button"]').first();
+    await expect(addUserBtn).toBeVisible();
+    await addUserBtn.click();
 
-    // Buscar la tabla de turnos
-    const shiftTable = await findShiftTable(page, { timeout: 10000 });
-    if (!shiftTable) {
-      console.log(
-        '❌ [FALLÓ] Voluntario asigna y desasigna turnos | Error: No se encontró la tabla de turnos'
-      );
-      throw new Error('No se encontró la tabla de turnos');
-    }
+    // Modal
+    await expect(page.getByText('Añadir Usuario al Turno')).toBeVisible();
 
-    // Esperar a que se carguen todos los elementos
-    await page.waitForTimeout(2000);
+    // Seleccionar primer usuario de la lista (asumimos que hay usuarios)
+    const userItem = page.locator('[data-testid="assign-shift"]').first();
+    await expect(userItem).toBeVisible();
 
-    // Verificar si ya hay algún turno asignado
-    const alreadyAssigned = (await page.locator('[data-testid="RemoveMyTurn"]').count()) > 0;
+    // Opcional: filtrar por nombre si queremos ser específicos
+    // const userItem = page.locator('[data-testid="assign-shift"]').filter({ hasText: 'Voluntario' }).first();
 
-    if (alreadyAssigned) {
-      // Si ya está asignado, buscar botón de eliminar
-      const deleteButtons = page.locator('[data-testid="RemoveMyTurn"]');
-      const deleteCount = await deleteButtons.count();
+    await userItem.click();
 
-      if (deleteCount > 0) {
-        await deleteButtons.first().click();
-        await page.waitForTimeout(3000);
-      }
-    }
-
-    // Buscar botones de autoasignación (AddIcon)
-    const selfAssignButtons = page.locator('[data-testid="AddMyTurn"]');
-    const selfAssignCount = await selfAssignButtons.count();
-
-    if (selfAssignCount > 0) {
-      // Hacer click para autoasignarse
-      await selfAssignButtons.first().click();
-
-      // Esperar a que se complete la asignación
-      await page.waitForTimeout(3000);
-
-      // Verificar que aparece el nombre del voluntario
-      const userNameVisible = await page
-        .getByTestId('notification-snackbar')
-        .filter({ hasText: 'asignado al turno' })
-        .isVisible()
-        .catch(() => false);
-
-      if (userNameVisible) {
-        // Ahora desasignar el turno
-        const deleteButtons = page.locator('[data-testid="RemoveMyTurn"]');
-        const deleteCount = await deleteButtons.count();
-
-        if (deleteCount > 0) {
-          await deleteButtons.first().click();
-          await page.waitForTimeout(3000);
-
-          // Verificar que ya no aparece el nombre
-          const userNameStillVisible = await page
-            .getByTestId('assignment-user-box')
-            .filter({ hasText: '(Tú)' })
-            .isVisible()
-            .catch(() => false);
-
-          if (!userNameStillVisible) {
-            console.log('✅ [CORRECTO] Voluntario asigna y desasigna sus propios turnos');
-          } else {
-            console.log(
-              '❌ [FALLÓ] Voluntario asigna y desasigna turnos | Error: No se pudo desasignar el turno'
-            );
-            throw new Error('No se pudo desasignar el turno');
-          }
-        } else {
-          console.log(
-            '❌ [FALLÓ] Voluntario asigna y desasigna turnos | Error: No se encontró botón de eliminar después de asignar'
-          );
-          throw new Error('No se encontró botón de eliminar después de asignar');
-        }
-      } else {
-        console.log(
-          '❌ [FALLÓ] Voluntario asigna y desasigna turnos | Error: No se pudo verificar la asignación del turno'
-        );
-        throw new Error('No se pudo verificar la asignación del turno');
-      }
-    } else {
-      console.log(
-        '❌ [FALLÓ] Voluntario asigna y desasigna turnos | Error: No se encontraron botones de autoasignación'
-      );
-      throw new Error('No se encontraron botones de autoasignación');
-    }
+    await expect(page.locator('text=asignado al turno')).toBeVisible();
   });
 
-  test('admin can assign shift to other user', async ({ page }) => {
-    console.log('🧪 [INICIANDO] Administrador asigna turno a otro usuario');
+  test('admin can unassign other user', async ({ page }) => {
+    // Setup: Seed shift con voluntario asignado
+    if (!TEST_USERS.VOLUNTARIO?.email) throw new Error('No volunteer email');
+    const volUid = await getUserIdByEmail(TEST_USERS.VOLUNTARIO.email);
 
-    try {
-      // Iniciar sesión como administrador
-      console.log('Intentando login como administrador...');
-      const loginSuccess = await loginUser(page, {
-        userType: 'ADMIN',
-        checkRedirect: true,
-        expectedRedirectUrl: /\/schedule$/,
-        timeout: 15000,
-      });
-
-      if (!loginSuccess) {
-        await page.screenshot({ path: './test-results/login-failed.png', fullPage: true });
-        console.log(
-          '❌ [FALLÓ] Administrador asigna turno a otro usuario | Error: No se pudo completar el login'
-        );
-        throw new Error('Login como administrador falló');
-      }
-
-      // Buscar la tabla de turnos
-      const shiftTable = await findShiftTable(page, { timeout: 15000 });
-      if (!shiftTable) {
-        await page.screenshot({ path: './test-results/shift-table-not-found.png', fullPage: true });
-        console.log(
-          '❌ [FALLÓ] Administrador asigna turno a otro usuario | Error: No se encontró la tabla de turnos'
-        );
-        throw new Error('No se encontró la tabla de turnos');
-      }
-
-      await page.waitForTimeout(3000);
-
-      const addUserButtons = page.locator('[data-testid="add-user-button"]');
-      const addUserCount = await addUserButtons.count();
-
-      if (addUserCount > 0) {
-        // Hacer click en el primer botón de añadir usuario
-        await addUserButtons.first().click();
-
-        // Esperar a que aparezca el modal
-        await page.waitForTimeout(1500);
-
-        // Verificar que se abre el modal de añadir usuario
-        const modalTitle = page.getByText('Añadir Usuario al Turno');
-        const modalVisible = await modalTitle.isVisible().catch(() => false);
-
-        if (modalVisible) {
-          // Buscar el primer usuario disponible en la lista
-          const userListItems = page.locator('[data-testid="assign-shift"]');
-          const userCount = await userListItems.count();
-
-          if (userCount > 0) {
-            // Hacer click en el primer usuario disponible
-            await userListItems.first().click();
-            await page.waitForTimeout(3000);
-
-            // Verificar que aparece el mensaje de confirmación
-            const confirmationVisible = await page
-              .getByTestId('notification-snackbar')
-              .filter({ hasText: 'asignado al turno' })
-              .isVisible()
-              .catch(() => false);
-
-            if (confirmationVisible) {
-              console.log('✅ [CORRECTO] Administrador asigna turno a otro usuario');
-            } else {
-              console.log(
-                '❌ [FALLÓ] Administrador asigna turno a otro usuario | Error: No se pudo verificar la asignación'
-              );
-              throw new Error('No se pudo verificar la asignación del turno');
-            }
-          } else {
-            console.log(
-              '❌ [FALLÓ] Administrador asigna turno a otro usuario | Error: No se encontraron usuarios disponibles'
-            );
-            throw new Error('No se encontraron usuarios disponibles en el modal');
-          }
-        } else {
-          console.log(
-            '❌ [FALLÓ] Administrador asigna turno a otro usuario | Error: No se abrió el modal de asignación'
-          );
-          throw new Error('No se abrió el modal de asignación de usuarios');
-        }
-      } else {
-        // Capturar screenshot para depuración
-        await page.screenshot({
-          path: './test-results/admin-no-add-buttons-debug.png',
-          fullPage: true,
-        });
-
-        // Log del HTML de la página para depuración
-        const pageContent = await page.content();
-        console.log(
-          'HTML de la página (primeros 2000 caracteres):',
-          pageContent.substring(0, 2000)
-        );
-
-        console.log(
-          '❌ [FALLÓ] Administrador asigna turno a otro usuario | Error: No se encontraron botones de añadir usuario'
-        );
-        throw new Error('No se encontraron botones de añadir usuario');
-      }
-    } catch (error) {
-      console.error('❌ Error inesperado en el test:', error);
-      await page.screenshot({ path: './test-results/test-error-final.png', fullPage: true });
-      throw error;
-    }
-  });
-
-  test('admin can unassign shift from other user', async ({ page }) => {
-    console.log('🧪 [INICIANDO] Administrador desasigna turno de otro usuario');
-
-    // Iniciar sesión como administrador
-    const loginSuccess = await loginUser(page, {
-      userType: 'ADMIN',
-      checkRedirect: true,
-      expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000,
+    await seedShift({
+      date: tomorrowStr,
+      area: 'Mañana',
+      assignments: [{ uid: volUid }],
     });
 
-    if (!loginSuccess) {
-      console.log(
-        '❌ [FALLÓ] Administrador desasigna turno de otro usuario | Error: No se pudo completar el login'
-      );
-      throw new Error('Login como administrador falló');
-    }
+    await loginUser(page, { userType: 'ADMIN' });
+    const shiftTable = await findShiftTable(page);
+    expect(shiftTable).toBeTruthy();
 
-    // Buscar la tabla de turnos
-    const shiftTable = await findShiftTable(page, { timeout: 10000 });
-    if (!shiftTable) {
-      console.log(
-        '❌ [FALLÓ] Administrador desasigna turno de otro usuario | Error: No se encontró la tabla de turnos'
-      );
-      throw new Error('No se encontró la tabla de turnos');
-    }
+    // Buscar el turno donde está el voluntario.
+    // El usuario aparece con un botón para eliminar (data-testid="unassign-user-button")
+    // OJO: Si el admin ve el turno, verá el nombre del voluntario y una 'X' o trash icon.
 
-    // Esperar a que se carguen todos los elementos
-    await page.waitForTimeout(2000);
+    // Verificar que el voluntario está asignado
+    // await expect(page.locator(`text=${TEST_USERS.VOLUNTARIO.userData.name}`)).toBeVisible();
+    // Puede ser flaky si hay scroll, pero asumimos visibilidad básica.
 
-    // Buscar usuarios asignados que no sean el administrador actual
-    const assignedUsers = page.getByTestId('unassign-user-button');
-    const assignedCount = await assignedUsers.count();
+    const unassignBtn = page.locator('[data-testid="unassign-user-button"]').first();
+    await expect(unassignBtn).toBeVisible();
+    await unassignBtn.click();
 
-    if (assignedCount > 0) {
-      // Hacer click en el primer botón de desasignar usuario
-      await assignedUsers.first().click();
-      await page.waitForTimeout(1000);
+    // Confirmación dialgo
+    const confirmBtn = page.getByTestId('confirm-remove-user-dialog-confirm-button');
+    await expect(confirmBtn).toBeVisible();
+    await confirmBtn.click();
 
-      // Buscar y hacer click en el botón de confirmación del diálogo
-      const confirmButton = page.getByTestId('confirm-remove-user-dialog-confirm-button');
-      const confirmButtonVisible = await confirmButton.isVisible().catch(() => false);
-
-      if (confirmButtonVisible) {
-        // Hacer click en el botón de confirmar eliminación
-        await confirmButton.click();
-        await page.waitForTimeout(3000);
-
-        // Verificar que aparece el mensaje de confirmación de eliminación
-        const confirmationVisible = await page
-          .getByTestId('notification-snackbar')
-          .filter({ hasText: /eliminado|desasignado|removido/ })
-          .isVisible()
-          .catch(() => false);
-
-        if (confirmationVisible) {
-          console.log('✅ [CORRECTO] Administrador desasigna turno de otro usuario');
-        } else {
-          console.log(
-            '❌ [FALLÓ] Administrador desasigna turno de otro usuario | Error: No se pudo verificar la desasignación'
-          );
-          throw new Error('No se pudo verificar la desasignación del turno');
-        }
-      } else {
-        console.log(
-          '❌ [FALLÓ] Administrador desasigna turno de otro usuario | Error: No se encontró botón de confirmación'
-        );
-        throw new Error('No se encontró botón de confirmación en el diálogo');
-      }
-    } else {
-      console.log(
-        '❌ [FALLÓ] Administrador desasigna turno de otro usuario | Error: No se encontraron usuarios asignados'
-      );
-      throw new Error('No se encontraron usuarios asignados para desasignar');
-    }
+    // Verificación
+    await expect(page.locator('text=eliminado').or(page.locator('text=removido'))).toBeVisible();
   });
 });

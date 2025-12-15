@@ -6,114 +6,99 @@ import {
   navigateToAdminPanel,
   navigateToHistoryTab,
 } from './helpers/e2e-utils';
+import { format, subDays } from 'date-fns';
+import { clearShiftsCollection, seedShift, getUserIdByEmail } from '../utils/db-utils';
+import { TEST_USERS } from '../helpers/test-db-setup';
 
 test.describe('History View', () => {
+  let volunteerUid: string;
+  // Usamos "ayer" como fecha fija para el test
+  const targetDate = subDays(new Date(), 1);
+  const targetDateStr = format(targetDate, 'yyyy-MM-dd');
+
   test.beforeEach(async ({ page, request }) => {
-    // Verificar estado del servidor antes de cada test
+    // 1. Verificar servidor
     const serverOk = await checkServerStatus(page, request, {
       timeout: 60000,
       failOnError: false,
     });
-
     if (!serverOk) {
       throw new Error('❌ El servidor no está disponible en el puerto 3001');
     }
 
-    // Navegar a la página principal
-    await page.goto(`${process.env.BASE_URL || 'http://localhost:3001'}`);
+    // 2. Limpiar Turnos
+    await clearShiftsCollection();
 
-    // Verificar que la página cargó correctamente
+    // 3. Obtener ID del voluntario
+    try {
+      if (!TEST_USERS.VOLUNTARIO?.email)
+        throw new Error('TEST_USERS.VOLUNTARIO.email is undefined');
+      volunteerUid = await getUserIdByEmail(TEST_USERS.VOLUNTARIO.email);
+    } catch (error) {
+      console.error('Error getting volunteer UID:', error);
+      throw new Error(
+        'No se pudo obtener el UID del voluntario. Asegúrate de que los usuarios estén creados.'
+      );
+    }
+
+    // 4. Seeding: Crear turno ayer asignado al voluntario
+    await seedShift({
+      date: targetDateStr,
+      area: 'Mañana',
+      assignments: [{ uid: volunteerUid }],
+    });
+
+    // Navegar a la home
+    await page.goto(`${process.env.BASE_URL || 'http://localhost:3001'}`);
     const pageLoaded = await checkPageLoad(page);
     if (!pageLoaded) {
       throw new Error('❌ La página no cargó correctamente');
     }
   });
 
-  test('admin can access history and view volunteers', async ({ page }) => {
-    console.log('🧪 [INICIANDO] Administrador accede al historial y visualiza voluntarios');
-
-    // Iniciar sesión como administrador
+  test('admin can access history and view specific volunteer shift', async ({ page }) => {
+    // Login Admin
     const loginSuccess = await loginUser(page, {
       userType: 'ADMIN',
       checkRedirect: true,
-      expectedRedirectUrl: /\/schedule$/,
-      timeout: 10000,
+      expectedRedirectUrl: /\/schedule/,
     });
+    if (!loginSuccess) throw new Error('Login Admin falló');
 
-    if (!loginSuccess) {
-      console.log(
-        '❌ [FALLÓ] Administrador accede al historial | Error: No se pudo completar el login'
-      );
-      throw new Error('Login como administrador falló');
-    }
+    // Ir a Admin Panel
+    await navigateToAdminPanel(page);
 
-    // Navegar al panel de administración
-    const adminPanelSuccess = await navigateToAdminPanel(page);
-    if (!adminPanelSuccess) {
-      console.log(
-        '❌ [FALLÓ] Administrador accede al historial | Error: No se pudo acceder al panel de administración'
-      );
-      throw new Error('No se pudo acceder al panel de administración');
-    }
+    // Ir a Historial
+    await navigateToHistoryTab(page);
 
-    // Navegar a la pestaña de historial
-    const historyTabSuccess = await navigateToHistoryTab(page);
-    if (!historyTabSuccess) {
-      console.log(
-        '❌ [FALLÓ] Administrador accede al historial | Error: No se pudo acceder a la pestaña de historial'
-      );
-      throw new Error('No se pudo acceder a la pestaña de historial');
-    }
+    // Esperar a que el calendario sea interactivo
+    await page.waitForTimeout(1000); // Pequeña espera para estabilidad UI
 
-    // Esperar a que cargue completamente el calendario
-    await page.waitForTimeout(3000);
+    // Seleccionar la fecha 'targetDate' en el calendario datetime picker
+    // Buscamos el botón del día específico.
+    // Estrategia alternativa: Buscar por texto del día
+    const dayNumber = format(targetDate, 'd');
 
-    // Intentar seleccionar una fecha disponible en el calendario
-    const enabledDays = await page
-      .locator('.MuiPickersDay-root:not(.Mui-disabled):not(.MuiPickersDay-hiddenDaySpacingFiller)')
-      .count();
-
-    if (enabledDays > 0) {
-      await page
-        .locator(
-          '.MuiPickersDay-root:not(.Mui-disabled):not(.MuiPickersDay-hiddenDaySpacingFiller)'
-        )
-        .first()
-        .click();
-    } else {
-      const visibleDays = await page
-        .locator('.MuiPickersDay-root:not(.MuiPickersDay-hiddenDaySpacingFiller)')
-        .count();
-      if (visibleDays > 0) {
-        await page
-          .locator('.MuiPickersDay-root:not(.MuiPickersDay-hiddenDaySpacingFiller)')
-          .first()
-          .click({ force: true });
+    const today = new Date();
+    if (today.getMonth() !== targetDate.getMonth()) {
+      const prevMonthBtn = page.locator('button[title="Previous month"]');
+      if (await prevMonthBtn.isVisible()) {
+        await prevMonthBtn.click();
       }
     }
 
-    // Esperar a que cargue la lista de voluntarios
-    await page.waitForTimeout(3000);
+    // Click en el día
+    const dayBtn = page
+      .locator('.MuiPickersDay-root')
+      .getByText(dayNumber, { exact: true })
+      .first();
 
-    // Buscar nombres de voluntarios en el historial
-    const volunteerNames = await page.locator('text=/[A-Z][a-z]+ [A-Z][a-z]+/').all();
+    await expect(dayBtn).toBeVisible();
+    await dayBtn.click();
 
-    if (volunteerNames.length > 0) {
-      await expect(volunteerNames[0]).toBeVisible();
-      console.log('✅ [CORRECTO] Administrador accede al historial y visualiza voluntarios');
-    } else {
-      // Verificar si hay tabla con datos
-      const anyTable = await page.locator('table').count();
-      if (anyTable > 0) {
-        const tableRows = await page.locator('table tr').count();
-        expect(tableRows).toBeGreaterThan(0);
-        console.log('✅ [CORRECTO] Administrador accede al historial y visualiza voluntarios');
-      } else {
-        console.log(
-          '❌ [FALLÓ] Administrador accede al historial | Error: No se encontraron datos de voluntarios en el historial'
-        );
-        throw new Error('No se encontraron datos de voluntarios en el historial');
-      }
-    }
+    // Verificamos que aparece el voluntario en la lista
+    // Nombre esperado: "Voluntario Test"
+    const volunteerName = `${TEST_USERS.VOLUNTARIO.userData.name} ${TEST_USERS.VOLUNTARIO.userData.lastName}`;
+    await expect(page.locator(`text=${volunteerName}`)).toBeVisible({ timeout: 5000 });
   });
 });

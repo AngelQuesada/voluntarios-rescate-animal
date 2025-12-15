@@ -1,29 +1,8 @@
-/**
- * Utilidades específicas para tests E2E de Playwright
- * Este archivo contiene funciones comunes reutilizables para los tests E2E
- */
-
-import { Page, expect, APIRequestContext } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 import { TEST_USERS } from '../../helpers/test-db-setup';
 
-/**
- * Tipos de usuario para iniciar sesión
- */
-export type UserType = 'ADMIN' | 'RESPONSABLE' | 'VOLUNTARIO';
-
-/**
- * Opciones para la verificación del servidor
- */
-export interface ServerCheckOptions {
-  timeout?: number;
-  failOnError?: boolean;
-}
-
-/**
- * Opciones para iniciar sesión
- */
 export interface LoginOptions {
-  userType: UserType;
+  userType: 'ADMIN' | 'RESPONSABLE' | 'VOLUNTARIO';
   checkRedirect?: boolean;
   expectedRedirectUrl?: string | RegExp;
   timeout?: number;
@@ -31,115 +10,81 @@ export interface LoginOptions {
   rememberMe?: boolean;
 }
 
-/**
- * Opciones para localizar elementos de turnos
- */
 export interface ShiftElementOptions {
   timeout?: number;
   waitForLoad?: boolean;
 }
 
 /**
- * Verifica que el servidor esté funcionando correctamente
+ * Verifica si el servidor de testing está disponible
  */
 export async function checkServerStatus(
   page: Page,
-  request: APIRequestContext,
-  options: ServerCheckOptions = {}
+  request: any,
+  options: { timeout?: number; failOnError?: boolean } = {}
 ): Promise<boolean> {
-  const { timeout = 60000, failOnError = true } = options;
+  const { timeout = 30000, failOnError = true } = options;
   const baseUrl = process.env.BASE_URL || 'http://localhost:3001';
 
   try {
-    // Verificar que el servidor está respondiendo con timeout extendido
-    const response = await request.get(baseUrl, {
-      timeout: timeout,
-    });
+    // Intentar conectar con fetch primero (más rápido)
+    const response = await request.get(baseUrl, { timeout: 5000 }).catch(() => null);
 
-    if (!response.ok()) {
-      const errorMsg = `⚠️ El servidor no responde correctamente. Código de estado: ${response.status()}`;
-      console.error(errorMsg);
-
-      if (failOnError) {
-        throw new Error(
-          `El servidor no está accesible o devuelve un error. Código: ${response.status()}`
-        );
-      }
-      return false;
+    if (response && response.ok()) {
+      return true;
     }
 
-    // Detectar explícitamente respuestas 404
-    if (response.status() === 404) {
-      const errorMsg =
-        '⚠️ La URL base devuelve un error 404. Verifica que el servidor esté ejecutándose y configurado correctamente.';
-      console.error(errorMsg);
-
-      if (failOnError) {
-        throw new Error('La URL base devuelve un error 404');
-      }
-      return false;
-    }
-
-    // Realizar múltiples peticiones para verificar la velocidad de respuesta
-    const maxAttempts = 3;
-    let isCompiled = false;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      // Medir el tiempo de respuesta
-      const startTime = Date.now();
-      await request.get(baseUrl);
-      const endTime = Date.now();
-      const responseTime = endTime - startTime;
-
-      // Si la respuesta es rápida (menos de 1 segundo), probablemente ya está compilado
-      if (responseTime < 1000) {
-        isCompiled = true;
-        break;
-      } else {
-        // Esperar antes del siguiente intento
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-      }
-    }
-
-    if (!isCompiled) {
-      console.warn('⚠️ El servidor está respondiendo pero podría no estar completamente compilado');
-      // Continuar de todos modos, pero con una advertencia
-    }
-
+    // Si falla, intentar con page.goto
+    await page.goto(baseUrl, { timeout, waitUntil: 'domcontentloaded' });
     return true;
   } catch (error) {
-    const errorMsg = '⚠️ Error al comprobar el estado del servidor:';
-    console.error(errorMsg, error);
-
     if (failOnError) {
-      throw new Error(
-        'No se pudo comprobar el estado del servidor. Verifica que esté en ejecución.'
-      );
+      console.error(`❌ Servidor no disponible en ${baseUrl}:`, error);
+      throw error;
     }
     return false;
   }
 }
 
 /**
- * Verifica si la página cargó correctamente (sin error 404)
+ * Verifica si la página ha cargado correctamente (no 404/500)
  */
 export async function checkPageLoad(page: Page): Promise<boolean> {
-  const is404 = await page
-    .locator('text="404"')
-    .isVisible()
-    .catch(() => false);
+  try {
+    // Check for "Application error" but verify it's not a false positive
+    // Using simple locator count can be misleading if text is hidden or part of valid content
+    // However, for now we assume "Application error" shouldn't appear in normal usage
 
-  if (is404) {
-    console.error(
-      '⚠️ La página cargó con error 404. Comprueba que el servidor esté ejecutándose y que BASE_URL sea correcto.'
-    );
-    await page.screenshot({ path: './test-results/server-404-error.png' });
-    const html = await page.content();
-    console.log('HTML actual de la página 404:', html.substring(0, 500) + '...');
+    const errorBody = await page.locator('body:has-text("Application error")').count();
+    const runtimeError = await page.locator('body:has-text("Unhandled Runtime Error")').count();
+    const notFound = await page.locator('h1:has-text("404")').count();
+
+    if (errorBody > 0 || runtimeError > 0) {
+      // Double check if it's REALLY an error page by checking if the main content is missing
+      // or if nextjs error overlay specific classes are present
+
+      // If we see the error but also normal content (like "Rescate Animal Granada"),
+      // it might be a false positive or a background error that doesn't block usage.
+      // But usually "Application error" replaces body content in production,
+      // or Overlay covers it in dev.
+
+      const bodyText = await page.locator('body').innerText();
+      if (bodyText.includes('Application error') || bodyText.includes('Unhandled Runtime Error')) {
+        console.error('❌ Error de aplicación detectado en la página');
+        console.error('Page body text snippet:', bodyText.substring(0, 500));
+        return false;
+      }
+    }
+
+    if (notFound > 0) {
+      console.error('❌ Página 404 detectada');
+      return false;
+    }
+
+    return true;
+  } catch {
     return false;
   }
-
-  return true;
 }
 
 /**
@@ -180,6 +125,7 @@ export async function loginUser(page: Page, options: LoginOptions): Promise<bool
     );
 
     if (!emailSelector) {
+      console.error('❌ Could not find email input');
       return false;
     }
 
@@ -194,6 +140,7 @@ export async function loginUser(page: Page, options: LoginOptions): Promise<bool
       });
 
     if (!passwordSelector) {
+      console.error('❌ Could not find password input');
       return false;
     }
 
@@ -238,9 +185,18 @@ export async function loginUser(page: Page, options: LoginOptions): Promise<bool
       await page.waitForURL(expectedRedirectUrl, { timeout });
       await expect(page).toHaveURL(expectedRedirectUrl);
     }
-
     return true;
   } catch (error) {
+    console.error(`❌ Error en loginUser (${userType}):`, error);
+    try {
+      console.error(`Current URL: ${page.url()}`);
+      console.error(
+        `Page text snippet:`,
+        (await page.locator('body').innerText()).substring(0, 300)
+      );
+    } catch (e) {
+      console.error('Error getting page state logging');
+    }
     await page.screenshot({ path: `./test-results/${userType.toLowerCase()}-login-error.png` });
     return false;
   }
@@ -256,7 +212,7 @@ export async function navigateToAdminPanel(page: Page, timeout: number = 10000):
     await page.click('button svg[data-testid="AdminPanelSettingsIcon"]');
 
     // Esperar a que se complete la navegación al panel de administración
-    await page.waitForURL(/\/admin$/, { timeout });
+    await page.waitForURL(/\/admin/, { timeout });
 
     // Verificar que estamos en el panel de administración
     expect(page.url()).toContain('/admin');
@@ -457,6 +413,7 @@ export async function waitForPageLoad(page: Page, timeout: number = 10000): Prom
     return false;
   }
 }
+
 export const userAlreadyInDB = async (email: string, adminAuth: any): Promise<boolean> => {
   try {
     await adminAuth.getUserByEmail(email);

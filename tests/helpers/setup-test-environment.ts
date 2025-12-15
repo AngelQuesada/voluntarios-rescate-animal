@@ -4,14 +4,14 @@
  */
 
 import { spawn, ChildProcess } from 'child_process';
-import { 
-  initializeFirebaseAdmin, 
-  createConstantUsers, 
-  createVariableUsers, 
-  createTestShifts, 
-  cleanupVariableData, 
+import {
+  initializeFirebaseAdmin,
+  createConstantUsers,
+  createVariableUsers,
+  createTestShifts,
+  cleanupVariableData,
   cleanupAllTestData,
-  TestEnvironmentOptions 
+  TestEnvironmentOptions,
 } from './test-db-setup';
 
 let testServer: ChildProcess | null = null;
@@ -22,9 +22,20 @@ let serverStarted = false;
  */
 export async function isServerRunning(port: number = 3001): Promise<boolean> {
   try {
-    const response = await fetch(`http://localhost:${port}`);
+    // AbortSignal para timeout rápido y evitar que la verificación se cuelgue
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 segundo de timeout
+
+    // Usar el método HEAD es más eficiente ya que solo queremos saber si el servidor responde, no necesitamos el body
+    const response = await fetch(`http://localhost:${port}`, {
+      signal: controller.signal,
+      method: 'HEAD',
+    });
+
+    clearTimeout(timeoutId); // Limpiar el timeout si la respuesta fue rápida
     return response.ok;
-  } catch {
+  } catch (error) {
+    // Si fetch falla (por timeout, conexión rechazada, etc.), el servidor no está corriendo.
     return false;
   }
 }
@@ -44,15 +55,6 @@ export async function startTestServer(port: number = 3001): Promise<boolean> {
     console.log(`🚀 Iniciando servidor de testing en puerto ${port}...`);
 
     return new Promise((resolve, reject) => {
-      // Configurar variables de entorno para el servidor
-      const env = {
-        ...process.env,
-        NODE_ENV: 'test',
-        PORT: port.toString(),
-        DISABLE_PWA: 'true',
-        IS_TESTING_ENVIRONMENT: 'true'
-      };
-
       // Iniciar el servidor usando npm run dev
       testServer = spawn('npm', ['run', 'dev'], {
         env: {
@@ -60,11 +62,11 @@ export async function startTestServer(port: number = 3001): Promise<boolean> {
           NODE_ENV: 'test' as 'development' | 'production' | 'test',
           PORT: port.toString(),
           DISABLE_PWA: 'true',
-          IS_TESTING_ENVIRONMENT: 'true'
+          IS_TESTING_ENVIRONMENT: 'true',
         },
         stdio: ['pipe', 'pipe', 'pipe'],
         shell: true,
-        cwd: process.cwd()
+        cwd: process.cwd(),
       });
 
       let serverOutput = '';
@@ -72,32 +74,37 @@ export async function startTestServer(port: number = 3001): Promise<boolean> {
       let resolved = false;
 
       // Manejar salida del servidor
-      if (testServer && testServer.stdout) testServer.stdout.on('data', (data) => {
-        const output = data.toString();
-        serverOutput += output;
-        
-        // Buscar indicadores de que el servidor está listo
-        if (output.includes('Ready') || 
-            output.includes('started server') || 
-            output.includes(`localhost:${port}`)) {
-          if (!resolved) {
-            resolved = true;
-            serverStarted = true;
-            console.log(`✅ Servidor de testing iniciado correctamente en puerto ${port}`);
-            resolve(true);
+      if (testServer && testServer.stdout)
+        testServer.stdout.on('data', (data) => {
+          const output = data.toString();
+          serverOutput += output;
+
+          // Buscar indicadores de que el servidor está listo
+          if (
+            output.includes('Ready') ||
+            output.includes('started server') ||
+            output.includes(`localhost:${port}`)
+          ) {
+            if (!resolved) {
+              resolved = true;
+              serverStarted = true;
+              console.log(`✅ Servidor de testing iniciado correctamente en puerto ${port}`);
+              resolve(true);
+            }
           }
-        }
-      });
+        });
 
       // Manejar errores del servidor
       testServer.stderr?.on('data', (data) => {
         const error = data.toString();
         errorOutput += error;
-        
+
         // Solo mostrar errores críticos, ignorar warnings comunes
-        if (error.includes('Error:') && 
-            !error.includes('Warning:') && 
-            !error.includes('ExperimentalWarning')) {
+        if (
+          error.includes('Error:') &&
+          !error.includes('Warning:') &&
+          !error.includes('ExperimentalWarning')
+        ) {
           console.error('❌ Error del servidor:', error);
         }
       });
@@ -146,17 +153,17 @@ export async function stopTestServer(): Promise<boolean> {
   try {
     if (testServer && !testServer.killed) {
       console.log('🛑 Deteniendo servidor de testing...');
-      
+
       // Intentar cerrar gracefully
       testServer.kill('SIGTERM');
-      
+
       // Esperar un poco y forzar si es necesario
       setTimeout(() => {
         if (testServer && !testServer.killed) {
           testServer.kill('SIGKILL');
         }
       }, 5000);
-      
+
       testServer = null;
       serverStarted = false;
       console.log('✅ Servidor de testing detenido');
@@ -173,12 +180,7 @@ export async function stopTestServer(): Promise<boolean> {
  */
 export async function setupTestEnvironment(options: TestEnvironmentOptions = {}): Promise<boolean> {
   try {
-    const {
-      requireUsers = true,
-      requireShifts = false,
-      pastDays = 7,
-      futureDays = 14
-    } = options;
+    const { requireUsers = true, requireShifts = false, pastDays = 7, futureDays = 14 } = options;
 
     console.log('🔧 Configurando entorno de testing...');
 
@@ -227,7 +229,7 @@ export async function setupTestEnvironment(options: TestEnvironmentOptions = {})
 export async function cleanupTestEnvironment(): Promise<boolean> {
   try {
     console.log('🧹 Limpiando entorno de testing...');
-    
+
     const cleanupSuccess = await cleanupVariableData();
     if (!cleanupSuccess) {
       console.error('❌ Error al limpiar datos variables');
@@ -248,7 +250,7 @@ export async function cleanupTestEnvironment(): Promise<boolean> {
 export async function cleanupCompleteTestEnvironment(): Promise<boolean> {
   try {
     console.log('🧹 Limpieza completa del entorno de testing...');
-    
+
     const cleanupSuccess = await cleanupAllTestData();
     if (!cleanupSuccess) {
       console.error('❌ Error al limpiar todos los datos de testing');
@@ -289,6 +291,6 @@ export async function verifyTestEnvironment(): Promise<boolean> {
 export function getServerStatus(): { running: boolean; process: ChildProcess | null } {
   return {
     running: serverStarted && testServer !== null && !testServer.killed,
-    process: testServer
+    process: testServer,
   };
 }

@@ -8,6 +8,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { createHash } from 'crypto';
 import { readFileSync, statSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { kill } from 'cross-port-killer';
 import {
   setupTestEnvironment,
   cleanupTestEnvironment,
@@ -147,39 +148,6 @@ function saveCompilationCache(): void {
   } catch (error) {
     console.warn('⚠️ Error al guardar caché de compilación:', error);
   }
-}
-
-/**
- * Verifica si un puerto está disponible
- */
-async function isPortAvailable(port: number): Promise<boolean> {
-  try {
-    const net = require('net');
-    return new Promise((resolve) => {
-      const server = net.createServer();
-      server.once('error', () => resolve(false));
-      server.once('listening', () => {
-        server.close();
-        resolve(true);
-      });
-      server.listen(port);
-    });
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Encuentra un puerto disponible comenzando desde el puerto especificado
- */
-async function findAvailablePort(startPort: number = 3001): Promise<number> {
-  for (let port = startPort; port <= startPort + 10; port++) {
-    const available = await isPortAvailable(port);
-    if (available) {
-      return port;
-    }
-  }
-  throw new Error(`No se pudo encontrar un puerto disponible desde ${startPort}`);
 }
 
 /**
@@ -636,6 +604,31 @@ async function globalSetup(_config: FullConfig) {
   // Cargar variables de entorno
   loadTestEnvironmentVariables();
 
+  // 1. Determinar puerto y verificar/iniciar servidor
+  let targetPort = 3001;
+  const baseUrl = process.env.BASE_URL;
+
+  if (baseUrl) {
+    try {
+      const url = new URL(baseUrl);
+      targetPort = parseInt(url.port) || 3001;
+    } catch (_) {
+      console.warn('⚠️ BASE_URL inválida, usando puerto 3001 por defecto');
+    }
+  }
+
+  // --- NUEVA LÓGICA ---
+  // Asegurarse de que el puerto esté libre antes de comenzar
+  try {
+    console.log(`🧹 Forzando la liberación del puerto ${targetPort} antes de iniciar...`);
+    await kill(targetPort);
+    console.log(`✅ Puerto ${targetPort} liberado correctamente.`);
+  } catch (error) {
+    // Si hay un error (ej. el puerto no estaba ocupado), simplemente lo registramos pero continuamos.
+    console.log(`ℹ️ No se pudo liberar el puerto ${targetPort} (puede que no estuviera en uso).`);
+  }
+  // --- FIN DE LA NUEVA LÓGICA ---
+
   // Verificar si estamos en modo de prueba
   if (process.env.NODE_ENV !== 'test') {
     console.warn('⚠️ NODE_ENV no está configurado como "test"');
@@ -662,19 +655,6 @@ async function globalSetup(_config: FullConfig) {
     console.log('✅ IS_TESTING_ENVIRONMENT configurado como "true"');
   }
 
-  // 1. Determinar puerto y verificar/iniciar servidor
-  let targetPort = 3001;
-  const baseUrl = process.env.BASE_URL;
-
-  if (baseUrl) {
-    try {
-      const url = new URL(baseUrl);
-      targetPort = parseInt(url.port) || 3001;
-    } catch (_) {
-      console.warn('⚠️ BASE_URL inválida, usando puerto 3001 por defecto');
-    }
-  }
-
   console.log('🔍 Verificando disponibilidad del servidor de testing...');
   const serverRunning = await isServerRunning(targetPort);
 
@@ -682,20 +662,13 @@ async function globalSetup(_config: FullConfig) {
   const needsRecompilation = hasSignificantChanges();
 
   if (!serverRunning) {
-    // Buscar un puerto disponible si el objetivo está ocupado
-    const availablePort = await findAvailablePort(targetPort);
-
-    if (availablePort !== targetPort) {
-      console.log(`ℹ️ Puerto ${targetPort} no disponible, usando puerto ${availablePort}`);
-      // Actualizar BASE_URL para que los tests usen el puerto correcto
-      process.env.BASE_URL = `http://localhost:${availablePort}`;
-    }
-
-    const serverStarted = await startGlobalTestServer(availablePort);
+    // Ya no es necesario buscar un puerto alternativo, hemos forzado la liberación del principal.
+    const serverStarted = await startGlobalTestServer(targetPort);
     if (!serverStarted) {
       console.error('❌ Error al iniciar el servidor de testing');
       process.exit(1);
     }
+
 
     // Esperar un tiempo significativo para asegurar que el servidor esté completamente listo
     console.log('⏳ Esperando que el servidor termine de inicializar completamente...');
