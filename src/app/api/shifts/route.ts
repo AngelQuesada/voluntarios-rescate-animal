@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import admin from 'firebase-admin';
 import { ShiftAssignment } from '@/store/api/shiftsApi';
+import { verifyAuth } from '@/lib/auth-api';
 
 // Inicializar Firebase Admin si no está inicializado
 if (!admin.apps.length) {
@@ -15,8 +16,17 @@ if (!admin.apps.length) {
   });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Verificar que el usuario esté autenticado
+    const authData = await verifyAuth(request);
+    if (!authData) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Token inválido o no proporcionado' },
+        { status: 401 }
+      );
+    }
+
     const db = admin.firestore();
     const shiftsSnapshot = await db.collection('shifts').get();
 

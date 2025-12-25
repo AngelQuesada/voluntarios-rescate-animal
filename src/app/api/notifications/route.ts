@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminFirestore } from '@/lib/firebaseAdmin';
+import { verifyAuth } from '@/lib/auth-api';
+import { UserRoles } from '@/lib/constants';
 
 // TODO: Añadir una validación más robusta de los datos de entrada
 
@@ -10,6 +12,14 @@ import { getAdminFirestore } from '@/lib/firebaseAdmin';
  */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
+    const authData = await verifyAuth(request);
+    if (!authData) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
     const { token, userId } = await request.json();
 
     if (!token || !userId) {
@@ -19,17 +29,31 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    // Remove duplicate db declaration since it's declared again below
+    // Validación de permisos: Solo el propio usuario o un admin pueden actualizar el token
+    const isOwner = authData.user.uid === userId;
+    const isAdmin = (authData.userData.roles as number[] || []).includes(UserRoles.ADMINISTRADOR);
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'No tienes permiso para modificar este usuario' },
+        { status: 403 }
+      );
+    }
+
+    // Borra la declaración de db que se declara más abajo
     const db = getAdminFirestore();
+    
+    // Validación del ID de usuario
+    if (typeof userId !== 'string' || userId.trim().length === 0) {
+      return NextResponse.json({ error: 'ID de usuario inválido' }, { status: 400 });
+    }
+
     await db.collection('users').doc(userId).set(
       {
         fcmToken: token,
       },
       { merge: true }
-    ); // Validate userId format
-    if (typeof userId !== 'string' || userId.trim().length === 0) {
-      return NextResponse.json({ error: 'ID de usuario inválido' }, { status: 400 });
-    }
+    );
 
     await db.collection('users').doc(userId).update({
       fcmToken: token,
@@ -50,18 +74,35 @@ export async function POST(request: Request): Promise<NextResponse> {
  */
 export async function DELETE(request: Request): Promise<NextResponse> {
   try {
+    const authData = await verifyAuth(request);
+    if (!authData) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
     const { userId } = await request.json();
 
     if (!userId) {
       return NextResponse.json({ error: 'El ID de usuario es obligatorio' }, { status: 400 });
     }
 
+    // Validación de permisos
+    const isOwner = authData.user.uid === userId;
+    const isAdmin = (authData.userData.roles as number[] || []).includes(UserRoles.ADMINISTRADOR);
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'No tienes permiso para modificar este usuario' },
+        { status: 403 }
+      );
+    }
+
     const db = getAdminFirestore();
     await db.collection('users').doc(userId).update({
       fcmToken: null,
     });
-
-    //TODO: Verificar que el usuario solo puede borrar su propio token o es administrador
 
     return NextResponse.json({ success: true });
   } catch (error) {

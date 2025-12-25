@@ -1,5 +1,6 @@
 import { POST, DELETE } from '@/app/api/notifications/route';
 import { getAdminFirestore } from '@/lib/firebaseAdmin';
+import { verifyAuth } from '@/lib/auth-api';
 
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -14,6 +15,16 @@ jest.mock('@/lib/firebaseAdmin', () => ({
   getAdminFirestore: jest.fn(),
 }));
 
+jest.mock('@/lib/auth-api', () => ({
+  verifyAuth: jest.fn(),
+}));
+
+jest.mock('@/lib/constants', () => ({
+  UserRoles: {
+    ADMINISTRADOR: 3,
+  },
+}));
+
 const mockDb = {
   collection: jest.fn().mockReturnThis(),
   doc: jest.fn().mockReturnThis(),
@@ -24,6 +35,14 @@ const mockDb = {
 (getAdminFirestore as jest.Mock).mockReturnValue(mockDb);
 
 describe('API /api/notifications', () => {
+  beforeEach(() => {
+    // Default mock for successful auth (Owner accessing their own data)
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { uid: 'test-user' },
+      userData: { roles: [1] }, // 1 = Volunteer
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -54,6 +73,23 @@ describe('API /api/notifications', () => {
 
       expect(response.status).toBe(400);
       expect(body.error).toBe('El token y el ID de usuario son obligatorios');
+    });
+
+    it('should return 403 if user is not owner nor admin', async () => {
+      // Mock auth as a different user
+      (verifyAuth as jest.Mock).mockResolvedValue({
+        user: { uid: 'other-user' },
+        userData: { roles: [1] },
+      });
+
+      const req = {
+        json: async () => ({ token: 'test-token', userId: 'test-user' }),
+      } as any;
+
+      const response = await POST(req);
+      const body = await response.json();
+
+      expect(response.status).toBe(403);
     });
   });
 

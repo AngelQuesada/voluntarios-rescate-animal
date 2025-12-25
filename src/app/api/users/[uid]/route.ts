@@ -3,6 +3,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase-admin/auth';
 import { initAdmin } from '@/lib/firebaseAdmin';
+import { verifyAuth, requireRole } from '@/lib/auth-api';
+import { UserRoles } from '@/lib/constants';
 
 interface RequestContext {
   params: {
@@ -10,9 +12,29 @@ interface RequestContext {
   };
 }
 
-// Modificamos la estructura para ser compatible con Next.js App Router
 export async function GET(request: Request, { params }: RequestContext) {
   try {
+    // Verificar autenticación
+    const authData = await verifyAuth(request);
+    
+    if (!authData) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'No se proporcionó un token válido' }, 
+        { status: 401 }
+      );
+    }
+
+    const { user, userData } = authData;
+    const isOwner = user.uid === params.uid;
+    const isAdmin = (userData.roles || []).includes(UserRoles.ADMINISTRADOR);
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'No tienes permisos para ver este perfil' },
+        { status: 403 }
+      );
+    }
+
     const userRef = doc(db, 'users', params.uid);
     const userSnap = await getDoc(userRef);
 
@@ -34,6 +56,13 @@ export async function GET(request: Request, { params }: RequestContext) {
 
 export async function DELETE(request: Request, { params }: RequestContext) {
   try {
+    // Solo administradores pueden eliminar usuarios
+    const validation = await requireRole(request, [UserRoles.ADMINISTRADOR]);
+    
+    if ('errorResponse' in validation) {
+      return validation.errorResponse;
+    }
+
     initAdmin();
 
     await getAuth().deleteUser(params.uid);

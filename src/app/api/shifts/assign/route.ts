@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import admin from 'firebase-admin';
 import { sendNotification } from '@/lib/notifications';
+import { verifyAuth } from '@/lib/auth-api';
+import { UserRoles } from '@/lib/constants';
 
 interface ShiftAssignmentRequest {
   dateKey: string;
   shiftKey: 'M' | 'T';
   uid: string;
   action: 'add' | 'remove';
-  performedByUid?: string;
-  isAdminAssignment?: boolean;
 }
 
 // Inicializar Firebase Admin si no está inicializado
@@ -26,16 +26,23 @@ if (!admin.apps.length) {
 
 export async function POST(request: Request) {
   try {
+    // 1. Verificar Autenticación
+    const authData = await verifyAuth(request);
+    if (!authData) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    const { user: actor, userData: actorData } = authData;
+    const actorRoles = (actorData.roles as number[]) || [];
+
     const {
       dateKey,
       shiftKey,
       uid,
       action,
-      performedByUid,
-      isAdminAssignment,
     }: ShiftAssignmentRequest = await request.json();
 
-    // Validar que los parámetros requeridos estén presentes
+    // Validar parámetros básicos
     if (!dateKey || typeof dateKey !== 'string' || dateKey.trim() === '') {
       return new NextResponse('dateKey es requerido y debe ser una cadena no vacía', {
         status: 400,
@@ -53,6 +60,21 @@ export async function POST(request: Request) {
     if (!action || !['add', 'remove'].includes(action)) {
       return new NextResponse('action debe ser "add" o "remove"', { status: 400 });
     }
+
+    // 2. Control de Acceso (RBAC) Simplificado
+    // Regla: 
+    // - Si el actor intenta modificarse a sí mismo -> Permitido.
+    // - Si el actor intenta modificar a otro -> Requiere ser ADMIN o RESPONSABLE.
+    
+    const isSelfModification = actor.uid === uid;
+    const hasElevatedPrivileges = actorRoles.includes(UserRoles.ADMINISTRADOR) || actorRoles.includes(UserRoles.RESPONSABLE);
+
+    if (!isSelfModification && !hasElevatedPrivileges) {
+      return new NextResponse('Forbidden: No tienes permisos para modificar los turnos de otros usuarios.', { status: 403 });
+    }
+
+    const isAdminAssignment = !isSelfModification && hasElevatedPrivileges;
+    const performedByUid = actor.uid;
 
     // Construir el shiftId a partir de dateKey y shiftKey
     const shiftId = `${dateKey.trim()}_${shiftKey}`;
